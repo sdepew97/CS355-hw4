@@ -2,10 +2,9 @@
 // Created by Sarah Depew on 3/13/18.
 //
 
-#include "logger.h"
 #include <stdlib.h>
 #include <stdio.h>
-#include "system.h"
+#include "logger.h"
 
 void Log (int ticks, int OPERATION, int TID, int PRIORITY) {
     FILE *file;
