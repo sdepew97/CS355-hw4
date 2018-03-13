@@ -1,6 +1,6 @@
-all: test logger userthreads clean
+all: logger test userthreads clean
 
-test:
+test: logger.h
 	gcc -o test test.c -L. -luserthread
 
 logger:
