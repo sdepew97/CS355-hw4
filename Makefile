@@ -1,10 +1,13 @@
 all: logger test userthreads clean
 
-test: logger.h
+test:
 	gcc -o test test.c -L. -luserthread
 
-logger:
-	gcc -o logger logger.c
+logger: logger.o
+	gcc -o logger logger.o
+
+logger.o: logger.c logger.h
+	gcc -c -Wall logger.c
 
 userthreads: userthreads.o
 	gcc -o libuserthread.so userthread.o -shared
