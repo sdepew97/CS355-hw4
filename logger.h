@@ -6,7 +6,11 @@
 
 #ifndef HW4_LOGGER_H
 #define HW4_LOGGER_H
+
+#define TRUE 1
+#define FALSE 0
 #define LOGFILE	"scheduleLogger.txt\0"     // all Log(); messages will be appended to this file
+extern int LogCreated;      // keeps track whether the log file is created or not
 
 enum {CREATED, SCHEDULED, STOPPED, FINISHED};
 char* states[] = {"CREATED\0", "SCHEDULED\0", "STOPPED\0", "FINISHED\0"};
