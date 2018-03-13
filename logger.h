@@ -6,10 +6,10 @@
 
 #ifndef HW4_LOGGER_H
 #define HW4_LOGGER_H
-#define LOGFILE	"scheduleLogger.txt"     // all Log(); messages will be appended to this file
+#define LOGFILE	"scheduleLogger.txt\0"     // all Log(); messages will be appended to this file
 
 enum {CREATED, SCHEDULED, STOPPED, FINISHED};
-char states[] = {"CREATED", "SCHEDULED", "STOPPED", "FINISHED"};
+char states[] = {"CREATED\0", "SCHEDULED\0", "STOPPED\0", "FINISHED\0"};
 void Log (int ticks, int OPERATION, int TID, int PRIORITY);    // logs a message to LOGFILE
 
 #endif //HW4_LOGGER_H
