@@ -1,4 +1,4 @@
-all: userthreads clean
+all: test userthreads clean
 
 test:
 	gcc -o test test.c -L. -luserthread
@@ -6,7 +6,7 @@ test:
 userthreads: userthreads.o
 	gcc -o libuserthread.so userthread.o -shared
 
-userthread.o: userthread.c userthread.h
+userthreads.o: userthread.c userthread.h
 	gcc -Wall -fpic -c userthread.c
 
 clean:
