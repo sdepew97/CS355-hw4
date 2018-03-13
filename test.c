@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include "userthread.h"
+#include "logger.h"
 
 int main() {
-    printf("Hello, World!\n");
+    Log(100, SCHEDULED, 1, 100);
     return 0;
 }
