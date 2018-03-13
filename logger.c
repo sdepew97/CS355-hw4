@@ -4,7 +4,12 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdarg.h>
 #include "logger.h"
+
+int main() {
+    return 0;
+}
 
 void Log (int ticks, int OPERATION, int TID, int PRIORITY) {
     FILE *file;

@@ -4,7 +4,7 @@ test: logger.h
 	gcc -o test test.c -L. -luserthread
 
 logger:
-	gcc -o logger logger.c -L. -luserthread
+	gcc -o logger logger.c
 
 userthreads: userthreads.o
 	gcc -o libuserthread.so userthread.o -shared
