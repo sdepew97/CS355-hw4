@@ -99,7 +99,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
         newThread->uc_link = NULL;
         newThread->uc_stack.ss_sp = malloc(STACKSIZE);
         newThread->uc_stack.ss_size = STACKSIZE;
-        makecontext(newThread, (void (*)(void)) func, 1, arg);
+        makecontext(newThread, (void (*)(void)) stub, 2, func, arg);
         //TODO: figure out what to do with masking here??
 
         TCB *newThreadTCB = malloc(sizeof(TCB));
@@ -134,3 +134,11 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
 int thread_yield(void);
 
 int thread_join(int tid);
+
+
+int stub(void (*func)(void *), void *arg) {
+    // thread starts here
+    func(arg); // call root function
+    //TODO: thread clean up
+    exit(0); // all threads are done, so process should exit
+}
