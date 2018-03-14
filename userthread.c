@@ -136,7 +136,13 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
 int thread_yield(void);
 
 int thread_join(int tid) {
-    
+    if(POLICY == FIFO) {
+        //make sure main thread waits
+        ucontext_t *main;
+        getcontext(main);
+
+        swapcontext(main, FIFOList->tail->TCB->ucontext);
+    }
 }
 
 int stub(void (*func)(void *), void *arg) {
