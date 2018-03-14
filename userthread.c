@@ -138,10 +138,10 @@ int thread_yield(void);
 int thread_join(int tid) {
     if(POLICY == FIFO) {
         //make sure main thread waits
-        ucontext_t *mainContext;
-        getcontext(mainContext);
+        ucontext_t *mainContext = malloc(sizeof(ucontext_t));
+        //getcontext(mainContext);
 
-       // swapcontext(mainContext, ((TCB*) (FIFOList->tail->TCB))->ucontext);
+        swapcontext(mainContext, ((TCB*) (FIFOList->tail->TCB))->ucontext);
     }
 }
 
