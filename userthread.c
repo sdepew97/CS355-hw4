@@ -69,7 +69,7 @@ void Log (int ticks, int OPERATION, int TID, int PRIORITY);    // logs a message
 
 int thread_libinit(int policy) {
     main = malloc(sizeof(TCB));
-    main->ucontext = malloc(sizeof(ucontext));
+    main->ucontext = malloc(sizeof(ucontext_t));
     //TODO: mark main here/get context as needed
 
     running = malloc(sizeof(TCB));
