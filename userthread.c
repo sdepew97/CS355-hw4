@@ -39,6 +39,8 @@ static linkedList *FIFOList = NULL;
 static linkedList *SJFList = NULL;
 static linkedList *PRIORITYList = NULL;
 
+int stub(void (*func)(void *), void *arg);
+
 int thread_libinit(int policy) {
     if(policy == FIFO) {
         //TODO: setup queues here
@@ -134,7 +136,6 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
 int thread_yield(void);
 
 int thread_join(int tid);
-
 
 int stub(void (*func)(void *), void *arg) {
     // thread starts here
