@@ -15,5 +15,8 @@ userthreads: userthreads.o logger.o
 userthreads.o: userthread.c userthread.h logger.h
 	gcc -Wall -fpic -c userthread.c
 
+logger.o: logger.c logger.h
+	gcc -Wall -fpic -c logger.c
+
 clean:
 	rm -rf *.o *.gch *.dSYM
