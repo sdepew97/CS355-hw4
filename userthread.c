@@ -293,7 +293,7 @@ int schedule() {
         TCB *lastRunning = runningTCB;
         runningTCB = ((TCB*) readyList->head->TCB);
         lastRunning->state = WAITING;
-        swapcontext(&lastRunning->ucontext, runningTCB->ucontext);
+        swapcontext(lastRunning->ucontext, runningTCB->ucontext);
     } else if(POLICY == SJF) {
 
     } else if(POLICY == PRIORITY) {
