@@ -39,11 +39,13 @@ static linkedList *FIFOList = NULL;
 static linkedList *SJFList = NULL;
 static linkedList *PRIORITYList = NULL;
 
-ucontext_t *mainContext = malloc(sizeof(ucontext_t));
+ucontext_t *mainContext;
 
 int stub(void (*func)(void *), void *arg);
 
 int thread_libinit(int policy) {
+    mainContext = malloc(sizeof(ucontext_t));
+
     if(policy == FIFO) {
         //TODO: setup queues here
         POLICY = FIFO;
