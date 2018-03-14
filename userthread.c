@@ -59,6 +59,7 @@ void Log (int ticks, int OPERATION, int TID, int PRIORITY);    // logs a message
 int thread_libinit(int policy) {
     mainContext = malloc(sizeof(ucontext_t));
     startTime = (int) getTicks();
+    //header for the LOG
 
     if(policy == FIFO) {
         //TODO: setup queues here
