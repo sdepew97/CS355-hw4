@@ -14,3 +14,11 @@ logger.o: logger.c logger.h
 
 clean:
 	rm -rf *.o *.gch *.dSYM
+
+
+
+logger: logger.o
+	gcc -o logger logger.o
+
+logger.o: logger.c logger.h
+	gcc -c -Wall logger.c
