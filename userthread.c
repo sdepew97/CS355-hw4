@@ -139,7 +139,7 @@ int thread_join(int tid) {
     if(POLICY == FIFO) {
         //make sure main thread waits
         ucontext_t *mainContext;
-        //getcontext(mainContext);
+        getcontext(mainContext);
 
        // swapcontext(mainContext, ((TCB*) (FIFOList->tail->TCB))->ucontext);
     }
