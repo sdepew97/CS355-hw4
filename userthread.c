@@ -141,7 +141,7 @@ int thread_join(int tid) {
         ucontext_t *mainContext;
         getcontext(mainContext);
 
-        swapcontext(mainContext, ((TCB*) (FIFOList->tail->TCB))->ucontext);
+       // swapcontext(mainContext, ((TCB*) (FIFOList->tail->TCB))->ucontext);
     }
 }
 
