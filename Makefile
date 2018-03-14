@@ -9,7 +9,7 @@ userthreads: userthreads.o
 logger.o: logger.c logger.h
 	gcc -Wall -fpic -c logger.c
 
-userthreads.o: userthread.c userthread.h
+userthreads.o: userthread.c userthread.h logger.h
 	gcc -Wall -fpic -c userthread.c
 
 clean:
