@@ -11,5 +11,7 @@ int main() {
     thread_create(printHello, NULL, -1);
     thread_join(1);
 
+    printf("Back to main\n");
+
     return 0;
 }
