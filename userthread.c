@@ -18,7 +18,7 @@ static int TID = 1;
 //structs used in program
 typedef struct TCB {
     int TID;
-    ucontext_t ucontext;
+    ucontext_t *ucontext;
     unsigned int CPUusage;
     unsigned int priority;
 } TCB;
@@ -95,10 +95,10 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
         int currentTID = TID;
         //TODO: mask access to global variable!
         ucontext_t *newThread = malloc(sizeof(ucontext_t)); //TODO: error check malloc
-        getcontext(thread);
+        getcontext(newThread);
         newThread->uc_link = NULL;
-        newThread->ss_sp = malloc(STACKSIZE);
-        newThread->ss_size = STACKSIZE;
+        newThread->uc_stack.ss_sp = malloc(STACKSIZE);
+        newThread->uc_stack.ss_size = STACKSIZE;
         makecontext(newThread, func, 1, arg);
         //TODO: figure out what to do with masking here??
 
