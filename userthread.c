@@ -149,5 +149,6 @@ int stub(void (*func)(void *), void *arg) {
     // thread starts here
     func(arg); // call root function
     //TODO: thread clean up mentioned in assignment guidelines on page 3
+    printf("thread done\n");
     exit(0); // all threads are done, so process should exit
 }
