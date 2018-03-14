@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <ucontext.h>
 #include "userthread.h"
-//#include "logger.h"
+#include "logger.h"
 
 #define FAILURE -1
 #define SUCCESS 0
@@ -131,6 +131,8 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
             newThreadNode->prev = tailNode;
             FIFOList->tail = newThreadNode;
         }
+
+        Log((int) getTicks(), CREATED, currentTID, -1);
         return currentTID;
     }
 
@@ -142,6 +144,7 @@ int thread_yield(void);
 int thread_join(int tid) {
     if(POLICY == FIFO) {
         //make sure main thread waits
+        Log((int) getTicks(), SCHEDULED, tid, -1);
         getcontext(mainContext);
         swapcontext(mainContext, ((TCB*) (FIFOList->tail->TCB))->ucontext);
     }
@@ -153,5 +156,12 @@ int stub(void (*func)(void *), void *arg) {
     //TODO: thread clean up mentioned in assignment guidelines on page 3
     printf("thread done\n");
     setcontext(mainContext);
+    Log((int) getTicks(), FINISHED, 1, -1); //TODO: fix logging here
     exit(0); // all threads are done, so process should exit
+}
+
+long getTicks() {
+    struct timeval time;
+    gettimeofday(&time, NULL);
+    return time.tv_usec;
 }
