@@ -1,9 +1,9 @@
-all: logger test userthread libuserthread clean
+all: logger test userthread clean
 
 test:
 	gcc -o test test.c -L. -luserthread
 
-libuserthread: userthreads.o logger.o
+userthread: userthreads.o logger.o
 	gcc -o libuserthread.so userthread.o logger.o -shared
 
 userthreads.o: userthread.c userthread.h logger.h
