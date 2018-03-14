@@ -42,6 +42,7 @@ static linkedList *PRIORITYList = NULL;
 ucontext_t *mainContext;
 
 int stub(void (*func)(void *), void *arg);
+long getTicks();
 
 int thread_libinit(int policy) {
     mainContext = malloc(sizeof(ucontext_t));
