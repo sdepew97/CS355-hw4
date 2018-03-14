@@ -135,11 +135,13 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
 
 int thread_yield(void);
 
-int thread_join(int tid);
+int thread_join(int tid) {
+    
+}
 
 int stub(void (*func)(void *), void *arg) {
     // thread starts here
     func(arg); // call root function
-    //TODO: thread clean up
+    //TODO: thread clean up mentioned in assignment guidelines on page 3
     exit(0); // all threads are done, so process should exit
 }

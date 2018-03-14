@@ -2,7 +2,13 @@
 #include "userthread.h"
 #include "logger.h"
 
+void printHello () {
+    printf("Hello world\n");
+}
+
 int main() {
+    thread_libinit(FIFO);
+    thread_create(printHello, NULL, -1);
 
     return 0;
 }
