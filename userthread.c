@@ -19,11 +19,11 @@
 //globals for logging
 enum {CREATED, SCHEDULED, STOPPED, FINISHED};
 char* states[] = {"CREATED\0", "SCHEDULED\0", "STOPPED\0", "FINISHED\0"};
-void Log (int ticks, int OPERATION, int TID, int PRIORITY);    // logs a message to LOGFILE
 
 //global variable to store the scheduling policy
 static int POLICY; //policy for scheduling that the user passed
 static int TID = 1;
+static int startTime;
 static int LogCreated = FALSE;
 
 //structs used in program
@@ -54,9 +54,11 @@ ucontext_t *mainContext;
 
 int stub(void (*func)(void *), void *arg);
 long getTicks();
+void Log (int ticks, int OPERATION, int TID, int PRIORITY);    // logs a message to LOGFILE
 
 int thread_libinit(int policy) {
     mainContext = malloc(sizeof(ucontext_t));
+    startTime = (int) getTicks();
 
     if(policy == FIFO) {
         //TODO: setup queues here
@@ -146,7 +148,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
             FIFOList->tail = newThreadNode;
         }
 
-        Log((int) getTicks(), CREATED, currentTID, -1);
+        Log((int) getTicks()-startTime, CREATED, currentTID, -1);
         return currentTID;
     }
 
@@ -160,7 +162,7 @@ int thread_yield(void) {
 int thread_join(int tid) {
     if(POLICY == FIFO) {
         //make sure main thread waits
-        Log((int) getTicks(), SCHEDULED, tid, -1);
+        Log((int) getTicks()-startTime, SCHEDULED, tid, -1);
         getcontext(mainContext);
         swapcontext(mainContext, ((TCB*) (FIFOList->tail->TCB))->ucontext);
     }
@@ -173,7 +175,7 @@ int stub(void (*func)(void *), void *arg) {
     //TODO: thread clean up mentioned in assignment guidelines on page 3
     printf("thread done\n");
     setcontext(mainContext);
-    Log((int) getTicks(), FINISHED, 1, -1); //TODO: fix logging here
+    Log((int) getTicks()-startTime, FINISHED, 1, -1); //TODO: fix logging here
     exit(0); // all threads are done, so process should exit
 }
 
@@ -199,7 +201,7 @@ void Log (int ticks, int OPERATION, int TID, int PRIORITY) {
         return;
     } else {
 
-        fprintf(file, "[%d]\t\t%s\t\t\t%d\t\t\t%d\n", ticks, states[OPERATION], TID, PRIORITY);
+        fprintf(file, "[%d]\t%s\t%d\t%d\n", ticks, states[OPERATION], TID, PRIORITY);
     }
 
     if (file) {
