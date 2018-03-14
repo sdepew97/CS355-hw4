@@ -99,7 +99,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
         newThread->uc_link = NULL;
         newThread->uc_stack.ss_sp = malloc(STACKSIZE);
         newThread->uc_stack.ss_size = STACKSIZE;
-        makecontext(newThread, func, 1, arg);
+        makecontext(newThread, (void (*)(void)) func, 1, arg);
         //TODO: figure out what to do with masking here??
 
         TCB *newThreadTCB = malloc(sizeof(TCB));
