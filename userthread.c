@@ -37,8 +37,8 @@ typedef struct linkedList {
 } linkedList;
 
 static linkedList *FIFOList = NULL;
-static linkedList *SJFList = NULL;
-static linkedList *PRIORITYList = NULL;
+//static linkedList *SJFList = NULL;
+//static linkedList *PRIORITYList = NULL;
 
 ucontext_t *mainContext;
 
@@ -141,7 +141,9 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
     return FAILURE;
 }
 
-int thread_yield(void);
+int thread_yield(void) {
+    return FAILURE;
+}
 
 int thread_join(int tid) {
     if(POLICY == FIFO) {
@@ -150,6 +152,7 @@ int thread_join(int tid) {
         getcontext(mainContext);
         swapcontext(mainContext, ((TCB*) (FIFOList->tail->TCB))->ucontext);
     }
+    return FAILURE;
 }
 
 int stub(void (*func)(void *), void *arg) {
