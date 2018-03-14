@@ -60,16 +60,16 @@ static linkedList *lowList = NULL;
 static linkedList *mediumList = NULL;
 static linkedList *highList = NULL;
 
-TCB *main;
-TCB *running;
+TCB *mainTCB;
+TCB *runningTCB;
 
 int stub(void (*func)(void *), void *arg);
 long getTicks();
 void Log (int ticks, int OPERATION, int TID, int PRIORITY);    // logs a message to LOGFILE
 
 int thread_libinit(int policy) {
-    main = malloc(sizeof(TCB));
-    main->ucontext = malloc(sizeof(ucontext_t));
+    mainTCB = malloc(sizeof(TCB));
+    mainTCB->ucontext = malloc(sizeof(ucontext_t));
     //TODO: mark main here/get context as needed
 
     running = malloc(sizeof(TCB));
@@ -231,7 +231,7 @@ int thread_join(int tid) {
     if(POLICY == FIFO) {
         //make sure main thread waits
         Log((int) getTicks()-startTime, SCHEDULED, tid, -1);
-        getcontext(main->ucontext);
+        getcontext(mainTCB->ucontext);
         //swapcontext(main->ucontext, ((TCB*) (readyList->tail->TCB))->ucontext);
     }
     return FAILURE;
@@ -243,7 +243,7 @@ int stub(void (*func)(void *), void *arg) {
     //TODO: thread clean up mentioned in assignment guidelines on page 3
     printf("thread done\n");
     Log((int) getTicks()-startTime, FINISHED, 1, -1); //TODO: fix logging here
-    setcontext(main->ucontext);
+    setcontext(mainTCB->ucontext);
     exit(0); // all threads are done, so process should exit
 }
 
