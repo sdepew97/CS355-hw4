@@ -72,7 +72,7 @@ int thread_libinit(int policy) {
     mainTCB->ucontext = malloc(sizeof(ucontext_t));
     //TODO: mark main here/get context as needed
 
-    running = malloc(sizeof(TCB));
+    runningTCB = malloc(sizeof(TCB));
 
     startTime = (int) getTicks();
 
