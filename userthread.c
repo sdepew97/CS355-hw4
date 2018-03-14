@@ -232,7 +232,7 @@ int thread_join(int tid) {
         //make sure main thread waits
         Log((int) getTicks()-startTime, SCHEDULED, tid, -1);
         getcontext(mainTCB->ucontext);
-        swapcontext(main->ucontext, ((TCB*) (readyList->tail->TCB))->ucontext);
+        swapcontext(mainTCB->ucontext, ((TCB*) (readyList->tail->TCB))->ucontext);
     }
     return FAILURE;
 }
