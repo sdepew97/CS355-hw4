@@ -32,7 +32,16 @@ typedef struct TCB {
     ucontext_t *ucontext;
     unsigned int CPUusage;
     unsigned int priority;
+    unsigned int state;
 } TCB;
+
+typedef enum {
+    READY = 0,
+    WAITING = 1,
+    RUNNING = 2,
+    BLOCKED = 3,
+    DONE = 4
+} status;
 
 typedef struct node {
     void *TCB;
@@ -46,40 +55,40 @@ typedef struct linkedList {
     unsigned int size;
 } linkedList;
 
-static linkedList *FIFOList = NULL;
-//static linkedList *SJFList = NULL;
-//static linkedList *PRIORITYList = NULL;
+static linkedList *readyList = NULL;
+static linkedList *lowList = NULL;
+static linkedList *mediumList = NULL;
+static linkedList *highList = NULL;
 
-ucontext_t *mainContext;
+TCB *main;
+TCB *running;
 
 int stub(void (*func)(void *), void *arg);
 long getTicks();
 void Log (int ticks, int OPERATION, int TID, int PRIORITY);    // logs a message to LOGFILE
 
 int thread_libinit(int policy) {
-    mainContext = malloc(sizeof(ucontext_t));
+    main = malloc(sizeof(TCB));
+    //TODO: mark main here/get context as needed
+
+    running = malloc(sizeof(TCB));
+
     startTime = (int) getTicks();
-    //header for the LOG
 
-    if(policy == FIFO) {
-        //TODO: setup queues here
-        POLICY = FIFO;
+    POLICY = policy;
 
+    if(policy == FIFO || policy == SJF) {
         //TODO: free memory malloced here!
-        FIFOList = malloc(sizeof(linkedList));
+        readyList = malloc(sizeof(linkedList));
 
-        if(FIFOList == NULL) {
+        if(readyList == NULL) {
             return FAILURE;
         }
 
-        FIFOList->head = NULL;
-        FIFOList->tail = NULL;
-        FIFOList->size = 0;
+        readyList->head = NULL;
+        readyList->tail = NULL;
+        readyList->size = 0;
 
-        return SUCCESS;
-    } else if(policy == SJF) {
-        //TODO: setup queues here
-        POLICY = SJF;
         return SUCCESS;
     } else if(policy == PRIORITY) {
         //TODO: setup queues here
@@ -89,6 +98,7 @@ int thread_libinit(int policy) {
         return FAILURE;
     }
 
+    return FAILURE;
 }
 
 int thread_libterminate(void) {
@@ -113,43 +123,96 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
     //add to the ready queue for the job type
 
     //return the TID or the failure value
+    int currentTID = TID;
 
-    if (POLICY == FIFO) {
-        int currentTID = TID;
-        //TODO: mask access to global variable!
-        ucontext_t *newThread = malloc(sizeof(ucontext_t)); //TODO: error check malloc
-        getcontext(newThread);
-        newThread->uc_link = NULL;
-        newThread->uc_stack.ss_sp = malloc(STACKSIZE);
-        newThread->uc_stack.ss_size = STACKSIZE;
-        makecontext(newThread, (void (*)(void)) stub, 2, func, arg);
-        //TODO: figure out what to do with masking here??
+    //TODO: mask access to global variable!
+    ucontext_t *newThread = malloc(sizeof(ucontext_t)); //TODO: error check malloc
+    getcontext(newThread);
+    newThread->uc_link = NULL;
+    newThread->uc_stack.ss_sp = malloc(STACKSIZE);
+    newThread->uc_stack.ss_size = STACKSIZE;
+    makecontext(newThread, (void (*)(void)) stub, 2, func, arg);
+    //TODO: figure out what to do with masking here??
 
-        TCB *newThreadTCB = malloc(sizeof(TCB));
-        newThreadTCB->ucontext = newThread;
-        newThreadTCB->CPUusage = 0;
-        newThreadTCB->priority = -1; //we are not doing priority scheduling here
-        newThreadTCB->TID = currentTID;
-        TID++; //TODO: MASK!!
+    TCB *newThreadTCB = malloc(sizeof(TCB));
+    newThreadTCB->ucontext = newThread;
+    newThreadTCB->CPUusage = 0;
+    newThreadTCB->priority = -1; //we are not doing priority scheduling here
+    newThreadTCB->TID = currentTID;
+    newThreadTCB->state = READY;
+    TID++; //TODO: MASK!!
 
-        node *newThreadNode = malloc(sizeof(node));
-        newThreadNode->TCB = newThreadTCB;
+    node *newThreadNode = malloc(sizeof(node));
+    newThreadNode->TCB = newThreadTCB;
 
+    if (POLICY == FIFO || POLICY == SJF) {
         //TODO: mask this linked list interaction
-        //first node ever
-        if (FIFOList->head == NULL) {
-            FIFOList->head = newThreadNode;
-            FIFOList->tail = newThreadNode;
+        //first node ever on the list
+        if (readyList->size == 0) {
+            readyList->head = newThreadNode;
+            readyList->tail = newThreadNode;
+            readyList->size++;
             newThreadNode->next = NULL;
             newThreadNode->prev = NULL;
-        } else { //there are other nodes
-            node *tailNode = FIFOList->tail;
+        } else { //there are other nodes on the list
+            node *tailNode = readyList->tail;
             tailNode->next = newThreadNode;
-            newThreadNode->prev = tailNode;
-            FIFOList->tail = newThreadNode;
+            tailNode->prev = tailNode;
+            readyList->tail = newThreadNode;
+            readyList->size++;
         }
-
-        Log((int) getTicks()-startTime, CREATED, currentTID, -1);
+        Log((int) getTicks() - startTime, CREATED, currentTID, -1);
+        return currentTID;
+    } else { //we are priority scheduling
+        if (priority == -1) {
+            //first node ever on the list
+            if (lowList->size == 0) {
+                lowList->head = newThreadNode;
+                lowList->tail = newThreadNode;
+                lowList->size++;
+                newThreadNode->next = NULL;
+                newThreadNode->prev = NULL;
+            } else { //there are other nodes on the list
+                node *tailNode = lowList->tail;
+                tailNode->next = newThreadNode;
+                tailNode->prev = tailNode;
+                lowList->tail = newThreadNode;
+                lowList->size++;
+            }
+        } else if (priority == 0) {
+            //first node ever on the list
+            if (mediumList->size == 0) {
+                mediumList->head = newThreadNode;
+                mediumList->tail = newThreadNode;
+                mediumList->size++;
+                newThreadNode->next = NULL;
+                newThreadNode->prev = NULL;
+            } else { //there are other nodes on the list
+                node *tailNode = mediumList->tail;
+                tailNode->next = newThreadNode;
+                tailNode->prev = tailNode;
+                mediumList->tail = newThreadNode;
+            }
+        } else if (priority == 1) {
+            //first node ever on the list
+            if (highList->size == 0) {
+                highList->head = newThreadNode;
+                highList->tail = newThreadNode;
+                highList->size++;
+                newThreadNode->next = NULL;
+                newThreadNode->prev = NULL;
+            } else { //there are other nodes on the list
+                node *tailNode = highList->tail;
+                tailNode->next = newThreadNode;
+                tailNode->prev = tailNode;
+                highList->tail = newThreadNode;
+                highList->size++;
+            }
+        } else {
+            //priority is invalid
+            return FAILURE;
+        }
+        Log((int) getTicks() - startTime, CREATED, currentTID, -1);
         return currentTID;
     }
 
@@ -157,6 +220,9 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
 }
 
 int thread_yield(void) {
+    if(POLICY == FIFO) {
+        //take current running thread or the head of the list
+    }
     return FAILURE;
 }
 
@@ -164,8 +230,8 @@ int thread_join(int tid) {
     if(POLICY == FIFO) {
         //make sure main thread waits
         Log((int) getTicks()-startTime, SCHEDULED, tid, -1);
-        getcontext(mainContext);
-        swapcontext(mainContext, ((TCB*) (FIFOList->tail->TCB))->ucontext);
+        getcontext(main->ucontext);
+        swapcontext(main->ucontext, ((TCB*) (readyList->tail->TCB))->ucontext);
     }
     return FAILURE;
 }
@@ -176,7 +242,7 @@ int stub(void (*func)(void *), void *arg) {
     //TODO: thread clean up mentioned in assignment guidelines on page 3
     printf("thread done\n");
     Log((int) getTicks()-startTime, FINISHED, 1, -1); //TODO: fix logging here
-    setcontext(mainContext);
+    setcontext(main->ucontext);
     exit(0); // all threads are done, so process should exit
 }
 
@@ -208,4 +274,8 @@ void Log (int ticks, int OPERATION, int TID, int PRIORITY) {
     if (file) {
         fclose(file);
     }
+}
+
+void schedule() {
+
 }
