@@ -84,6 +84,8 @@ int thread_libterminate(void) {
     //free all thread memory malloced
 
     //free all TCB's etc...
+
+    return FAILURE;
 }
 
 int thread_create(void (*func)(void *), void *arg, int priority) {
