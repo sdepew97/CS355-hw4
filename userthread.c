@@ -221,13 +221,19 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
 }
 
 int thread_yield(void) {
-    if(POLICY == FIFO) {
-        //take current running thread or the head of the list
-    }
+    //put current running back onto the ready queue
+
+    //change state of running thread to ready
+
+    //ensure that running thread is back of the ready queue
+
+    //call scheduler for the threads
+
     return FAILURE;
 }
 
 int thread_join(int tid) {
+    //TODO call scheduler here!
     if(POLICY == FIFO) {
         //make sure main thread waits
         Log((int) getTicks()-startTime, SCHEDULED, tid, -1);
@@ -277,6 +283,20 @@ void Log (int ticks, int OPERATION, int TID, int PRIORITY) {
     }
 }
 
-void schedule() {
+/* Method with the scheduling algorithms */
+int schedule() {
+    if(POLICY == FIFO) {
+        //TODO: ensure this interaction is masked
+        //In FIFO run the head of the ready queue and make the global running tcb correct
+        //change state
+        ((TCB*) readyList->head->TCB)->state = RUNNING;
+        TCB *lastRunning = runningTCB;
+        runningTCB = ((TCB*) readyList->head->TCB);
+        lastRunning->state = WAITING;
+        swapcontext(&lastRunning->ucontext, runningTCB->ucontext);
+    } else if(POLICY == SJF) {
 
+    } else if(POLICY == PRIORITY) {
+
+    }
 }
