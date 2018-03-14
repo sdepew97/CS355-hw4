@@ -39,6 +39,8 @@ static linkedList *FIFOList = NULL;
 static linkedList *SJFList = NULL;
 static linkedList *PRIORITYList = NULL;
 
+ucontext_t *mainContext = malloc(sizeof(ucontext_t));
+
 int stub(void (*func)(void *), void *arg);
 
 int thread_libinit(int policy) {
@@ -138,9 +140,7 @@ int thread_yield(void);
 int thread_join(int tid) {
     if(POLICY == FIFO) {
         //make sure main thread waits
-        ucontext_t *mainContext = malloc(sizeof(ucontext_t));
         getcontext(mainContext);
-
         swapcontext(mainContext, ((TCB*) (FIFOList->tail->TCB))->ucontext);
     }
 }
@@ -150,5 +150,6 @@ int stub(void (*func)(void *), void *arg) {
     func(arg); // call root function
     //TODO: thread clean up mentioned in assignment guidelines on page 3
     printf("thread done\n");
+    setcontext(mainContext);
     exit(0); // all threads are done, so process should exit
 }
