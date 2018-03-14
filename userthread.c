@@ -6,15 +6,25 @@
 #include <stdlib.h>
 #include <ucontext.h>
 #include <sys/time.h>
+#include <stdarg.h>
 #include "userthread.h"
 #include "logger.h"
 
 #define FAILURE -1
 #define SUCCESS 0
+#define TRUE 1
+#define FALSE 0
+#define LOGFILE	"scheduleLogger.txt\0"     // all Log(); messages will be appended to this file
+
+//globals for logging
+enum {CREATED, SCHEDULED, STOPPED, FINISHED};
+char* states[] = {"CREATED\0", "SCHEDULED\0", "STOPPED\0", "FINISHED\0"};
+void Log (int ticks, int OPERATION, int TID, int PRIORITY);    // logs a message to LOGFILE
 
 //global variable to store the scheduling policy
 static int POLICY; //policy for scheduling that the user passed
 static int TID = 1;
+static int LogCreated = FALSE;
 
 //structs used in program
 typedef struct TCB {
@@ -171,4 +181,28 @@ long getTicks() {
     struct timeval time;
     gettimeofday(&time, NULL);
     return time.tv_usec;
+}
+
+void Log (int ticks, int OPERATION, int TID, int PRIORITY) {
+    FILE *file;
+
+    if (!LogCreated) {
+        file = fopen(LOGFILE, "w");
+        LogCreated = TRUE;
+    }
+    else {
+        file = fopen(LOGFILE, "a");
+    }
+
+    if (file == NULL) {
+        //there was an error here...
+        return;
+    } else {
+
+        fprintf(file, "[%d]\t\t%s\t\t\t%d\t\t\t%d\n", ticks, states[OPERATION], TID, PRIORITY);
+    }
+
+    if (file) {
+        fclose(file);
+    }
 }
