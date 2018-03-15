@@ -239,7 +239,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
             return FAILURE;
         }
         Log((int) getTicks() - startTime, CREATED, currentTID, -1);
-        printlist();
+        printList();
         return currentTID;
     }
 
@@ -491,7 +491,7 @@ int schedule() {
 }
 
 void printList() {
-    node *currentNode = readyList;
+    node *currentNode = readyList->head;
     while(currentNode!=NULL) {
         printf("%d->", ((TCB *) currentNode->TCB)->TID);
     }
