@@ -256,7 +256,8 @@ int thread_join(int tid) {
             printf("hello\n");
             getcontext(mainTCB->ucontext); //TODO: determine why I need to save main here?!?
         }
-        printf("running %d", ((TCB*) running->TCB)->TID );
+        printf("running %d\n", ((TCB*) running->TCB)->TID);
+        printf("main %d\n", mainTCB->TID);
         schedule();
     }
     return FAILURE;
