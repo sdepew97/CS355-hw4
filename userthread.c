@@ -38,11 +38,11 @@ typedef struct TCB {
 } TCB;
 
 typedef enum {
-    READY = 0,
-    WAITING = 1,
-    RUNNING = 2,
-    BLOCKED = 3,
-    DONE = 4
+    READY = 0, //ready when joined
+    WAITING = 1, //waiting when has joined something that's now ready to run
+    RUNNING = 2, //running when it has been joined
+    BLOCKED = 3, //created and blocked, since not joined
+    DONE = 4 //when thread is done running
 } status;
 
 typedef struct node {
@@ -162,7 +162,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
     newThreadTCB->ucontext = newThread;
     newThreadTCB->CPUusage = 0;//TODO: update for the Priority scheduling needed
     newThreadTCB->priority = priority;
-    newThreadTCB->state = READY;
+    newThreadTCB->state = BLOCKED;
     newThreadTCB->joined = malloc(sizeof(TCB));
     newThreadTCB->joined = NULL;
     newThreadTCB->policy = malloc(sizeof(int));
@@ -318,39 +318,52 @@ int thread_join(int tid) {
     if ((*(((TCB *) running->TCB)->policy)) == FIFO || (*(((TCB *) running->TCB)->policy)) == SJF) {
         printf("got into FIFO or SJF\n");
         node *currentNode = readyList->head;
-        getcontext(
-                ((TCB *) running)->ucontext); //as soon as calls thread join, get context, since this is where we want to return
 
-        while (currentNode != NULL && ((TCB *) currentNode->TCB)->TID != tid) {
+        //find the node to join
+        while(currentNode!=NULL && ((TCB *) currentNode->TCB)->TID !=tid) {
             currentNode = currentNode->next;
         }
 
-        //case 1: TID doesn't exist/thread already finished
-        if (currentNode == NULL) {
-            printf("failed on null\n");
-            return FAILURE;
-        }
+        if(currentNode != NULL) {
+            ((TCB *) currentNode->TCB)->state = READY; //change to ready, since it's been joined and can run as a result
+            getcontext(
+                    ((TCB *) running)->ucontext); //as soon as calls thread join, get context, since this is where we want to return
 
-        //case 2: TID does exist and found thread is waiting already, which would mean you'd get stuck forever, perhaps?
-        if (((TCB *) currentNode->TCB)->state == WAITING) {
-            if (((TCB *) currentNode->TCB)->joined->TID != ((TCB *) running->TCB)->TID) {
-                ((TCB *) running->TCB)->state = WAITING;
-                Log((int) getTicks() - startTime, STOPPED, ((TCB *) running->TCB)->TID, -1);
-                ((TCB *) currentNode->TCB)->joined = running->TCB;
-                schedule();
-            } else {
-                //attempting a circular join
-                printf("failed on circular\n");
+//            while (currentNode != NULL && ((TCB *) currentNode->TCB)->TID != tid) {
+//                currentNode = currentNode->next;
+//            }
+
+            //case 2: TID does exist and found thread is waiting already, which would mean you'd get stuck forever, perhaps?
+            if (((TCB *) currentNode->TCB)->state == WAITING) {
+                if (((TCB *) currentNode->TCB)->joined->TID != ((TCB *) running->TCB)->TID) {
+                    ((TCB *) running->TCB)->state = WAITING;
+                    Log((int) getTicks() - startTime, STOPPED, ((TCB *) running->TCB)->TID, -1);
+                    ((TCB *) currentNode->TCB)->joined = running->TCB;
+                    schedule();
+                } else {
+                    //attempting a circular join
+                    printf("failed on circular\n");
+                    return FAILURE;
+                }
+            }
+            //case 3: TID does exist and thread is ready to go! (set calling thread to waiting by this thread and set joined pointer)
+            printf("third case\n");
+            ((TCB *) running->TCB)->state = WAITING;
+            ((TCB *) currentNode->TCB)->joined = running->TCB;
+            schedule();
+
+            return SUCCESS;
+        }
+        else {
+
+            //case 1: TID doesn't exist/thread already finished
+            if (currentNode == NULL) {
+                printf("failed on null\n");
                 return FAILURE;
             }
+            //not found
+//            return FAILURE;
         }
-        //case 3: TID does exist and thread is ready to go! (set calling thread to waiting by this thread and set joined pointer)
-        printf("third case\n");
-        ((TCB *) running->TCB)->state = WAITING;
-        ((TCB *) currentNode->TCB)->joined = running->TCB;
-        schedule();
-
-        return SUCCESS;
     }
     printf("got to end here\n");
     return FAILURE;
