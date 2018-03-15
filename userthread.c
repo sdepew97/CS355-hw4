@@ -78,6 +78,7 @@ int thread_libinit(int policy) {
     running = malloc(sizeof(node));
     running->TCB = malloc(sizeof(TCB));
     ((TCB*) running->TCB)->ucontext = malloc(sizeof(ucontext_t));
+    running->TCB = mainTCB;
 
     startTime = (int) getTicks();
 
