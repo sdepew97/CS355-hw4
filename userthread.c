@@ -326,7 +326,7 @@ int thread_join(int tid) {
             if (((TCB *) currentNode->TCB)->joined->TID != ((TCB *) running->TCB)->TID) {
                 ((TCB *) running->TCB)->state = WAITING;
                 Log((int) getTicks()-startTime, STOPPED, ((TCB *) running->TCB)->TID, -1);
-                ((TCB *) currentNode->TCB)->joined = running;
+                ((TCB *) currentNode->TCB)->joined = running->TCB;
                 schedule();
             } else {
                 //attempting a circular join
@@ -335,7 +335,7 @@ int thread_join(int tid) {
         }
         //case 3: TID does exist and thread is ready to go! (set calling thread to waiting by this thread and set joined pointer)
         ((TCB *) running->TCB)->state = WAITING;
-        ((TCB *) currentNode->TCB)->joined = running;
+        ((TCB *) currentNode->TCB)->joined = running->TCB;
         schedule();
 
 //        // set state of running node to waiting
