@@ -338,7 +338,7 @@ int schedule() {
 //            lastRunning->state = WAITING;
 //            swapcontext(lastRunning->ucontext, ((TCB*) running->TCB)->ucontext);
 //        }
-        if (readyList->size > 0) {
+        if (readyList->head != NULL) {
             printf("running %d\n", ((TCB*) running->TCB)->TID);
             //take node to run out of queue
             node *toRun = readyList->head;
@@ -358,7 +358,6 @@ int schedule() {
 
             running = toRun;
 
-//        setcontext(toRun);
             printf("running TID %d\n", ((TCB *) running->TCB)->TID);
             if(((TCB *) running->TCB)->ucontext != NULL) {
                 setcontext(((TCB *) running->TCB)->ucontext);
