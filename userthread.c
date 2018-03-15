@@ -252,7 +252,9 @@ int thread_join(int tid) {
     if(POLICY == FIFO || POLICY == SJF) {
         //make sure main thread waits
         Log((int) getTicks()-startTime, SCHEDULED, tid, -1);
-        getcontext(mainTCB->ucontext);
+        if(((TCB*) running->TCB)->TID == -1) {
+            getcontext(mainTCB->ucontext); //TODO: determine why I need to save main here?!?
+        }
         schedule();
     }
     return FAILURE;
