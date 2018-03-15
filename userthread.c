@@ -310,7 +310,7 @@ int thread_join(int tid) {
     printf("POLICY: %d\n", (*((TCB *) running->TCB)->policy));
     printList();
 
-//    if ((*(((TCB *) running->TCB)->policy)) == FIFO || (*(((TCB *) running->TCB)->policy)) == SJF) {
+    if ((*(((TCB *) running->TCB)->policy)) == FIFO || (*(((TCB *) running->TCB)->policy)) == SJF) {
         printf("got into FIFO or SJF\n");
         node *currentNode = readyList->head;
         getcontext(
@@ -347,9 +347,9 @@ int thread_join(int tid) {
 
         return SUCCESS;
     }
-//    printf("got to end here\n");
-//    return FAILURE;
-//}
+    printf("got to end here\n");
+    return FAILURE;
+}
 
 int stub(void (*func)(void *), void *arg) {
     printf("entered stub\n");
