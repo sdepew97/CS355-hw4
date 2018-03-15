@@ -396,7 +396,7 @@ void Log (int ticks, int OPERATION, int TID, int PRIORITY) {
 /* Method with the scheduling algorithms */
 int schedule() {
     printf("schedule called\n");
-    printf("POLICY in schedule: %d\n", ((*(TCB *) running->TCB)->policy));
+    printf("POLICY in schedule: %d\n", (*(((TCB *) running->TCB)->policy)));
     if (((TCB *) running->TCB)->policy == FIFO) {
         //TODO: ensure this interaction is masked
         node *currentNode = readyList->head;
@@ -408,7 +408,7 @@ int schedule() {
         running = currentNode;
         Log((int) getTicks() - startTime, SCHEDULED, ((TCB *) currentNode->TCB)->TID, -1);
         printf("running TID %d\n", ((TCB *) running->TCB)->TID);
-        printf("POLICY in schedule two: %d\n", ((*(TCB *) running->TCB)->policy));
+        printf("POLICY in schedule two: %d\n", (*(((TCB *) running->TCB)->policy)));
         if (((TCB *) running->TCB)->ucontext != NULL) {
             setcontext(((TCB *) running->TCB)->ucontext);
         }
@@ -422,7 +422,7 @@ int schedule() {
 void printList() {
     node *currentNode = readyList->head;
     while (currentNode != NULL) {
-        printf("%d, state %d, policy %d->", ((TCB *) currentNode->TCB)->TID, ((TCB *) currentNode->TCB)->state, ((*(TCB *) currentNode->TCB)->policy));
+        printf("%d, state %d, policy %d->", ((TCB *) currentNode->TCB)->TID, ((TCB *) currentNode->TCB)->state, (*(((TCB *) currentNode->TCB)->policy)));
 
         currentNode = currentNode->next;
     }
