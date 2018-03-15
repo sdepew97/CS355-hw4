@@ -312,7 +312,7 @@ int thread_join(int tid) {
     //TODO call scheduler here!
     if (POLICY == FIFO || POLICY == SJF) {
         node *currentNode = readyList->head;
-        getcontext(((TCB *) running)->ucontext);
+        //getcontext(((TCB *) running)->ucontext);
 
         while (currentNode != NULL && ((TCB *) currentNode->TCB)->TID != tid) {
             currentNode = currentNode->next;
@@ -466,8 +466,8 @@ int schedule() {
         if(((TCB*) running->TCB)->TID == -1) { //update main
             printf("hello\n");
             running = currentNode;
-            setcontext(((TCB *) currentNode->TCB)->ucontext);
-            //swapcontext(mainTCB->ucontext, ((TCB *) currentNode->TCB)->ucontext); //TODO: determine why I need to save main here?!?
+//            setcontext(((TCB *) currentNode->TCB)->ucontext);
+            swapcontext(mainTCB->ucontext, ((TCB *) currentNode->TCB)->ucontext); //TODO: determine why I need to save main here?!?
         } else {
             printf("hello from not main\n");
             //getcontext(((TCB *) running->TCB)->ucontext);
