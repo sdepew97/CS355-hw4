@@ -348,17 +348,19 @@ int schedule() {
             ((TCB *) toRun->TCB)->state = RUNNING;
 
             //put currently running into queue with a state of waiting at the tail
-//            node *currentTail = readyList->tail;
-//            currentTail->next = running;
-//            running->prev = currentTail;
-//            running->next = NULL;
-//            readyList->tail = running;
-//
-//            running = toRun;
-//
-////        setcontext(toRun);
-//            printf("running TID %d\n", ((TCB *) running->TCB)->TID);
-//            setcontext(((TCB *) running->TCB)->ucontext);
+            node *currentTail = readyList->tail;
+            currentTail->next = running;
+            running->prev = currentTail;
+            running->next = NULL;
+            readyList->tail = running;
+
+            running = toRun;
+
+//        setcontext(toRun);
+            printf("running TID %d\n", ((TCB *) running->TCB)->TID);
+            if(((TCB *) running->TCB)->ucontext != NULL) {
+                setcontext(((TCB *) running->TCB)->ucontext);
+            }
         }
     } else if (POLICY == SJF) {
 
