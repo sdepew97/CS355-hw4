@@ -338,6 +338,7 @@ int schedule() {
 //            lastRunning->state = WAITING;
 //            swapcontext(lastRunning->ucontext, ((TCB*) running->TCB)->ucontext);
 //        }
+        printf("entered scheduler\n");
         if (readyList->head != NULL) {
             printf("running %d\n", ((TCB*) running->TCB)->TID);
             //take node to run out of queue
