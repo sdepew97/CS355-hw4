@@ -165,7 +165,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
     newThreadTCB->joined = malloc(sizeof(TCB));
     newThreadTCB->joined = NULL;
     newThreadTCB->policy = malloc(sizeof(int));
-    *(newThreadTCB->policy) = ((TCB *) running->TCB)->policy;
+    *(newThreadTCB->policy) = (*(((TCB *) running->TCB)->policy));
     TID++; //TODO: MASK!!
 
     node *newThreadNode = malloc(sizeof(node));
@@ -255,7 +255,7 @@ int thread_yield(void) {
 
     //call scheduler for the threads
 
-    if ((*((TCB *) running->TCB)->policy) == FIFO || ((*(TCB *) running->TCB)->policy) == SJF) {
+    if ((*(((TCB *) running->TCB)->policy)) == FIFO || (*(((TCB *) running->TCB)->policy)) == SJF) {
         //running node is in the list, so have to 1) find it (have a pointer to it rn), 2) move it to the tail
         node *currentRunning = running;
         node *currentRunningPrev = running->prev;
@@ -309,7 +309,7 @@ int thread_join(int tid) {
     printf("POLICY: %d\n", ((TCB *) running->TCB)->policy);
     printList(); 
 
-    if ((*((TCB *) running->TCB)->policy) == FIFO || ((*(TCB *) running->TCB)->policy) == SJF) {
+    if ((*(((TCB *) running->TCB)->policy)) == FIFO || (*(((TCB *) running->TCB)->policy)) == SJF) {
         printf("got into FIFO or SJF\n");
         node *currentNode = readyList->head;
         getcontext(
