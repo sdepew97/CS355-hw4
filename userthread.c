@@ -307,7 +307,7 @@ int thread_join(int tid) {
     //TODO call scheduler here!
     printf("join called for %d\n", tid);
     printf("POLICY: %d\n", (*((TCB *) running->TCB)->policy));
-    printList(); 
+    printList();
 
     if ((*(((TCB *) running->TCB)->policy)) == FIFO || (*(((TCB *) running->TCB)->policy)) == SJF) {
         printf("got into FIFO or SJF\n");
@@ -397,7 +397,7 @@ void Log (int ticks, int OPERATION, int TID, int PRIORITY) {
 int schedule() {
     printf("schedule called\n");
     printf("POLICY in schedule: %d\n", (*(((TCB *) running->TCB)->policy)));
-    if (((TCB *) running->TCB)->policy == FIFO) {
+    if ((*((TCB *) running->TCB)->policy) == FIFO) {
         //TODO: ensure this interaction is masked
         node *currentNode = readyList->head;
         while (currentNode != NULL && ((TCB *) currentNode->TCB)->state != READY) {
