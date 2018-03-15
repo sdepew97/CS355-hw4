@@ -308,6 +308,9 @@ int thread_yield(void) {
 int thread_join(int tid) {
     //TODO call scheduler here!
     printf("join called for %d\n", tid);
+    if((*(((TCB *) running->TCB)->policy)) > PRIORITY) {
+        (((TCB *) running)->ucontext) = malloc(sizeof(ucontext_t)); //TODO: replace once solve main deletion error
+    }
     (*(((TCB *) running->TCB)->policy)) = 0; //TODO: replace this here once policy is saved correctly
     printf("POLICY: %d\n", (*((TCB *) running->TCB)->policy));
     printList();
@@ -315,7 +318,6 @@ int thread_join(int tid) {
     if ((*(((TCB *) running->TCB)->policy)) == FIFO || (*(((TCB *) running->TCB)->policy)) == SJF) {
         printf("got into FIFO or SJF\n");
         node *currentNode = readyList->head;
-        (((TCB *) running)->ucontext) = malloc(sizeof(ucontext_t)); //TODO: replace once solve main deletion error
         getcontext(
                 ((TCB *) running)->ucontext); //as soon as calls thread join, get context, since this is where we want to return
 
