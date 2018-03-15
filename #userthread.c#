@@ -302,8 +302,7 @@ int thread_join(int tid) {
     printList(); 
     if (POLICY == FIFO || POLICY == SJF) {
         node *currentNode = readyList->head;
-        getcontext(
-                ((TCB *) running)->ucontext); //as soon as calls thread join, get context, since this is where we want to return
+        //getcontext(((TCB *) running)->ucontext); //as soon as calls thread join, get context, since this is where we want to return
 
         while (currentNode != NULL && ((TCB *) currentNode->TCB)->TID != tid) {
             currentNode = currentNode->next;
