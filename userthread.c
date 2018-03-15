@@ -253,7 +253,7 @@ int thread_join(int tid) {
         //make sure main thread waits
         Log((int) getTicks()-startTime, SCHEDULED, tid, -1);
         if(((TCB*) running->TCB)->TID == -1) {
-            printf("hello");
+            printf("hello\n");
             getcontext(mainTCB->ucontext); //TODO: determine why I need to save main here?!?
         }
         schedule();
