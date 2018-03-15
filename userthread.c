@@ -33,7 +33,7 @@ typedef struct TCB {
     unsigned int CPUusage;
     unsigned int priority;
     unsigned int state;
-    TCB *joined;
+    struct TCB *joined;
 } TCB;
 
 typedef enum {
@@ -261,7 +261,7 @@ int thread_yield(void) {
         node *currentTail = readyList->tail;
 
         //running is head
-        if(currentRunningPrev = NULL) {
+        if(currentRunningPrev == NULL) {
             readyList->head = currentRunningNext;
             readyList->head->prev = NULL;
             currentRunning->next = NULL;
