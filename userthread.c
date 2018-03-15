@@ -130,6 +130,7 @@ int thread_libterminate(void) {
 
     //free all TCB's etc...
 
+    //mark main as finished and free
     return FAILURE;
 }
 
@@ -398,13 +399,14 @@ void Log (int ticks, int OPERATION, int TID, int PRIORITY) {
 int schedule() {
     printf("schedule called\n");
     printf("POLICY in schedule: %d\n", (*(((TCB *) running->TCB)->policy)));
-    if ((*((TCB *) running->TCB)->policy) == FIFO) {
-        //TODO: ensure this interaction is masked
-        node *currentNode = readyList->head;
-        while (currentNode != NULL && ((TCB *) currentNode->TCB)->state != READY) {
-            currentNode = currentNode->next;
-        }
 
+    //TODO: ensure this interaction is masked
+    node *currentNode = readyList->head;
+    while (currentNode != NULL && ((TCB *) currentNode->TCB)->state != READY) {
+        currentNode = currentNode->next;
+    }
+
+    if ((*((TCB *) currentNode->TCB)->policy) == FIFO) {
         //now current node is ready to run, so have to run it here
         running = currentNode;
         Log((int) getTicks() - startTime, SCHEDULED, ((TCB *) currentNode->TCB)->TID, -1);
