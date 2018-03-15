@@ -73,7 +73,19 @@ void printList();
 void initMainTCB();
 
 int thread_libinit(int policy) {
-    initMainTCB(policy);
+//    initMainTCB(policy);
+
+    mainTCB = malloc(sizeof(TCB));
+    mainTCB->ucontext = malloc(sizeof(ucontext_t));
+    getcontext(mainTCB->ucontext);
+    mainTCB->joined = malloc(sizeof(TCB));
+    mainTCB->joined = NULL;
+    mainTCB->state = READY;
+    mainTCB->priority = 1; //main automatically has highest priority
+    mainTCB->TID = -1; //set a unique TID for the main context, so we know when it's doing the switching
+    mainTCB->policy = malloc(sizeof(int));
+    *(mainTCB->policy) = policy;
+    //TODO: mark main here/get context as needed
 
     running = malloc(sizeof(node));
     running->tcb = malloc(sizeof(TCB));
