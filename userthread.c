@@ -339,6 +339,7 @@ int schedule() {
 //            swapcontext(lastRunning->ucontext, ((TCB*) running->TCB)->ucontext);
 //        }
         if (readyList->size > 0) {
+            printf("running %d\n", ((TCB*) running->TCB)->TID);
             //take node to run out of queue
             node *toRun = readyList->head;
             readyList->head = toRun->next;
