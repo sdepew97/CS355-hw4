@@ -80,15 +80,15 @@ int thread_libinit(int policy) {
     ((TCB*) running->TCB)->ucontext = malloc(sizeof(ucontext_t));
     running->TCB = mainTCB;
 
-    readyList = malloc(sizeof(linkedList));
-    //add main to the ready queue
-    if (readyList->size == 0) {
-        readyList->head = running;
-        readyList->tail = running;
-        readyList->size++;
-        running->next = NULL;
-        running->prev = NULL;
-    }
+//    readyList = malloc(sizeof(linkedList));
+//    //add main to the ready queue
+//    if (readyList->size == 0) {
+//        readyList->head = running;
+//        readyList->tail = running;
+//        readyList->size++;
+//        running->next = NULL;
+//        running->prev = NULL;
+//    }
 
     startTime = (int) getTicks();
 
@@ -96,15 +96,15 @@ int thread_libinit(int policy) {
 
     if(policy == FIFO || policy == SJF) {
         //TODO: free memory malloced here!
-
+        readyList = malloc(sizeof(linkedList));
 
         if(readyList == NULL) {
             return FAILURE;
         }
 
-//        readyList->head = NULL;
-//        readyList->tail = NULL;
-//        readyList->size = 0;
+        readyList->head = NULL;
+        readyList->tail = NULL;
+        readyList->size = 0;
 
         return SUCCESS;
     } else if(policy == PRIORITY) {
@@ -321,23 +321,23 @@ int schedule() {
         //In FIFO run the head of the ready queue and make the global running tcb correct
         //change state
 
-        if(((TCB*) running->TCB)->TID == -1) {
-            //we know that we have the main context trying to make a thread join and that's the thread to suspend
-            mainTCB->state = WAITING;
-            node *toRun = readyList->head;
-            readyList->head = toRun->next;
-            readyList->head = NULL;
-            toRun->next = NULL;
-            ((TCB *) toRun->TCB)->state = RUNNING;
-            running = toRun;
-            setcontext(((TCB*) running->TCB)->ucontext);
-        } else { //the thread running isn't main, so we don't have to worry about updating the main's context
+//        if(((TCB*) running->TCB)->TID == -1) {
+//            //we know that we have the main context trying to make a thread join and that's the thread to suspend
+//            mainTCB->state = WAITING;
+//            node *toRun = readyList->head;
+//            readyList->head = toRun->next;
+//            readyList->head = NULL;
+//            toRun->next = NULL;
+//            ((TCB *) toRun->TCB)->state = RUNNING;
+//            running = toRun;
+//            setcontext(((TCB*) running->TCB)->ucontext);
+//        } else { //the thread running isn't main, so we don't have to worry about updating the main's context
             ((TCB*) readyList->head->TCB)->state = RUNNING;
             TCB *lastRunning = running->TCB;
             running->TCB = ((TCB*) readyList->head->TCB);
             lastRunning->state = WAITING;
             swapcontext(lastRunning->ucontext, ((TCB*) running->TCB)->ucontext);
-        }
+//        }
     } else if(POLICY == SJF) {
 
     } else if(POLICY == PRIORITY) {
