@@ -302,6 +302,7 @@ int thread_join(int tid) {
     //TODO call scheduler here!
     printf("join called for %d\n", tid); 
     printList(); 
+
     if (POLICY == FIFO || POLICY == SJF) {
         node *currentNode = readyList->head;
         getcontext(
