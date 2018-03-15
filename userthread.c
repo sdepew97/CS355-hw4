@@ -304,6 +304,7 @@ int thread_join(int tid) {
     printList(); 
 
     if (POLICY == FIFO || POLICY == SJF) {
+        printf("got into FIFO or SJF\n");
         node *currentNode = readyList->head;
         getcontext(
                 ((TCB *) running)->ucontext); //as soon as calls thread join, get context, since this is where we want to return
