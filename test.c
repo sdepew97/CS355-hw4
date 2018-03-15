@@ -13,7 +13,7 @@ int main() {
     printf("joining 1\n");
     thread_join(1);
     printf("joining 2\n"); 
-    thread_join(2);
+    printf("%d\n", thread_join(2));
 
     printf("Back to main\n");
 
