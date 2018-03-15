@@ -316,7 +316,7 @@ void Log (int ticks, int OPERATION, int TID, int PRIORITY) {
 
 /* Method with the scheduling algorithms */
 int schedule() {
-    if(POLICY == FIFO) {
+    if (POLICY == FIFO) {
         //TODO: ensure this interaction is masked
         //In FIFO run the head of the ready queue and make the global running tcb correct
         //change state
@@ -338,29 +338,30 @@ int schedule() {
 //            lastRunning->state = WAITING;
 //            swapcontext(lastRunning->ucontext, ((TCB*) running->TCB)->ucontext);
 //        }
+        if (readyList != NULL) {
+            //take node to run out of queue
+            node *toRun = readyList->head;
+            readyList->head = toRun->next;
+            readyList->head = NULL;
+            toRun->next = NULL;
+            ((TCB *) toRun->TCB)->state = RUNNING;
 
-        //take node to run out of queue
-        node *toRun = readyList->head;
-        readyList->head = toRun->next;
-        readyList->head = NULL;
-        toRun->next = NULL;
-        ((TCB *) toRun->TCB)->state = RUNNING;
+            //put currently running into queue with a state of waiting at the tail
+            node *currentTail = readyList->tail;
+            currentTail->next = running;
+            running->prev = currentTail;
+            running->next = NULL;
+            readyList->tail = running;
 
-        //put currently running into queue with a state of waiting at the tail
-        node *currentTail = readyList->tail;
-        currentTail->next = running;
-        running->prev = currentTail;
-        running->next = NULL;
-        readyList->tail = running;
-
-        running = toRun;
+            running = toRun;
 
 //        setcontext(toRun);
-        printf("running TID %d\n", ((TCB *) running->TCB)->TID);
-        setcontext(((TCB *) running->TCB)->ucontext);
-    } else if(POLICY == SJF) {
+            printf("running TID %d\n", ((TCB *) running->TCB)->TID);
+            setcontext(((TCB *) running->TCB)->ucontext);
+        }
+    } else if (POLICY == SJF) {
 
-    } else if(POLICY == PRIORITY) {
+    } else if (POLICY == PRIORITY) {
 
     }
 }
