@@ -80,6 +80,15 @@ int thread_libinit(int policy) {
     ((TCB*) running->TCB)->ucontext = malloc(sizeof(ucontext_t));
     running->TCB = mainTCB;
 
+    //add main to the ready queue
+    if (readyList->size == 0) {
+        readyList->head = running;
+        readyList->tail = running;
+        readyList->size++;
+        running->next = NULL;
+        running->prev = NULL;
+    }
+
     startTime = (int) getTicks();
 
     POLICY = policy;
@@ -92,9 +101,9 @@ int thread_libinit(int policy) {
             return FAILURE;
         }
 
-        readyList->head = NULL;
-        readyList->tail = NULL;
-        readyList->size = 0;
+//        readyList->head = NULL;
+//        readyList->tail = NULL;
+//        readyList->size = 0;
 
         return SUCCESS;
     } else if(policy == PRIORITY) {
