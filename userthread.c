@@ -462,8 +462,10 @@ int schedule() {
         Log((int) getTicks()-startTime, SCHEDULED, ((TCB *) currentNode->TCB)->TID, -1);
         if(((TCB*) running->TCB)->TID == -1) { //update main
             printf("hello\n");
+            running = currentNode;
             swapcontext(mainTCB->ucontext, ((TCB *) currentNode->TCB)->ucontext); //TODO: determine why I need to save main here?!?
         } else {
+            running = currentNode;
             swapcontext(((TCB *) running->TCB)->ucontext, ((TCB *) currentNode->TCB)->ucontext);
         }
 
