@@ -465,7 +465,7 @@ int schedule() {
         }
 
         //now current node is ready to run, so have to run it here
-        Log((int) getTicks()-startTime, SCHEDULED, ((TCB *) currentNode->TCB)->TID, -1);
+
 //        if(((TCB*) running->TCB)->TID == -1) { //update main
 //            printf("hello\n");
 //            running = currentNode;
@@ -475,6 +475,7 @@ int schedule() {
             printf("hello from not main\n");
 //            getcontext(((TCB *) running->TCB)->ucontext); //already called in join
             running = currentNode;
+            Log((int) getTicks()-startTime, SCHEDULED, ((TCB *) currentNode->TCB)->TID, -1);
             setcontext(((TCB *) currentNode->TCB)->ucontext);
 //        }
 
