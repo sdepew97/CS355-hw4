@@ -476,13 +476,13 @@ int schedule() {
 //            getcontext(((TCB *) running->TCB)->ucontext); //already called in join
             running = currentNode;
             Log((int) getTicks()-startTime, SCHEDULED, ((TCB *) currentNode->TCB)->TID, -1);
-            setcontext(((TCB *) currentNode->TCB)->ucontext);
+//            setcontext(((TCB *) currentNode->TCB)->ucontext);
 //        }
 
-//            printf("running TID %d\n", ((TCB *) running->TCB)->TID);
-//            if(((TCB *) running->TCB)->ucontext != NULL) {
-//                setcontext(((TCB *) running->TCB)->ucontext);
-//            }
+            printf("running TID %d\n", ((TCB *) running->TCB)->TID);
+            if(((TCB *) running->TCB)->ucontext != NULL) {
+                setcontext(((TCB *) running->TCB)->ucontext);
+            }
         //}
     } else if (POLICY == SJF) {
 
