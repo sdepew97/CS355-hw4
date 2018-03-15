@@ -154,11 +154,13 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
     //TODO: figure out what to do with masking here??
 
     TCB *newThreadTCB = malloc(sizeof(TCB));
+    newThreadTCB->TID = currentTID;
     newThreadTCB->ucontext = newThread;
     newThreadTCB->CPUusage = 0;//TODO: update for the Priority scheduling needed
     newThreadTCB->priority = priority;
-    newThreadTCB->TID = currentTID;
     newThreadTCB->state = READY;
+    newThreadTCB->joined = malloc(sizeof(TCB));
+    newThreadTCB->joined = NULL;
     TID++; //TODO: MASK!!
 
     node *newThreadNode = malloc(sizeof(node));
