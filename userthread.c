@@ -494,5 +494,6 @@ void printList() {
     node *currentNode = readyList->head;
     while(currentNode!=NULL) {
         printf("%d->\n", ((TCB *) currentNode->TCB)->TID);
+        currentNode = currentNode->next;
     }
 }
