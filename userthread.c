@@ -327,6 +327,7 @@ int thread_join(int tid) {
                 schedule();
             } else {
                 //attempting a circular join
+                printf("failed on circular\n");
                 return FAILURE;
             }
         }
