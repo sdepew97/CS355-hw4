@@ -347,6 +347,8 @@ int schedule() {
             toRun->next = NULL;
             ((TCB *) toRun->TCB)->state = RUNNING;
 
+            printf("running two %d\n", ((TCB*) running->TCB)->TID);
+
             //put currently running into queue with a state of waiting at the tail
             node *currentTail = readyList->tail;
             currentTail->next = running;
