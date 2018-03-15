@@ -34,6 +34,7 @@ typedef struct TCB {
     unsigned int priority;
     unsigned int state;
     struct TCB *joined;
+    unsigned int policy;
 } TCB;
 
 typedef enum {
@@ -79,6 +80,7 @@ int thread_libinit(int policy) {
     mainTCB->state = READY;
     mainTCB->priority = 1; //main automatically has highest priority 
     mainTCB->TID = -1; //set a unique TID for the main context, so we know when it's doing the switching
+    mainTCB->policy = policy;
     //TODO: mark main here/get context as needed
 
     running = malloc(sizeof(node));
@@ -94,8 +96,8 @@ int thread_libinit(int policy) {
 
     startTime = (int) getTicks();
 
-    POLICY = malloc(sizeof(int));
-    *POLICY = policy;
+//    POLICY = malloc(sizeof(int));
+//    *POLICY = policy;
 
     if (policy == FIFO || policy == SJF) {
         //TODO: free memory malloced here!
@@ -112,7 +114,7 @@ int thread_libinit(int policy) {
         return SUCCESS;
     } else if (policy == PRIORITY) {
         //TODO: setup queues here
-        *POLICY = PRIORITY;
+//        *POLICY = PRIORITY;
         return SUCCESS;
     } else {
         return FAILURE;
@@ -167,7 +169,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
     node *newThreadNode = malloc(sizeof(node));
     newThreadNode->TCB = newThreadTCB;
 
-    if (*POLICY == FIFO || *POLICY == SJF) {
+    if (mainTCB->policy == FIFO || mainTCB->policy == SJF) {
         //TODO: mask this linked list interaction
         //first node ever on the list
         if (readyList->size == 0) {
@@ -251,7 +253,7 @@ int thread_yield(void) {
 
     //call scheduler for the threads
 
-    if (*POLICY == FIFO || *POLICY == SJF) {
+    if (mainTCB->policy == FIFO || mainTCB->policy == SJF) {
         //running node is in the list, so have to 1) find it (have a pointer to it rn), 2) move it to the tail
         node *currentRunning = running;
         node *currentRunningPrev = running->prev;
@@ -305,7 +307,7 @@ int thread_join(int tid) {
     printf("POLICY: %d\n", *POLICY);
     printList(); 
 
-    if (*POLICY == FIFO || *POLICY == SJF) {
+    if (mainTCB->policy == FIFO || mainTCB->policy == SJF) {
         printf("got into FIFO or SJF\n");
         node *currentNode = readyList->head;
         getcontext(
