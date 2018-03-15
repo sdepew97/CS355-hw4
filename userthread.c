@@ -357,7 +357,7 @@ int schedule() {
 
 //        setcontext(toRun);
             printf("running TID %d\n", ((TCB *) running->TCB)->TID);
-            setcontext(((TCB *) running->TCB)->ucontext);
+           // setcontext(((TCB *) running->TCB)->ucontext);
         }
     } else if (POLICY == SJF) {
 
