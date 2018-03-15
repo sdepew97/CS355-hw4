@@ -21,7 +21,7 @@ enum {CREATED, SCHEDULED, STOPPED, FINISHED};
 char* states[] = {"CREATED\0", "SCHEDULED\0", "STOPPED\0", "FINISHED\0"};
 
 //global variable to store the scheduling policy
-static int *POLICY; //policy for scheduling that the user passed
+static int POLICY; //policy for scheduling that the user passed
 static int TID = 1;
 static int startTime;
 static int LogCreated = FALSE;
@@ -34,7 +34,6 @@ typedef struct TCB {
     unsigned int priority;
     unsigned int state;
     struct TCB *joined;
-    unsigned int policy;
 } TCB;
 
 typedef enum {
@@ -80,7 +79,6 @@ int thread_libinit(int policy) {
     mainTCB->state = READY;
     mainTCB->priority = 1; //main automatically has highest priority 
     mainTCB->TID = -1; //set a unique TID for the main context, so we know when it's doing the switching
-    mainTCB->policy = policy;
     //TODO: mark main here/get context as needed
 
     running = malloc(sizeof(node));
@@ -96,8 +94,7 @@ int thread_libinit(int policy) {
 
     startTime = (int) getTicks();
 
-//    POLICY = malloc(sizeof(int));
-//    *POLICY = policy;
+    POLICY = policy;
 
     if (policy == FIFO || policy == SJF) {
         //TODO: free memory malloced here!
@@ -114,7 +111,7 @@ int thread_libinit(int policy) {
         return SUCCESS;
     } else if (policy == PRIORITY) {
         //TODO: setup queues here
-//        *POLICY = PRIORITY;
+        POLICY = PRIORITY;
         return SUCCESS;
     } else {
         return FAILURE;
@@ -169,7 +166,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
     node *newThreadNode = malloc(sizeof(node));
     newThreadNode->TCB = newThreadTCB;
 
-    if (mainTCB->policy == FIFO || mainTCB->policy == SJF) {
+    if (POLICY == FIFO || POLICY == SJF) {
         //TODO: mask this linked list interaction
         //first node ever on the list
         if (readyList->size == 0) {
@@ -253,7 +250,7 @@ int thread_yield(void) {
 
     //call scheduler for the threads
 
-    if (mainTCB->policy == FIFO || mainTCB->policy == SJF) {
+    if (POLICY == FIFO || POLICY == SJF) {
         //running node is in the list, so have to 1) find it (have a pointer to it rn), 2) move it to the tail
         node *currentRunning = running;
         node *currentRunningPrev = running->prev;
@@ -304,10 +301,10 @@ int thread_yield(void) {
 int thread_join(int tid) {
     //TODO call scheduler here!
     printf("join called for %d\n", tid);
-    printf("POLICY: %d\n", *POLICY);
+    printf("POLICY: %d\n", POLICY);
     printList(); 
 
-    if (mainTCB->policy == FIFO || mainTCB->policy == SJF) {
+    if (POLICY == FIFO || POLICY == SJF) {
         printf("got into FIFO or SJF\n");
         node *currentNode = readyList->head;
         getcontext(
@@ -394,7 +391,7 @@ void Log (int ticks, int OPERATION, int TID, int PRIORITY) {
 /* Method with the scheduling algorithms */
 int schedule() {
     printf("schedule called\n");
-    if (*POLICY == FIFO) {
+    if (POLICY == FIFO) {
         //TODO: ensure this interaction is masked
         node *currentNode = readyList->head;
         while (currentNode != NULL && ((TCB *) currentNode->TCB)->state != READY) {
@@ -408,9 +405,9 @@ int schedule() {
         if (((TCB *) running->TCB)->ucontext != NULL) {
             setcontext(((TCB *) running->TCB)->ucontext);
         }
-    } else if (*POLICY == SJF) {
+    } else if (POLICY == SJF) {
 
-    } else if (*POLICY == PRIORITY) {
+    } else if (POLICY == PRIORITY) {
 
     }
 }
