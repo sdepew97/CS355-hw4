@@ -280,6 +280,7 @@ int stub(void (*func)(void *), void *arg) {
     //TODO: thread clean up mentioned in assignment guidelines on page 3
     printf("thread done\n");
     Log((int) getTicks()-startTime, FINISHED, 1, -1); //TODO: fix logging here
+    ((TCB*) running->TCB)->state = DONE;
     schedule();
     exit(0); // all threads are done, so process should exit
 }
@@ -351,14 +352,16 @@ int schedule() {
             printf("running two %d\n", ((TCB*) running->TCB)->TID);
 
             //put currently running into queue with a state of waiting at the tail
-            node *currentTail = readyList->tail;
-            currentTail->next = running;
-            running->prev = currentTail;
-            running->next = NULL;
-            readyList->tail = running;
+            if(((TCB*) running->TCB)->state==READY) {
+                node *currentTail = readyList->tail;
+                currentTail->next = running;
+                running->prev = currentTail;
+                running->next = NULL;
+                readyList->tail = running;
 
-            if(readyList->head == NULL) {
-                readyList->head = running;
+                if (readyList->head == NULL) {
+                    readyList->head = running;
+                }
             }
 
             running = toRun;
