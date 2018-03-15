@@ -167,7 +167,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
     newThreadTCB->joined = NULL;
     newThreadTCB->policy = malloc(sizeof(int));
 //    *(newThreadTCB->policy) = (*(((TCB *) running->TCB)->policy));
-    *(newThreadTCB->policy) = 0;
+    *(newThreadTCB->policy) = 0; //TODO: fix this here with not saving the main context with switch!
     TID++; //TODO: MASK!!
 
     node *newThreadNode = malloc(sizeof(node));
@@ -399,6 +399,7 @@ void Log (int ticks, int OPERATION, int TID, int PRIORITY) {
 /* Method with the scheduling algorithms */
 int schedule() {
     printf("schedule called\n");
+    (*(((TCB *) running->TCB)->policy)) = 0; //TODO: replace this here once policy is saved correctly
     printf("POLICY in schedule: %d\n", (*(((TCB *) running->TCB)->policy)));
 
     //TODO: ensure this interaction is masked
