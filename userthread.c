@@ -338,7 +338,7 @@ int schedule() {
 //            lastRunning->state = WAITING;
 //            swapcontext(lastRunning->ucontext, ((TCB*) running->TCB)->ucontext);
 //        }
-        if (readyList != NULL) {
+        if (readyList->size > 0) {
             //take node to run out of queue
             node *toRun = readyList->head;
             readyList->head = toRun->next;
