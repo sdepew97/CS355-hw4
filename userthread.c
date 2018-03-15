@@ -167,7 +167,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
     newThreadTCB->joined = NULL;
     newThreadTCB->policy = malloc(sizeof(int));
 //    *(newThreadTCB->policy) = (*(((TCB *) running->TCB)->policy));
-    newThreadTCB->policy = 0;
+    *(newThreadTCB->policy) = 0;
     TID++; //TODO: MASK!!
 
     node *newThreadNode = malloc(sizeof(node));
