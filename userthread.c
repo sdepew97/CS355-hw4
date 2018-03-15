@@ -314,6 +314,7 @@ int thread_join(int tid) {
 
         //case 1: TID doesn't exist/thread already finished
         if (currentNode == NULL) {
+            printf("failed on null\n");
             return FAILURE;
         }
 
