@@ -21,7 +21,7 @@ enum {CREATED, SCHEDULED, STOPPED, FINISHED};
 char* states[] = {"CREATED\0", "SCHEDULED\0", "STOPPED\0", "FINISHED\0"};
 
 //global variable to store the scheduling policy
-static int POLICY; //policy for scheduling that the user passed
+static int POLICY = FIFO; //policy for scheduling that the user passed //TODO: figure out why this is being deleted
 static int TID = 1;
 static int startTime;
 static int LogCreated = FALSE;
