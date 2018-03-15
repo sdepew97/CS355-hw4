@@ -308,6 +308,7 @@ int thread_yield(void) {
 int thread_join(int tid) {
     //TODO call scheduler here!
     printf("join called for %d\n", tid);
+    (*(((TCB *) running->TCB)->policy)) = 0; //TODO: replace this here once policy is saved correctly
     printf("POLICY: %d\n", (*((TCB *) running->TCB)->policy));
     printList();
 
