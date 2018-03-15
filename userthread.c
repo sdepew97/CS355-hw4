@@ -61,18 +61,23 @@ static linkedList *mediumList = NULL;
 static linkedList *highList = NULL;
 
 TCB *mainTCB;
-TCB *runningTCB;
+node *running;
 
 int stub(void (*func)(void *), void *arg);
 long getTicks();
 void Log (int ticks, int OPERATION, int TID, int PRIORITY);    // logs a message to LOGFILE
+int schedule();
 
 int thread_libinit(int policy) {
     mainTCB = malloc(sizeof(TCB));
     mainTCB->ucontext = malloc(sizeof(ucontext_t));
+    mainTCB->state = READY;
+    mainTCB->TID = -1; //set a unique TID for the main context, so we know when it's doing the switching
     //TODO: mark main here/get context as needed
 
-    runningTCB = malloc(sizeof(TCB));
+    running = malloc(sizeof(node));
+    running->TCB = malloc(sizeof(TCB));
+    ((TCB*) running->TCB)->ucontext = malloc(sizeof(ucontext_t));
 
     startTime = (int) getTicks();
 
@@ -137,8 +142,8 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
 
     TCB *newThreadTCB = malloc(sizeof(TCB));
     newThreadTCB->ucontext = newThread;
-    newThreadTCB->CPUusage = 0;
-    newThreadTCB->priority = -1; //we are not doing priority scheduling here
+    newThreadTCB->CPUusage = 0;//TODO: update for the Priority scheduling needed
+    newThreadTCB->priority = priority;
     newThreadTCB->TID = currentTID;
     newThreadTCB->state = READY;
     TID++; //TODO: MASK!!
@@ -229,16 +234,25 @@ int thread_yield(void) {
 
     //call scheduler for the threads
 
+    if(POLICY == FIFO || POLICY == SJF) {
+        node* currentTail = readyList->tail;
+        currentTail->next = running;
+        running->prev = currentTail;
+        readyList->tail = running;
+        schedule();
+    } else {
+        //TODO: fill in code here
+    }
+
     return FAILURE;
 }
 
 int thread_join(int tid) {
     //TODO call scheduler here!
-    if(POLICY == FIFO) {
+    if(POLICY == FIFO || POLICY == SJF) {
         //make sure main thread waits
         Log((int) getTicks()-startTime, SCHEDULED, tid, -1);
-        getcontext(mainTCB->ucontext);
-        swapcontext(mainTCB->ucontext, ((TCB*) (readyList->tail->TCB))->ucontext);
+        schedule();
     }
     return FAILURE;
 }
@@ -289,11 +303,24 @@ int schedule() {
         //TODO: ensure this interaction is masked
         //In FIFO run the head of the ready queue and make the global running tcb correct
         //change state
-        ((TCB*) readyList->head->TCB)->state = RUNNING;
-        TCB *lastRunning = runningTCB;
-        runningTCB = ((TCB*) readyList->head->TCB);
-        lastRunning->state = WAITING;
-        swapcontext(lastRunning->ucontext, runningTCB->ucontext);
+
+        if(((TCB*) running->TCB)->TID == -1) {
+            //we know that we have the main context trying to make a thread join and that's the thread to suspend
+            mainTCB->state = WAITING;
+            node *toRun = readyList->head;
+            readyList->head = toRun->next;
+            readyList->head = NULL;
+            toRun->next = NULL;
+            ((TCB *) toRun->TCB)->state = RUNNING;
+            running = toRun;
+            swapcontext(mainTCB->ucontext, ((TCB*) running->TCB)->ucontext);
+        } else { //the thread running isn't main, so we don't have to worry about updating the main's context
+            ((TCB*) readyList->head->TCB)->state = RUNNING;
+            TCB *lastRunning = running->TCB;
+            running->TCB = ((TCB*) readyList->head->TCB);
+            lastRunning->state = WAITING;
+            swapcontext(lastRunning->ucontext, ((TCB*) running->TCB)->ucontext);
+        }
     } else if(POLICY == SJF) {
 
     } else if(POLICY == PRIORITY) {
