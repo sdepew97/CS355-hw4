@@ -357,6 +357,10 @@ int schedule() {
             running->next = NULL;
             readyList->tail = running;
 
+            if(readyList->head == NULL) {
+                readyList->head = running;
+            }
+
             running = toRun;
 
             printf("running TID %d\n", ((TCB *) running->TCB)->TID);
