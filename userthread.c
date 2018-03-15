@@ -267,7 +267,7 @@ int stub(void (*func)(void *), void *arg) {
     //TODO: thread clean up mentioned in assignment guidelines on page 3
     printf("thread done\n");
     Log((int) getTicks()-startTime, FINISHED, 1, -1); //TODO: fix logging here
-    setcontext(mainTCB->ucontext);
+    schedule();
     exit(0); // all threads are done, so process should exit
 }
 
