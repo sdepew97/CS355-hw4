@@ -68,6 +68,7 @@ int stub(void (*func)(void *), void *arg);
 long getTicks();
 void Log (int ticks, int OPERATION, int TID, int PRIORITY);    // logs a message to LOGFILE
 int schedule();
+void printList();
 
 int thread_libinit(int policy) {
     mainTCB = malloc(sizeof(TCB));
@@ -238,6 +239,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
             return FAILURE;
         }
         Log((int) getTicks() - startTime, CREATED, currentTID, -1);
+        printlist();
         return currentTID;
     }
 
@@ -485,5 +487,12 @@ int schedule() {
 
     } else if (POLICY == PRIORITY) {
 
+    }
+}
+
+void printList() {
+    node *currentNode = readyList;
+    while(currentNode!=NULL) {
+        printf("%d->", ((TCB *) currentNode->TCB)->TID);
     }
 }
