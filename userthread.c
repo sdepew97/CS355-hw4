@@ -332,12 +332,31 @@ int schedule() {
 //            running = toRun;
 //            setcontext(((TCB*) running->TCB)->ucontext);
 //        } else { //the thread running isn't main, so we don't have to worry about updating the main's context
-            ((TCB*) readyList->head->TCB)->state = RUNNING;
-            TCB *lastRunning = running->TCB;
-            running->TCB = ((TCB*) readyList->head->TCB);
-            lastRunning->state = WAITING;
-            swapcontext(lastRunning->ucontext, ((TCB*) running->TCB)->ucontext);
+//            ((TCB*) readyList->head->TCB)->state = RUNNING;
+//            TCB *lastRunning = running->TCB;
+//            running->TCB = ((TCB*) readyList->head->TCB);
+//            lastRunning->state = WAITING;
+//            swapcontext(lastRunning->ucontext, ((TCB*) running->TCB)->ucontext);
 //        }
+
+        //take node to run out of queue
+        node *toRun = readyList->head;
+        readyList->head = toRun->next;
+        readyList->head = NULL;
+        toRun->next = NULL;
+        ((TCB *) toRun->TCB)->state = RUNNING;
+
+        //put currently running into queue with a state of waiting at the tail
+        node *currentTail = readyList->tail;
+        currentTail->next = running;
+        running->prev = currentTail;
+        running->next = NULL;
+        readyList->tail = running;
+
+        running = toRun;
+
+        setcontext(toRun);
+
     } else if(POLICY == SJF) {
 
     } else if(POLICY == PRIORITY) {
