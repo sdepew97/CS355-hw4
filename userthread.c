@@ -338,6 +338,7 @@ int thread_join(int tid) {
 
         return SUCCESS;
     }
+    printf("got to end here\n");
     return FAILURE;
 }
 
