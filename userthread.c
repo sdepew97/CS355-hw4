@@ -92,7 +92,7 @@ int thread_libinit(int policy) {
     ((TCB *) running->tcb)->ucontext = malloc(sizeof(ucontext_t));
     ((TCB *) running->tcb)->joined = malloc(sizeof(node));
     mainTCB->state = RUNNING;
-    running->tcb = mainTCB; //TODO: determine if I need a deep copy here?
+    running->tcb = mainTCB; //TODO: determine if I need a deep copy here? (no)
     ((TCB *) running->tcb)->ucontext = mainTCB->ucontext;
     ((TCB *) running->tcb)->joined = mainTCB->joined;
     running->next = NULL;
@@ -309,12 +309,11 @@ int thread_yield(void) {
 }
 
 int thread_join(int tid) {
-    //TODO call scheduler here!
     printf("join called for %d\n", tid);
-    if((*(((TCB *) running->tcb)->policy)) > PRIORITY) {
-        (((TCB *) running)->ucontext) = malloc(sizeof(ucontext_t)); //TODO: replace once solve main deletion error
-    }
-    (*(((TCB *) running->tcb)->policy)) = 0; //TODO: replace this here once policy is saved correctly
+//    if((*(((TCB *) running->tcb)->policy)) > PRIORITY) {
+//        (((TCB *) running)->ucontext) = malloc(sizeof(ucontext_t)); //TODO: replace once solve main deletion error
+//    }
+//    (*(((TCB *) running->tcb)->policy)) = 0; //TODO: replace this here once policy is saved correctly
     printf("POLICY: %d\n", (*((TCB *) running->tcb)->policy));
     printList();
 
@@ -378,7 +377,6 @@ int stub(void (*func)(void *), void *arg) {
     func(arg); // call root function
     //TODO: thread clean up mentioned in assignment guidelines on page 3
     printf("thread done\n");
-    //Log((int) getTicks()-startTime, FINISHED, 1, -1); //TODO: fix logging here
     Log((int) getTicks()-startTime, FINISHED, ((TCB *) running->tcb)->TID, -1);
     ((TCB*) running->tcb)->state = DONE;
     ((TCB*) running->tcb)->joined->state = READY;
@@ -419,7 +417,7 @@ void Log (int ticks, int OPERATION, int TID, int PRIORITY) {
 /* Method with the scheduling algorithms */
 int schedule() {
     printf("schedule called\n");
-    (*(((TCB *) running->tcb)->policy)) = 0; //TODO: replace this here once policy is saved correctly
+//    (*(((TCB *) running->tcb)->policy)) = 0; //TODO: replace this here once policy is saved correctly
     printf("POLICY in schedule: %d\n", (*(((TCB *) running->tcb)->policy)));
 
     //TODO: ensure this interaction is masked
