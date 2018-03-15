@@ -467,8 +467,9 @@ int schedule() {
             swapcontext(mainTCB->ucontext, ((TCB *) currentNode->TCB)->ucontext); //TODO: determine why I need to save main here?!?
         } else {
             printf("hello from not main\n");
+            getcontext(((TCB *) running->TCB)->ucontext);
             running = currentNode;
-            swapcontext(((TCB *) running->TCB)->ucontext, ((TCB *) currentNode->TCB)->ucontext);
+            setcontext(((TCB *) currentNode->TCB)->ucontext);
         }
 
 //            printf("running TID %d\n", ((TCB *) running->TCB)->TID);
