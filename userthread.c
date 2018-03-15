@@ -384,6 +384,7 @@ void Log (int ticks, int OPERATION, int TID, int PRIORITY) {
 
 /* Method with the scheduling algorithms */
 int schedule() {
+    printf("schedule called\n");
     if (POLICY == FIFO) {
         //TODO: ensure this interaction is masked
         node *currentNode = readyList->head;
