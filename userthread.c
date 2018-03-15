@@ -252,6 +252,7 @@ int thread_join(int tid) {
     if(POLICY == FIFO || POLICY == SJF) {
         //make sure main thread waits
         Log((int) getTicks()-startTime, SCHEDULED, tid, -1);
+        getcontext(mainTCB->ucontext);
         schedule();
     }
     return FAILURE;
@@ -313,7 +314,7 @@ int schedule() {
             toRun->next = NULL;
             ((TCB *) toRun->TCB)->state = RUNNING;
             running = toRun;
-            swapcontext(mainTCB->ucontext, ((TCB*) running->TCB)->ucontext);
+            setcontext(((TCB*) running->TCB)->ucontext);
         } else { //the thread running isn't main, so we don't have to worry about updating the main's context
             ((TCB*) readyList->head->TCB)->state = RUNNING;
             TCB *lastRunning = running->TCB;
