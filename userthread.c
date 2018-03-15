@@ -355,8 +355,8 @@ int schedule() {
 
         running = toRun;
 
-        setcontext(toRun);
-
+//        setcontext(toRun);
+        setcontext(((TCB *) running->TCB)->ucontext);
     } else if(POLICY == SJF) {
 
     } else if(POLICY == PRIORITY) {
