@@ -370,6 +370,7 @@ int stub(void (*func)(void *), void *arg) {
     //Log((int) getTicks()-startTime, FINISHED, 1, -1); //TODO: fix logging here
     Log((int) getTicks()-startTime, FINISHED, ((TCB *) running->TCB)->TID, -1);
     ((TCB*) running->TCB)->state = DONE;
+    ((TCB*) running->TCB)->joined->state = READY;
     schedule();
     exit(0); // all threads are done, so process should exit
 }
