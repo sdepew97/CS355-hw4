@@ -12,7 +12,7 @@ int main() {
     thread_create(printHello, NULL, -1);
     thread_create(printHello, NULL, -1);
     //thread_join(thread_create(printHello, NULL, -1));
-    thread_join(2);
+    thread_join(3);
 //    thread_join(2);
 //    printf("joining 1\n");
 //    thread_join(1);
