@@ -360,6 +360,7 @@ int thread_join(int tid) {
 }
 
 int stub(void (*func)(void *), void *arg) {
+    printf("entered stub\n");
     // thread starts here
     func(arg); // call root function
     //TODO: thread clean up mentioned in assignment guidelines on page 3
