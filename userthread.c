@@ -33,6 +33,7 @@ typedef struct TCB {
     unsigned int CPUusage;
     unsigned int priority;
     unsigned int state;
+    TCB *joined;
 } TCB;
 
 typedef enum {
@@ -77,8 +78,11 @@ int thread_libinit(int policy) {
 
     running = malloc(sizeof(node));
     running->TCB = malloc(sizeof(TCB));
-    ((TCB*) running->TCB)->ucontext = malloc(sizeof(ucontext_t));
+    ((TCB *) running->TCB)->ucontext = malloc(sizeof(ucontext_t));
+    mainTCB->state = RUNNING;
     running->TCB = mainTCB;
+    running->next = NULL;
+    running->prev = NULL;
 
 //    readyList = malloc(sizeof(linkedList));
 //    //add main to the ready queue
@@ -94,20 +98,24 @@ int thread_libinit(int policy) {
 
     POLICY = policy;
 
-    if(policy == FIFO || policy == SJF) {
+    if (policy == FIFO || policy == SJF) {
         //TODO: free memory malloced here!
         readyList = malloc(sizeof(linkedList));
 
-        if(readyList == NULL) {
+        if (readyList == NULL) {
             return FAILURE;
         }
 
-        readyList->head = NULL;
-        readyList->tail = NULL;
-        readyList->size = 0;
+//        readyList->head = NULL;
+//        readyList->tail = NULL;
+//        readyList->size = 0;
+
+        readyList->head = running;
+        readyList->tail = running;
+        readyList->size++;
 
         return SUCCESS;
-    } else if(policy == PRIORITY) {
+    } else if (policy == PRIORITY) {
         //TODO: setup queues here
         POLICY = PRIORITY;
         return SUCCESS;
@@ -246,13 +254,55 @@ int thread_yield(void) {
     //call scheduler for the threads
 
     if(POLICY == FIFO || POLICY == SJF) {
-        node* currentTail = readyList->tail;
-        currentTail->next = running;
-        running->prev = currentTail;
-        readyList->tail = running;
+        //running node is in the list, so have to 1) find it (have a pointer to it rn), 2) move it to the tail
+        node *currentRunning = running;
+        node *currentRunningPrev = running->prev;
+        node *currentRunningNext = running->next;
+        node *currentTail = readyList->tail;
+
+        //running is head
+        if(currentRunningPrev = NULL) {
+            readyList->head = currentRunningNext;
+            readyList->head->prev = NULL;
+            currentRunning->next = NULL;
+            currentTail->next = currentRunning;
+            currentRunning->prev = currentTail;
+            readyList->tail = currentRunning;
+            ((TCB *) currentRunning->TCB)->state = READY;
+            Log((int) getTicks()-startTime, STOPPED, ((TCB *) currentRunning->TCB)->TID, -1);
+            schedule();
+        }
+
+        //running is tail (do nothing)
+        else if(currentRunningNext == NULL) {
+            //node is already at the tail, so mark as ready and then call scheduler
+            ((TCB *) currentRunning->TCB)->state = READY;
+            Log((int) getTicks()-startTime, STOPPED, ((TCB *) currentRunning->TCB)->TID, -1);
+            schedule();
+        }
+
+        //running is middle node
+        else {
+            currentRunning->next = NULL;
+            currentRunning->prev = currentTail;
+            currentRunningPrev->next = currentRunningNext;
+            currentRunningNext->prev = currentRunningPrev;
+            readyList->tail = currentRunning;
+            ((TCB *) currentRunning->TCB)->state = READY;
+            Log((int) getTicks()-startTime, STOPPED, ((TCB *) currentRunning->TCB)->TID, -1);
+            schedule();
+        }
+
+//        node* currentTail = readyList->tail;
+//        currentTail->next = running;
+//        running->prev = currentTail;
+//        readyList->tail = running;
+
+
+
         schedule();
     } else {
-        //TODO: fill in code here
+        //TODO: fill in code here for priority
     }
 
     return FAILURE;
@@ -260,17 +310,51 @@ int thread_yield(void) {
 
 int thread_join(int tid) {
     //TODO call scheduler here!
-    if(POLICY == FIFO || POLICY == SJF) {
-        //make sure main thread waits
-        Log((int) getTicks()-startTime, SCHEDULED, tid, -1);
-        if(((TCB*) running->TCB)->TID == -1) {
-            printf("hello\n");
-            getcontext(mainTCB->ucontext); //TODO: determine why I need to save main here?!?
+    if (POLICY == FIFO || POLICY == SJF) {
+        node *currentNode = readyList->head;
+        while (currentNode != NULL && ((TCB *) currentNode->TCB)->TID != tid) {
+            currentNode = currentNode->next;
         }
-        getcontext(mainTCB->ucontext);
-        printf("running %d\n", ((TCB*) running->TCB)->TID);
-        printf("main %d\n", mainTCB->TID);
+
+        //case 1: TID doesn't exist/thread already finished
+        if (currentNode == NULL) {
+            return FAILURE;
+        }
+
+        //case 2: TID does exist and found thread is waiting already, which would mean you'd get stuck forever, perhaps?
+        if (((TCB *) currentNode->TCB)->state == WAITING) {
+            if (((TCB *) currentNode->TCB)->joined->TID != ((TCB *) running->TCB)->TID) {
+                ((TCB *) running->TCB)->state = WAITING;
+                Log((int) getTicks()-startTime, STOPPED, ((TCB *) running->TCB)->TID, -1);
+                ((TCB *) currentNode->TCB)->joined = running;
+                schedule();
+            } else {
+                //attempting a circular join
+                return FAILURE;
+            }
+        }
+        //case 3: TID does exist and thread is ready to go! (set calling thread to waiting by this thread and set joined pointer)
+        ((TCB *) running->TCB)->state = WAITING;
+        ((TCB *) currentNode->TCB)->joined = running;
         schedule();
+
+//        // set state of running node to waiting
+//        ((TCB *) running->TCB)->state = WAITING;
+
+        //set tid sought node as running is waiting on it
+
+
+//        //make sure main thread waits
+//        if(((TCB*) running->TCB)->TID == -1) {
+//            printf("hello\n");
+//            getcontext(mainTCB->ucontext); //TODO: determine why I need to save main here?!?
+//        }
+////        getcontext(mainTCB->ucontext);
+//        printf("running %d\n", ((TCB*) running->TCB)->TID);
+//        printf("main %d\n", mainTCB->TID);
+//        schedule();
+
+        return SUCCESS;
     }
     return FAILURE;
 }
@@ -280,7 +364,8 @@ int stub(void (*func)(void *), void *arg) {
     func(arg); // call root function
     //TODO: thread clean up mentioned in assignment guidelines on page 3
     printf("thread done\n");
-    Log((int) getTicks()-startTime, FINISHED, 1, -1); //TODO: fix logging here
+    //Log((int) getTicks()-startTime, FINISHED, 1, -1); //TODO: fix logging here
+    Log((int) getTicks()-startTime, FINISHED, ((TCB *) running->TCB)->TID, -1);
     ((TCB*) running->TCB)->state = DONE;
     schedule();
     exit(0); // all threads are done, so process should exit
@@ -318,6 +403,7 @@ void Log (int ticks, int OPERATION, int TID, int PRIORITY) {
 
 /* Method with the scheduling algorithms */
 int schedule() {
+
     if (POLICY == FIFO) {
         //TODO: ensure this interaction is masked
         //In FIFO run the head of the ready queue and make the global running tcb correct
@@ -341,37 +427,51 @@ int schedule() {
 //            swapcontext(lastRunning->ucontext, ((TCB*) running->TCB)->ucontext);
 //        }
         printf("entered scheduler\n");
-        if (readyList->head != NULL) {
-            printf("running %d\n", ((TCB*) running->TCB)->TID);
-            //take node to run out of queue
-            node *toRun = readyList->head;
-            readyList->head = toRun->next;
-            readyList->head = NULL;
-            toRun->next = NULL;
-            ((TCB *) toRun->TCB)->state = RUNNING;
+//        if (readyList->head != NULL) {
+//            printf("running %d\n", ((TCB*) running->TCB)->TID);
+//            //take node to run out of queue
+//            node *toRun = readyList->head;
+//            readyList->head = toRun->next;
+//            readyList->head = NULL;
+//            toRun->next = NULL;
+//            ((TCB *) toRun->TCB)->state = RUNNING;
+//
+//            printf("running two %d\n", ((TCB*) running->TCB)->TID);
+//
+//            //put currently running into queue with a state of waiting at the tail
+//            if(((TCB*) running->TCB)->state==READY) {
+//                node *currentTail = readyList->tail;
+//                currentTail->next = running;
+//                running->prev = currentTail;
+//                running->next = NULL;
+//                readyList->tail = running;
+//
+//                if (readyList->head == NULL) {
+//                    readyList->head = running;
+//                }
+//            }
+//
+//            running = toRun;
 
-            printf("running two %d\n", ((TCB*) running->TCB)->TID);
-
-            //put currently running into queue with a state of waiting at the tail
-            if(((TCB*) running->TCB)->state==READY) {
-                node *currentTail = readyList->tail;
-                currentTail->next = running;
-                running->prev = currentTail;
-                running->next = NULL;
-                readyList->tail = running;
-
-                if (readyList->head == NULL) {
-                    readyList->head = running;
-                }
-            }
-
-            running = toRun;
-
-            printf("running TID %d\n", ((TCB *) running->TCB)->TID);
-            if(((TCB *) running->TCB)->ucontext != NULL) {
-                setcontext(((TCB *) running->TCB)->ucontext);
-            }
+        node *currentNode = readyList->head;
+        while(currentNode!=NULL && ((TCB *) currentNode->TCB)->state!=READY) {
+            currentNode = currentNode->next;
         }
+
+        //now current node is ready to run, so have to run it here
+        Log((int) getTicks()-startTime, SCHEDULED, ((TCB *) currentNode->TCB)->TID, -1);
+        if(((TCB*) running->TCB)->TID == -1) { //update main
+            printf("hello\n");
+            swapcontext(mainTCB->ucontext, ((TCB *) currentNode->TCB)->ucontext); //TODO: determine why I need to save main here?!?
+        } else {
+            swapcontext(((TCB *) running->TCB)->ucontext, ((TCB *) currentNode->TCB)->ucontext);
+        }
+
+//            printf("running TID %d\n", ((TCB *) running->TCB)->TID);
+//            if(((TCB *) running->TCB)->ucontext != NULL) {
+//                setcontext(((TCB *) running->TCB)->ucontext);
+//            }
+        //}
     } else if (POLICY == SJF) {
 
     } else if (POLICY == PRIORITY) {
