@@ -80,6 +80,7 @@ int thread_libinit(int policy) {
     ((TCB*) running->TCB)->ucontext = malloc(sizeof(ucontext_t));
     running->TCB = mainTCB;
 
+    readyList = malloc(sizeof(linkedList));
     //add main to the ready queue
     if (readyList->size == 0) {
         readyList->head = running;
@@ -95,7 +96,7 @@ int thread_libinit(int policy) {
 
     if(policy == FIFO || policy == SJF) {
         //TODO: free memory malloced here!
-        readyList = malloc(sizeof(linkedList));
+
 
         if(readyList == NULL) {
             return FAILURE;
