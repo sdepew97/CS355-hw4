@@ -306,7 +306,7 @@ int thread_yield(void) {
 int thread_join(int tid) {
     //TODO call scheduler here!
     printf("join called for %d\n", tid);
-    printf("POLICY: %d\n", ((TCB *) running->TCB)->policy);
+    printf("POLICY: %d\n", (*((TCB *) running->TCB)->policy));
     printList(); 
 
     if ((*(((TCB *) running->TCB)->policy)) == FIFO || (*(((TCB *) running->TCB)->policy)) == SJF) {
