@@ -314,7 +314,7 @@ int thread_join(int tid) {
     //TODO call scheduler here!
     if (POLICY == FIFO || POLICY == SJF) {
         node *currentNode = readyList->head;
-        //getcontext(((TCB *) running)->ucontext);
+        getcontext(((TCB *) running)->ucontext); //as soon as calls thread join, get context, since this is where we want to return
 
         while (currentNode != NULL && ((TCB *) currentNode->TCB)->TID != tid) {
             currentNode = currentNode->next;
@@ -473,7 +473,7 @@ int schedule() {
 ////            swapcontext(mainTCB->ucontext, ((TCB *) currentNode->TCB)->ucontext); //TODO: determine why I need to save main here?!?
 //        } else {
             printf("hello from not main\n");
-            getcontext(((TCB *) running->TCB)->ucontext);
+//            getcontext(((TCB *) running->TCB)->ucontext); //already called in join
             running = currentNode;
             setcontext(((TCB *) currentNode->TCB)->ucontext);
 //        }
