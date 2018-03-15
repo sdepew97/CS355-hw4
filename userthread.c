@@ -57,10 +57,10 @@ typedef struct linkedList {
     unsigned int size;
 } linkedList;
 
-static const linkedList *readyList = NULL;
-static const linkedList *lowList = NULL;
-static const linkedList *mediumList = NULL;
-static const linkedList *highList = NULL;
+static linkedList *readyList = NULL;
+static linkedList *lowList = NULL;
+static linkedList *mediumList = NULL;
+static linkedList *highList = NULL;
 
 TCB *mainTCB;
 node *running;
