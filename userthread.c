@@ -73,7 +73,7 @@ void printList();
 void initMainTCB();
 
 int thread_libinit(int policy) {
-    initMainTCB();
+    initMainTCB(policy);
 
     running = malloc(sizeof(node));
     running->tcb = malloc(sizeof(TCB));
@@ -442,7 +442,7 @@ void printList() {
     printf("\n");
 }
 
-void initMainTCB() {
+void initMainTCB(int policy) {
     mainTCB = malloc(sizeof(TCB));
     mainTCB->ucontext = malloc(sizeof(ucontext_t));
     getcontext(mainTCB->ucontext);
