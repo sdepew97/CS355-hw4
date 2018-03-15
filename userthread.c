@@ -466,17 +466,17 @@ int schedule() {
 
         //now current node is ready to run, so have to run it here
         Log((int) getTicks()-startTime, SCHEDULED, ((TCB *) currentNode->TCB)->TID, -1);
-        if(((TCB*) running->TCB)->TID == -1) { //update main
-            printf("hello\n");
-            running = currentNode;
-            setcontext(((TCB *) currentNode->TCB)->ucontext);
-//            swapcontext(mainTCB->ucontext, ((TCB *) currentNode->TCB)->ucontext); //TODO: determine why I need to save main here?!?
-        } else {
+//        if(((TCB*) running->TCB)->TID == -1) { //update main
+//            printf("hello\n");
+//            running = currentNode;
+//            setcontext(((TCB *) currentNode->TCB)->ucontext);
+////            swapcontext(mainTCB->ucontext, ((TCB *) currentNode->TCB)->ucontext); //TODO: determine why I need to save main here?!?
+//        } else {
             printf("hello from not main\n");
-//            getcontext(((TCB *) running->TCB)->ucontext);
+            getcontext(((TCB *) running->TCB)->ucontext);
             running = currentNode;
             setcontext(((TCB *) currentNode->TCB)->ucontext);
-        }
+//        }
 
 //            printf("running TID %d\n", ((TCB *) running->TCB)->TID);
 //            if(((TCB *) running->TCB)->ucontext != NULL) {
