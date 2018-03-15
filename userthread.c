@@ -408,7 +408,8 @@ int schedule() {
 void printList() {
     node *currentNode = readyList->head;
     while (currentNode != NULL) {
-        printf("%d->", ((TCB *) currentNode->TCB)->TID);
+        printf("%d, %d->", ((TCB *) currentNode->TCB)->TID, ((TCB *) currentNode->TCB)->state);
+
         currentNode = currentNode->next;
     }
     printf("\n");
