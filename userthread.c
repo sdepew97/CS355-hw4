@@ -188,6 +188,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
             readyList->size++;
         }
         Log((int) getTicks() - startTime, CREATED, currentTID, -1);
+        printList();
         return currentTID;
     } else { //we are priority scheduling
         if (priority == -1) {
@@ -239,7 +240,6 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
             return FAILURE;
         }
         Log((int) getTicks() - startTime, CREATED, currentTID, -1);
-        printList();
         return currentTID;
     }
 
