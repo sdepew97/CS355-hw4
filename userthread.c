@@ -73,15 +73,22 @@ void printList();
 int thread_libinit(int policy) {
     mainTCB = malloc(sizeof(TCB));
     mainTCB->ucontext = malloc(sizeof(ucontext_t));
+    getcontext(mainTCB->ucontext); 
+    mainTCB->joined = malloc(sizeof(TCB));
+    mainTCB->joined = NULL; 
     mainTCB->state = READY;
+    mainTCB->priority = 1; //main automatically has highest priority 
     mainTCB->TID = -1; //set a unique TID for the main context, so we know when it's doing the switching
     //TODO: mark main here/get context as needed
 
     running = malloc(sizeof(node));
     running->TCB = malloc(sizeof(TCB));
     ((TCB *) running->TCB)->ucontext = malloc(sizeof(ucontext_t));
+    ((TCB *) running->TCB)->joined = malloc(sizeof(node)); 
     mainTCB->state = RUNNING;
-    running->TCB = mainTCB;
+    running->TCB = mainTCB; //TODO: determine if I need a deep copy here?
+    ((TCB *) running->TCB)->ucontext = mainTCB->ucontext;
+    ((TCB *) running->TCB)->joined = mainTCB->joined; 
     running->next = NULL;
     running->prev = NULL;
 
