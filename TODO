@@ -9,3 +9,4 @@ To Do:
 6) Think about test cases for being atomic??
 7) Implement priority scheduling
 8) Create test cases for priority
+9) document how I chose to implement FIFO with main being ready and scheduling back to back
