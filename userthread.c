@@ -309,8 +309,8 @@ int thread_join(int tid) {
 
             //case 2: TID does exist and found thread is waiting already, which would mean you'd get stuck forever, perhaps?
             if (((TCB *) currentNode->tcb)->state == WAITING) {
-                if (((TCB *) currentNode->tcb)->joined->TID != ((TCB *) running->tcb)->TID) {
-                    ((TCB *) running->tcb)->state = WAITING;
+                if (currentNode->tcb->joined->TID != running->tcb->TID) {
+                    running->tcb->state = WAITING;
                     Log((int) getTicks() - startTime, STOPPED, ((TCB *) running->tcb)->TID, -1);
                     ((TCB *) currentNode->tcb)->joined = running->tcb;
                     schedule();
@@ -350,8 +350,8 @@ int stub(void (*func)(void *), void *arg) {
     //TODO: thread clean up mentioned in assignment guidelines on page 3
     printf("thread done\n");
     Log((int) getTicks()-startTime, FINISHED, ((TCB *) running->tcb)->TID, -1);
-    ((TCB*) running->tcb)->state = DONE;
-    ((TCB*) running->tcb)->joined->state = READY;
+    running->tcb->state = DONE;
+    running->tcb->joined->state = READY;
     printList();
     schedule();
     exit(0); // all threads are done, so process should exit
