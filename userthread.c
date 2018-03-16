@@ -367,8 +367,8 @@ int stub(void (*func)(void *), void *arg) {
     running->tcb->state = DONE;
     running->tcb->joined->state = READY;
     printList();
-//    schedule();
-    setcontext(scheduler);
+    schedule();
+//    setcontext(scheduler);
     exit(0); // all threads are done, so process should exit
 }
 
