@@ -1,7 +1,7 @@
-//#include <stdio.h>
-//#include "userthread.h"
-//#include "logger.h"
-//
+#include <stdio.h>
+#include "userthread.h"
+#include "logger.h"
+
 //void printHello () {
 //    printf("Hello world\n");
 //}
@@ -134,22 +134,22 @@
 //    exit(EXIT_SUCCESS);
 //}
 
-//#include <stdio.h>
-//#include <stdlib.h>
-//#include "userthread.h"
-//
-//#define FAILURE -1
-//
-//void foo() {}
-//
-//void foo_yield() {
-//    thread_yield();
-//}
-//
-//void foo_join(void *tid) {
-//    thread_join(*((int *)tid));
-//}
-//
+#include <stdio.h>
+#include <stdlib.h>
+#include "userthread.h"
+
+#define FAILURE -1
+
+void foo() {}
+
+void foo_yield() {
+    thread_yield();
+}
+
+void foo_join(void *tid) {
+    thread_join(*((int *)tid));
+}
+
 int main(void) {
     if (thread_libinit(FIFO) == FAILURE)
         exit(EXIT_FAILURE);
