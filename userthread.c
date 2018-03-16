@@ -420,7 +420,7 @@ int schedule() {
         currentNode = currentNode->next;
     }
 
-    if ((*((TCB *) currentNode->tcb)->policy) == FIFO) {
+    if (POLICY == FIFO) {
         //now current node is ready to run, so have to run it here
         running = currentNode;
         Log((int) getTicks() - startTime, SCHEDULED, ((TCB *) currentNode->tcb)->TID, -1);
@@ -455,7 +455,5 @@ void initMainTCB(int policy) {
     mainTCB->state = READY;
     mainTCB->priority = 1; //main automatically has highest priority
     mainTCB->TID = -1; //set a unique TID for the main context, so we know when it's doing the switching
-    mainTCB->policy = malloc(sizeof(int));
-    *(mainTCB->policy) = policy;
     //TODO: mark main here/get context as needed
 }
