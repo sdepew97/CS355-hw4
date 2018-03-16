@@ -450,7 +450,7 @@ void printList() {
     printf("\n");
 }
 
-struct TCB* newTCB(int TID, int CPUUsage, int priority, int state, TCB *joined) {
+TCB* newTCB(int TID, int CPUUsage, int priority, int state, TCB *joined) {
     TCB *returnValue = malloc(sizeof(TCB));
     returnValue->ucontext = malloc(sizeof(ucontext_t));
     returnValue->TID = TID;
@@ -459,4 +459,5 @@ struct TCB* newTCB(int TID, int CPUUsage, int priority, int state, TCB *joined) 
     returnValue->joined = malloc(sizeof(TCB));
     returnValue->joined = joined;
     returnValue->state = state;
+    return returnValue;
 }
