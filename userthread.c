@@ -62,9 +62,9 @@ static linkedList *lowList = NULL;
 static linkedList *mediumList = NULL;
 static linkedList *highList = NULL;
 
-TCB *mainTCB;
-node *running;
-ucontext_t *scheduler;
+TCB *mainTCB = NULL;
+node *running = NULL;
+ucontext_t *scheduler = NULL;
 
 int stub(void (*func)(void *), void *arg);
 long getTicks();
@@ -134,6 +134,11 @@ int thread_libterminate(void) {
 
 int thread_create(void (*func)(void *), void *arg, int priority) {
     printf("creating new thread %d\n", TID);
+
+    //This means that we have not called threadlib_init first, which is required
+    if(running == NULL) {
+        return FAILURE;
+    }
     printList();
     //check type of scheduling
 
