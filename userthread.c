@@ -71,33 +71,24 @@ int schedule();
 void printList();
 void initMainTCB(int policy);
 TCB* newTCB(int TID, int CPUUsage, int priority, int state, TCB *joined);
+node* newNode(TCB *node, node* next, node* prev);
 
 int thread_libinit(int policy) {
-//    initMainTCB(policy);
-
-    mainTCB = malloc(sizeof(TCB));
-    mainTCB->ucontext = malloc(sizeof(ucontext_t));
+    mainTCB = newTCB(-1, 0, 1, READY, NULL);
     getcontext(mainTCB->ucontext);
-    mainTCB->joined = malloc(sizeof(TCB));
-    mainTCB->joined = NULL;
-    mainTCB->state = READY;
-    mainTCB->priority = 1; //main automatically has highest priority
-    mainTCB->TID = -1; //set a unique TID for the main context, so we know when it's doing the switching
-    //TODO: mark main here/get context as needed
 
-//    mainTCB = newTCB(-1, 0, 1, READY, NULL);
-//    getcontext(mainTCB->ucontext);
+//    running = malloc(sizeof(node));
+//    running->tcb = malloc(sizeof(TCB));
+//    ((TCB *) running->tcb)->ucontext = malloc(sizeof(ucontext_t));
+//    ((TCB *) running->tcb)->joined = malloc(sizeof(node));
+//    running->tcb = mainTCB; //TODO: determine if I need a deep copy here? (no)
+//    ((TCB *) running->tcb)->ucontext = mainTCB->ucontext;
+//    ((TCB *) running->tcb)->joined = mainTCB->joined;
+//    running->next = NULL;
+//    running->prev = NULL;
 
-    running = malloc(sizeof(node));
-    running->tcb = malloc(sizeof(TCB));
-    ((TCB *) running->tcb)->ucontext = malloc(sizeof(ucontext_t));
-    ((TCB *) running->tcb)->joined = malloc(sizeof(node));
+    running = newNode(mainTCB, NULL, NULL);
     mainTCB->state = RUNNING;
-    running->tcb = mainTCB; //TODO: determine if I need a deep copy here? (no)
-    ((TCB *) running->tcb)->ucontext = mainTCB->ucontext;
-    ((TCB *) running->tcb)->joined = mainTCB->joined;
-    running->next = NULL;
-    running->prev = NULL;
 
     startTime = (int) getTicks();
 
@@ -459,5 +450,13 @@ TCB* newTCB(int TID, int CPUUsage, int priority, int state, TCB *joined) {
     returnValue->joined = malloc(sizeof(TCB));
     returnValue->joined = joined;
     returnValue->state = state;
+    return returnValue;
+}
+
+node* newNode(TCB *tcb, node* next, node* prev) {
+    node *returnValue = malloc(sizeof(node));
+    returnValue->tcb = tcb;
+    returnValue->next = next;
+    returnValue->prev = prev;
     return returnValue;
 }
