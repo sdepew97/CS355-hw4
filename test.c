@@ -10,6 +10,7 @@ void tryYield() {
     printf("start yield\n");
     thread_yield();
     printf("end yield\n");
+    printHello();
 }
 
 int main() {
