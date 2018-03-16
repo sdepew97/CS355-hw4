@@ -7,8 +7,9 @@ void printHello () {
 }
 
 void tryYield() {
+    printf("start yield\n");
     thread_yield();
-    printf("Hello world\n");
+    printf("end yield\n");
 }
 
 int main() {

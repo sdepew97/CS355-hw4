@@ -86,6 +86,8 @@ int thread_libinit(int policy) {
     scheduler->uc_stack.ss_size = STACKSIZE;
     makecontext(scheduler, (void (*)(void)) schedule, 0);
 
+    //TODO: log here for main being created
+
     mainTCB = newTCB(-1, 0, 1, READY, NULL);
     getcontext(mainTCB->ucontext);
 
