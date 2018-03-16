@@ -138,6 +138,8 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
     ucontext_t *newThread = newContext(NULL, func, arg);
 
     TCB *newThreadTCB = newTCB(currentTID, 0, priority, BLOCKED, NULL);
+    newThreadTCB->ucontext = newThread;
+
 //            = malloc(sizeof(TCB));
 //    newThreadTCB->TID = currentTID;
 //    newThreadTCB->ucontext = newThread;
