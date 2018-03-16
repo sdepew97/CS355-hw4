@@ -412,11 +412,12 @@ void schedule() {
         //now current node is ready to run, so have to run it here
         running = currentNode;
         Log((int) getTicks() - startTime, SCHEDULED, ((TCB *) currentNode->tcb)->TID, -1);
+        running->tcb->state = RUNNING;
         printf("running TID %d\n", ((TCB *) running->tcb)->TID);
         printf("POLICY in schedule two: %d\n", POLICY);
         printList();
 //        if (((TCB *) running->tcb)->ucontext != NULL) {
-            setcontext(((TCB *) running->tcb)->ucontext);
+        setcontext(((TCB *) running->tcb)->ucontext);
 //        }
     } else if (POLICY == SJF) {
 
