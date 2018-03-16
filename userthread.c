@@ -346,7 +346,7 @@ int thread_join(int tid) {
 int stub(void (*func)(void *), void *arg) {
     printf("entered stub\n");
     // thread starts here
-    func(arg); // call root function
+    func(); // call root function
     //TODO: thread clean up mentioned in assignment guidelines on page 3
     printf("thread done\n");
     Log((int) getTicks()-startTime, FINISHED, ((TCB *) running->tcb)->TID, -1);
@@ -432,7 +432,10 @@ ucontext_t *newContext(ucontext_t *uc_link, void (*func)(void *), void* arg) {
 //    returnValue->uc_sigmask = uc_sigmask;
     returnValue->uc_stack.ss_sp = malloc(STACKSIZE);
     returnValue->uc_stack.ss_size = STACKSIZE;
-    makecontext(returnValue, (void (*)(void)) stub, 2, func, arg);
+    //count list values //TODO: change 2 to argc (which is length of arg)
+//    int argc;
+    makecontext(returnValue, (void (*)(void)) stub, func, arg);
+//    makecontext(returnValue, (void (*)(void)) func, 1, arg);
     //TODO: figure out what to do with masking here??
     return returnValue;
 }
