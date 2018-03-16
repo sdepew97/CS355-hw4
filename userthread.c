@@ -382,10 +382,11 @@ int stub(void (*func)(void *), void *arg) {
 //    printList();
     Log((int) getTicks()-startTime, FINISHED, ((TCB *) running->tcb)->TID, -1);
     running->tcb->state = DONE;
+    printList();
     if(running->tcb->joined->state !=NULL) {
         running->tcb->joined->state = READY;
     }
-    printList();
+//    printList();
 //    schedule();
     setcontext(scheduler);
 //    exit(0); // all threads are done, so process should exit
