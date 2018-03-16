@@ -382,7 +382,9 @@ int stub(void (*func)(void *), void *arg) {
 //    printList();
     Log((int) getTicks()-startTime, FINISHED, ((TCB *) running->tcb)->TID, -1);
     running->tcb->state = DONE;
-    running->tcb->joined->state = READY;
+    if(running->tcb->joined->state !=NULL) {
+        running->tcb->joined->state = READY;
+    }
     printList();
 //    schedule();
     setcontext(scheduler);
