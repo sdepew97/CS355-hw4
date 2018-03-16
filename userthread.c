@@ -97,7 +97,7 @@ int thread_libinit(int policy) {
 
     startTime = (int) getTicks();
 
-//    POLICY = policy;
+    POLICY = policy;
 
     if (policy == FIFO || policy == SJF) {
         //TODO: free memory malloced here!
@@ -446,14 +446,6 @@ void printList() {
     printf("\n");
 }
 
-void initMainTCB(int policy) {
-    mainTCB = malloc(sizeof(TCB));
-    mainTCB->ucontext = malloc(sizeof(ucontext_t));
-    getcontext(mainTCB->ucontext);
-    mainTCB->joined = malloc(sizeof(TCB));
-    mainTCB->joined = NULL;
-    mainTCB->state = READY;
-    mainTCB->priority = 1; //main automatically has highest priority
-    mainTCB->TID = -1; //set a unique TID for the main context, so we know when it's doing the switching
-    //TODO: mark main here/get context as needed
+TCB* newTCB() {
+
 }
