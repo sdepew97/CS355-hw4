@@ -346,7 +346,7 @@ int thread_join(int tid) {
 int stub(void (*func)(void *), void *arg) {
     printf("entered stub\n");
     // thread starts here
-    func(); // call root function
+    func(arg); // call root function
     //TODO: thread clean up mentioned in assignment guidelines on page 3
     printf("thread done\n");
     Log((int) getTicks()-startTime, FINISHED, ((TCB *) running->tcb)->TID, -1);
