@@ -225,14 +225,14 @@ int main(void) {
     if (thread_join(tid6) == -1)
         exit(EXIT_FAILURE);
 
-    if (thread_libterminate() == -1)
-        exit(EXIT_FAILURE);
+//    if (thread_libterminate() == -1)
+//        exit(EXIT_FAILURE);
 
     printf(" * Threads should in this order: %d -> %d -> %d -> %d -> %d -> %d\n",
            tid1, tid2 ,tid3, tid4, tid5, tid6);
 
     // more misuses...
-    thread_libterminate();
+//    thread_libterminate();
     thread_join(123132);
     exit(EXIT_SUCCESS);
 }
