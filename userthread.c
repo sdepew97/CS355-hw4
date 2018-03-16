@@ -346,7 +346,7 @@ int stub(void (*func)(void *), void *arg) {
     func(arg); // call root function
     //TODO: thread clean up mentioned in assignment guidelines on page 3
     printf("thread done\n");
-    printList();
+//    printList();
     Log((int) getTicks()-startTime, FINISHED, ((TCB *) running->tcb)->TID, -1);
     running->tcb->state = DONE;
     running->tcb->joined->state = READY;
