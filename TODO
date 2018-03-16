@@ -1,0 +1,11 @@
+To Do:
+
+0) Try to run thread yield
+1) Free memory and remove nodes in stub function
+2) Create test cases for FIFO
+3) Implement SJF scheduling (ask tutor)
+4) Create test cases for SJF
+5) Implement atomic methods (ask tutor)
+6) Think about test cases for being atomic??
+7) Implement priority scheduling
+8) Create test cases for priority

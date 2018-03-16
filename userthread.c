@@ -84,7 +84,6 @@ int thread_libinit(int policy) {
     scheduler->uc_link = NULL;
     scheduler->uc_stack.ss_sp = malloc(STACKSIZE);
     scheduler->uc_stack.ss_size = STACKSIZE;
-//    sigemptyset(scheduler->uc_sigmask);
     makecontext(scheduler, (void (*)(void)) schedule, 0);
 
     mainTCB = newTCB(-1, 0, 1, READY, NULL);
