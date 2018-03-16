@@ -78,7 +78,6 @@ node* newNode(TCB *tcb, node* next, node* prev);
 
 int thread_libinit(int policy) {
     //create context for scheduler
-//    scheduler = newContext(NULL, )
     scheduler = malloc(sizeof(ucontext_t)); //TODO: error check malloc
     getcontext(scheduler);
     scheduler->uc_link = NULL;
@@ -292,7 +291,8 @@ int thread_yield(void) {
         }
 
 //        schedule();
-        swapcontext(running->tcb->ucontext, scheduler);
+//        swapcontext(running->tcb->ucontext, scheduler);
+        return SUCCESS;
     } else {
         //TODO: fill in code here for priority
     }
@@ -367,9 +367,9 @@ int stub(void (*func)(void *), void *arg) {
     running->tcb->state = DONE;
     running->tcb->joined->state = READY;
     printList();
-    schedule();
-//    setcontext(scheduler);
-    exit(0); // all threads are done, so process should exit
+//    schedule();
+    setcontext(scheduler);
+//    exit(0); // all threads are done, so process should exit
 }
 
 long getTicks() {
