@@ -7,6 +7,7 @@
 #include <ucontext.h>
 #include <sys/time.h>
 #include <stdarg.h>
+#include <signal.h>
 #include "userthread.h"
 #include "logger.h"
 
