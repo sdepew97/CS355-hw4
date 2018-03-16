@@ -69,7 +69,7 @@ ucontext_t *scheduler;
 int stub(void (*func)(void *), void *arg);
 long getTicks();
 void Log (int ticks, int OPERATION, int TID, int PRIORITY);    // logs a message to LOGFILE
-int schedule();
+void scheduler();
 void printList();
 void initMainTCB(int policy);
 ucontext_t *newContext(ucontext_t *uc_link, void (*func)(void *), void* arg);
@@ -84,8 +84,8 @@ int thread_libinit(int policy) {
     scheduler->uc_link = NULL;
     scheduler->uc_stack.ss_sp = malloc(STACKSIZE);
     scheduler->uc_stack.ss_size = STACKSIZE;
-    sigemptyset(scheduler->uc_sigmask);
-    makecontext(scheduler, (void (*)(void)) schedule(), 0);
+//    sigemptyset(scheduler->uc_sigmask);
+    makecontext(scheduler, scheduler, 0);
 
     mainTCB = newTCB(-1, 0, 1, READY, NULL);
     getcontext(mainTCB->ucontext);
@@ -397,7 +397,7 @@ void Log (int ticks, int OPERATION, int TID, int PRIORITY) {
 }
 
 /* Method with the scheduling algorithms */
-int schedule() {
+void scheduler() {
     printf("schedule called\n");
 //    (*(((TCB *) running->tcb)->policy)) = 0; //TODO: replace this here once policy is saved correctly
     printf("POLICY in schedule: %d\n", POLICY);
