@@ -70,19 +70,23 @@ void Log (int ticks, int OPERATION, int TID, int PRIORITY);    // logs a message
 int schedule();
 void printList();
 void initMainTCB(int policy);
+TCB* newTCB(int TID, int CPUUsage, int priority, int state, TCB *joined);
 
 int thread_libinit(int policy) {
 //    initMainTCB(policy);
 
-    mainTCB = malloc(sizeof(TCB));
-    mainTCB->ucontext = malloc(sizeof(ucontext_t));
+//    mainTCB = malloc(sizeof(TCB));
+//    mainTCB->ucontext = malloc(sizeof(ucontext_t));
+//    getcontext(mainTCB->ucontext);
+//    mainTCB->joined = malloc(sizeof(TCB));
+//    mainTCB->joined = NULL;
+//    mainTCB->state = READY;
+//    mainTCB->priority = 1; //main automatically has highest priority
+//    mainTCB->TID = -1; //set a unique TID for the main context, so we know when it's doing the switching
+//    //TODO: mark main here/get context as needed
+
+    mainTCB = newTCB(-1, NULL, 1, READY, NULL);
     getcontext(mainTCB->ucontext);
-    mainTCB->joined = malloc(sizeof(TCB));
-    mainTCB->joined = NULL;
-    mainTCB->state = READY;
-    mainTCB->priority = 1; //main automatically has highest priority
-    mainTCB->TID = -1; //set a unique TID for the main context, so we know when it's doing the switching
-    //TODO: mark main here/get context as needed
 
     running = malloc(sizeof(node));
     running->tcb = malloc(sizeof(TCB));
@@ -114,7 +118,7 @@ int thread_libinit(int policy) {
         return SUCCESS;
     } else if (policy == PRIORITY) {
         //TODO: setup queues here
-//        POLICY = PRIORITY;
+
         return SUCCESS;
     } else {
         return FAILURE;
@@ -446,6 +450,13 @@ void printList() {
     printf("\n");
 }
 
-TCB* newTCB() {
-
+TCB* newTCB(int TID, int CPUUsage, int priority, int state, TCB *joined) {
+    TCB *returnValue = malloc(sizeof(TCB));
+    returnValue->ucontext = malloc(sizeof(ucontext_t));
+    returnValue->TID = TID;
+    returnValue->CPUusage = CPUUsage;
+    returnValue->priority = priority;
+    returnValue->joined = malloc(sizeof(TCB));
+    returnValue->joined = joined;
+    returnValue->state = state;
 }
