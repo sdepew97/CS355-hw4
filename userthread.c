@@ -239,6 +239,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
 }
 
 int thread_yield(void) {
+    printf("yield hit\n");
     //put current running back onto the ready queue
 
     //change state of running thread to ready
