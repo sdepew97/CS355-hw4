@@ -434,7 +434,7 @@ ucontext_t *newContext(ucontext_t *uc_link, void (*func)(void *), void* arg) {
     returnValue->uc_stack.ss_size = STACKSIZE;
     //count list values //TODO: change 2 to argc (which is length of arg)
 //    int argc;
-    makecontext(returnValue, (void (*)(void)) stub, func, arg);
+    makecontext(returnValue, (void (*)(void)) stub, 2, func, arg);
 //    makecontext(returnValue, (void (*)(void)) func, 1, arg);
     //TODO: figure out what to do with masking here??
     return returnValue;
