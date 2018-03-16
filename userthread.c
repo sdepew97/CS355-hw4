@@ -160,7 +160,9 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
         Log((int) getTicks() - startTime, CREATED, currentTID, -1);
         printList();
         return currentTID;
-    } else { //we are priority scheduling
+    }
+    /*
+     * else { //we are priority scheduling
         if (priority == -1) {
             //first node ever on the list
             if (lowList->size == 0) {
@@ -212,9 +214,11 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
             //priority is invalid
             return FAILURE;
         }
-        Log((int) getTicks() - startTime, CREATED, currentTID, -1);
-        return currentTID;
-    }
+        */
+
+//        Log((int) getTicks() - startTime, CREATED, currentTID, -1);
+//        return currentTID;
+//    }
 
     return FAILURE;
 }
