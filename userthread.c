@@ -291,7 +291,8 @@ int thread_yield(void) {
             swapcontext(running->tcb->ucontext, scheduler);
         }
 
-        schedule();
+//        schedule();
+        swapcontext(running->tcb->ucontext, scheduler);
     } else {
         //TODO: fill in code here for priority
     }
@@ -324,7 +325,7 @@ int thread_join(int tid) {
                     running->tcb->state = WAITING;
                     Log((int) getTicks() - startTime, STOPPED, ((TCB *) running->tcb)->TID, -1);
                     ((TCB *) currentNode->tcb)->joined = running->tcb;
-                    schedule();
+//                    schedule();
                 } else {
                     //attempting a circular join
                     printf("failed on circular\n");
@@ -366,7 +367,8 @@ int stub(void (*func)(void *), void *arg) {
     running->tcb->state = DONE;
     running->tcb->joined->state = READY;
     printList();
-    schedule();
+//    schedule();
+    setcontext(scheduler);
     exit(0); // all threads are done, so process should exit
 }
 
