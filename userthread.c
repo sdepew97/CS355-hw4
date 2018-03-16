@@ -139,31 +139,19 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
 
     TCB *newThreadTCB = newTCB(currentTID, 0, priority, BLOCKED, NULL);
     newThreadTCB->ucontext = newThread;
-
-//            = malloc(sizeof(TCB));
-//    newThreadTCB->TID = currentTID;
-//    newThreadTCB->ucontext = newThread;
-//    newThreadTCB->CPUusage = 0;//TODO: update for the Priority scheduling needed
-//    newThreadTCB->priority = priority;
-//    newThreadTCB->state = BLOCKED;
-//    newThreadTCB->joined = malloc(sizeof(TCB));
-//    newThreadTCB->joined = NULL;
     TID++; //TODO: MASK!!
-
-    node *newThreadNode = malloc(sizeof(node));
-    newThreadNode->tcb = newThreadTCB;
 
     if (POLICY == FIFO || POLICY == SJF) {
         //TODO: mask this linked list interaction
         //first node ever on the list
         if (readyList->size == 0) {
+            node *newThreadNode = newNode(newThreadTCB, NULL, NULL);
             readyList->head = newThreadNode;
             readyList->tail = newThreadNode;
             readyList->size++;
-            newThreadNode->next = NULL;
-            newThreadNode->prev = NULL;
         } else { //there are other nodes on the list
             node *tailNode = readyList->tail;
+            node *newThreadNode = newNode(newThreadTCB, NULL, tailNode);
             tailNode->next = newThreadNode;
             tailNode->prev = tailNode;
             readyList->tail = newThreadNode;
