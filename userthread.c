@@ -398,7 +398,6 @@ void Log (int ticks, int OPERATION, int TID, int PRIORITY) {
 void schedule() {
     getcontext(scheduler);
     printf("schedule called\n");
-//    (*(((TCB *) running->tcb)->policy)) = 0; //TODO: replace this here once policy is saved correctly
     printf("POLICY in schedule: %d\n", POLICY);
     printList();
 
