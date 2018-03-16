@@ -8,6 +8,7 @@ void printHello () {
 
 void tryYield() {
     thread_yield();
+    printf("Hello world\n");
 }
 
 int main() {
