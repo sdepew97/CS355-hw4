@@ -282,9 +282,9 @@ int thread_yield(void) {
 
 int thread_join(int tid) {
     printf("join called for %d\n", tid);
-//    if((*(((TCB *) running->tcb)->policy)) > PRIORITY) {
-//        (((TCB *) running)->ucontext) = malloc(sizeof(ucontext_t)); //TODO: replace once solve main deletion error
-//    }
+    if((*(((TCB *) running->tcb)->policy)) > PRIORITY) {
+        (((TCB *) running)->ucontext) = malloc(sizeof(ucontext_t)); //TODO: replace once solve main deletion error
+    }
 //    (*(((TCB *) running->tcb)->policy)) = 0; //TODO: replace this here once policy is saved correctly
     printf("POLICY: %d\n", POLICY);
     printList();
