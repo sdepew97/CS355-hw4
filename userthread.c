@@ -71,7 +71,7 @@ int schedule();
 void printList();
 void initMainTCB(int policy);
 TCB* newTCB(int TID, int CPUUsage, int priority, int state, TCB *joined);
-node* newNode(TCB *node, node* next, node* prev);
+node* newNode(TCB *tcb, node* next, node* prev);
 
 int thread_libinit(int policy) {
     mainTCB = newTCB(-1, 0, 1, READY, NULL);
