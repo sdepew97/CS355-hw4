@@ -122,6 +122,7 @@ int thread_libterminate(void) {
 
 int thread_create(void (*func)(void *), void *arg, int priority) {
     printf("creating new thread %d\n", TID);
+    printList();
     //check type of scheduling
 
     //create a new context and TCB for the thread
