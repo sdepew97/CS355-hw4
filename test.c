@@ -8,7 +8,7 @@ void printHello () {
 
 int main() {
     thread_libinit(FIFO);
-   thread_create(printHello, NULL, -1);
+    thread_join(thread_create(printHello, NULL, -1));
     thread_create(printHello, NULL, -1);
 //    thread_join(thread_create(printHello, NULL, -1));
 //    thread_join(thread_create(printHello, NULL, -1));
