@@ -309,12 +309,9 @@ int thread_join(int tid) {
 
         if(currentNode != NULL) {
             ((TCB *) currentNode->tcb)->state = READY; //change to ready, since it's been joined and can run as a result
-            getcontext(
-                    ((TCB *) running)->ucontext); //as soon as calls thread join, get context, since this is where we want to return
+//            getcontext(
+//                    ((TCB *) running)->ucontext); //as soon as calls thread join, get context, since this is where we want to return
 
-//            while (currentNode != NULL && ((TCB *) currentNode->tcb)->TID != tid) {
-//                currentNode = currentNode->next;
-//            }
 
             //case 2: TID does exist and found thread is waiting already, which would mean you'd get stuck forever, perhaps?
             if (((TCB *) currentNode->tcb)->state == WAITING) {
@@ -333,7 +330,8 @@ int thread_join(int tid) {
             printf("third case\n");
             ((TCB *) running->tcb)->state = WAITING;
             ((TCB *) currentNode->tcb)->joined = running->tcb;
-            schedule();
+            //schedule();
+            swapcontext(running->tcb->ucontext, scheduler);
 
             return SUCCESS;
         }
@@ -398,6 +396,7 @@ void Log (int ticks, int OPERATION, int TID, int PRIORITY) {
 
 /* Method with the scheduling algorithms */
 void schedule() {
+    getcontext(scheduler);
     printf("schedule called\n");
 //    (*(((TCB *) running->tcb)->policy)) = 0; //TODO: replace this here once policy is saved correctly
     printf("POLICY in schedule: %d\n", POLICY);
