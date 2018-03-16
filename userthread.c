@@ -70,7 +70,7 @@ void Log (int ticks, int OPERATION, int TID, int PRIORITY);    // logs a message
 int schedule();
 void printList();
 void initMainTCB(int policy);
-ucontext_t *newContext(ucontext_t *uc_link, sigset_t uc_sigmask, void (*func)(void *), void* arg);
+ucontext_t *newContext(ucontext_t *uc_link, void (*func)(void *), void* arg);
 TCB* newTCB(int TID, int CPUUsage, int priority, int state, TCB *joined);
 node* newNode(TCB *tcb, node* next, node* prev);
 
