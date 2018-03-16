@@ -380,10 +380,10 @@ int stub(void (*func)(void *), void *arg) {
     //TODO: thread clean up mentioned in assignment guidelines on page 3
     printf("thread done\n");
 //    printList();
-    Log((int) getTicks()-startTime, FINISHED, ((TCB *) running->tcb)->TID, -1);
+    Log((int) getTicks() - startTime, FINISHED, ((TCB *) running->tcb)->TID, -1);
     running->tcb->state = DONE;
     printList();
-    if(running->tcb->joined->state !=NULL) {
+    if (running->tcb->joined != NULL) {
         running->tcb->joined->state = READY;
     }
 //    printList();
@@ -478,7 +478,6 @@ ucontext_t *newContext(ucontext_t *uc_link, void (*func)(void *), void* arg) {
     //TODO: figure out what to do with masking here??
     return returnValue;
 }
-
 
 //TODO: masking
 TCB* newTCB(int TID, int CPUUsage, int priority, int state, TCB *joined) {
