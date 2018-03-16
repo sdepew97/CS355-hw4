@@ -244,6 +244,12 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
 
 int thread_yield(void) {
     printf("yield hit\n");
+
+    //This means that we have not called threadlib_init first, which is required
+    if(running == NULL) {
+        return FAILURE;
+    }
+
     //put current running back onto the ready queue
 
     //change state of running thread to ready
@@ -307,6 +313,11 @@ int thread_yield(void) {
 
 int thread_join(int tid) {
     printf("join called for %d\n", tid);
+
+    //This means that we have not called threadlib_init first, which is required
+    if(running == NULL) {
+        return FAILURE;
+    }
     printList();
 
     if (POLICY == FIFO || POLICY == SJF) {
