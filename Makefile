@@ -1,7 +1,7 @@
 all: userthreads test clean
 
 test:
-	gcc -o test test.c -L. -luserthread
+	gcc -g -o test test.c -L. -luserthread
 
 userthreads: userthreads.o
 	gcc -o libuserthread.so userthread.o -shared
