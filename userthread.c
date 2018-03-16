@@ -63,6 +63,7 @@ static linkedList *highList = NULL;
 
 TCB *mainTCB;
 node *running;
+ucontext_t *scheduler;
 
 int stub(void (*func)(void *), void *arg);
 long getTicks();
@@ -75,6 +76,16 @@ TCB* newTCB(int TID, int CPUUsage, int priority, int state, TCB *joined);
 node* newNode(TCB *tcb, node* next, node* prev);
 
 int thread_libinit(int policy) {
+    //create context for scheduler
+//    scheduler = newContext(NULL, )
+    scheduler = malloc(sizeof(ucontext_t)); //TODO: error check malloc
+    getcontext(scheduler);
+    scheduler->uc_link = NULL;
+    scheduler->uc_stack.ss_sp = malloc(STACKSIZE);
+    scheduler->uc_stack.ss_size = STACKSIZE;
+    sigemptyset(scheduler->uc_sigmask);
+    makecontext(scheduler, (void (*)(void)) schedule(), 0);
+
     mainTCB = newTCB(-1, 0, 1, READY, NULL);
     getcontext(mainTCB->ucontext);
 
