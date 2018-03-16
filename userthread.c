@@ -446,6 +446,7 @@ ucontext_t *newContext(ucontext_t *uc_link, sigset_t uc_sigmask, void (*func)(vo
     returnValue->uc_stack.ss_size = STACKSIZE;
     makecontext(returnValue, (void (*)(void)) stub, 2, func, arg);
     //TODO: figure out what to do with masking here??
+    return returnValue;
 }
 
 
