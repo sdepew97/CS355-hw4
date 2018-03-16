@@ -164,6 +164,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
         if (priority == -1) {
             //first node ever on the list
             if (lowList->size == 0) {
+                node *newThreadNode = newNode(newThreadTCB, NULL, NULL);
                 lowList->head = newThreadNode;
                 lowList->tail = newThreadNode;
                 lowList->size++;
@@ -179,6 +180,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
         } else if (priority == 0) {
             //first node ever on the list
             if (mediumList->size == 0) {
+                node *newThreadNode = newNode(newThreadTCB, NULL, NULL);
                 mediumList->head = newThreadNode;
                 mediumList->tail = newThreadNode;
                 mediumList->size++;
@@ -193,6 +195,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
         } else if (priority == 1) {
             //first node ever on the list
             if (highList->size == 0) {
+                node *newThreadNode = newNode(newThreadTCB, NULL, NULL);
                 highList->head = newThreadNode;
                 highList->tail = newThreadNode;
                 highList->size++;
