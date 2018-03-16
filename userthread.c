@@ -85,7 +85,7 @@ int thread_libinit(int policy) {
 //    mainTCB->TID = -1; //set a unique TID for the main context, so we know when it's doing the switching
 //    //TODO: mark main here/get context as needed
 
-    mainTCB = newTCB(-1, NULL, 1, READY, NULL);
+    mainTCB = newTCB(-1, 0, 1, READY, NULL);
     getcontext(mainTCB->ucontext);
 
     running = malloc(sizeof(node));
@@ -450,7 +450,7 @@ void printList() {
     printf("\n");
 }
 
-TCB* newTCB(int TID, int CPUUsage, int priority, int state, TCB *joined) {
+struct TCB* newTCB(int TID, int CPUUsage, int priority, int state, TCB *joined) {
     TCB *returnValue = malloc(sizeof(TCB));
     returnValue->ucontext = malloc(sizeof(ucontext_t));
     returnValue->TID = TID;
