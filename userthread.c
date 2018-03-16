@@ -262,7 +262,8 @@ int thread_yield(void) {
             readyList->tail = currentRunning;
             ((TCB *) currentRunning->tcb)->state = READY;
             Log((int) getTicks() - startTime, STOPPED, ((TCB *) currentRunning->tcb)->TID, -1);
-            schedule();
+//            schedule();
+            swapcontext(running->tcb->ucontext, scheduler);
         }
 
             //running is tail (do nothing)
@@ -270,7 +271,8 @@ int thread_yield(void) {
             //node is already at the tail, so mark as ready and then call scheduler
             ((TCB *) currentRunning->tcb)->state = READY;
             Log((int) getTicks() - startTime, STOPPED, ((TCB *) currentRunning->tcb)->TID, -1);
-            schedule();
+//            schedule();
+            swapcontext(running->tcb->ucontext, scheduler);
         }
 
             //running is middle node
@@ -282,7 +284,8 @@ int thread_yield(void) {
             readyList->tail = currentRunning;
             ((TCB *) currentRunning->tcb)->state = READY;
             Log((int) getTicks() - startTime, STOPPED, ((TCB *) currentRunning->tcb)->TID, -1);
-            schedule();
+//            schedule();
+            swapcontext(running->tcb->ucontext, scheduler);
         }
 
         schedule();
