@@ -156,8 +156,8 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
     //TODO: mask access to global variable!
     ucontext_t *newThread = newContext(NULL, func, arg);
 
-//    TCB *newThreadTCB = newTCB(currentTID, 0, priority, BLOCKED, NULL);
-    TCB *newThreadTCB = newTCB(currentTID, 0, priority, READY, NULL);
+    TCB *newThreadTCB = newTCB(currentTID, 0, priority, BLOCKED, NULL);
+//    TCB *newThreadTCB = newTCB(currentTID, 0, priority, READY, NULL);
     newThreadTCB->ucontext = newThread;
     TID++; //TODO: MASK!!
 
