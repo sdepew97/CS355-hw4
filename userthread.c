@@ -415,9 +415,9 @@ void schedule() {
         printf("running TID %d\n", ((TCB *) running->tcb)->TID);
         printf("POLICY in schedule two: %d\n", POLICY);
         printList();
-        if (((TCB *) running->tcb)->ucontext != NULL) {
+//        if (((TCB *) running->tcb)->ucontext != NULL) {
             setcontext(((TCB *) running->tcb)->ucontext);
-        }
+//        }
     } else if (POLICY == SJF) {
 
     } else if (POLICY == PRIORITY) {
