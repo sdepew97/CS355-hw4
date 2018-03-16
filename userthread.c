@@ -403,6 +403,7 @@ int schedule() {
         Log((int) getTicks() - startTime, SCHEDULED, ((TCB *) currentNode->tcb)->TID, -1);
         printf("running TID %d\n", ((TCB *) running->tcb)->TID);
         printf("POLICY in schedule two: %d\n", POLICY);
+        printList();
         if (((TCB *) running->tcb)->ucontext != NULL) {
             setcontext(((TCB *) running->tcb)->ucontext);
         }
