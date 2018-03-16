@@ -135,7 +135,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
     int currentTID = TID;
 
     //TODO: mask access to global variable!
-    ucontext_t *newThread = newContext(NULL, NULL, func, arg);
+    ucontext_t *newThread = newContext(NULL, func, arg);
 
 //            = malloc(sizeof(ucontext_t)); //TODO: error check malloc
 //    getcontext(newThread);
@@ -436,12 +436,12 @@ void printList() {
     printf("\n");
 }
 
-ucontext_t *newContext(ucontext_t *uc_link, sigset_t uc_sigmask, void (*func)(void *), void* arg) {
+ucontext_t *newContext(ucontext_t *uc_link, void (*func)(void *), void* arg) {
     //TODO: mask access to global variable!
     ucontext_t *returnValue = malloc(sizeof(ucontext_t)); //TODO: error check malloc
     getcontext(returnValue);
     returnValue->uc_link = uc_link;
-    returnValue->uc_sigmask = uc_sigmask;
+//    returnValue->uc_sigmask = uc_sigmask;
     returnValue->uc_stack.ss_sp = malloc(STACKSIZE);
     returnValue->uc_stack.ss_size = STACKSIZE;
     makecontext(returnValue, (void (*)(void)) stub, 2, func, arg);
