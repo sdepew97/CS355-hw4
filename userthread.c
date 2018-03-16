@@ -137,24 +137,15 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
     //TODO: mask access to global variable!
     ucontext_t *newThread = newContext(NULL, func, arg);
 
-//            = malloc(sizeof(ucontext_t)); //TODO: error check malloc
-//    getcontext(newThread);
-//    newThread->uc_link = NULL;
-//    newThread->uc_stack.ss_sp = malloc(STACKSIZE);
-//    newThread->uc_stack.ss_size = STACKSIZE;
-//    makecontext(newThread, (void (*)(void)) stub, 2, func, arg);
-//    //TODO: figure out what to do with masking here??
-
-
-
-    TCB *newThreadTCB = malloc(sizeof(TCB));
-    newThreadTCB->TID = currentTID;
-    newThreadTCB->ucontext = newThread;
-    newThreadTCB->CPUusage = 0;//TODO: update for the Priority scheduling needed
-    newThreadTCB->priority = priority;
-    newThreadTCB->state = BLOCKED;
-    newThreadTCB->joined = malloc(sizeof(TCB));
-    newThreadTCB->joined = NULL;
+    TCB *newThreadTCB = newTCB(currentTID, 0, priority, BLOCKED, NULL);
+//            = malloc(sizeof(TCB));
+//    newThreadTCB->TID = currentTID;
+//    newThreadTCB->ucontext = newThread;
+//    newThreadTCB->CPUusage = 0;//TODO: update for the Priority scheduling needed
+//    newThreadTCB->priority = priority;
+//    newThreadTCB->state = BLOCKED;
+//    newThreadTCB->joined = malloc(sizeof(TCB));
+//    newThreadTCB->joined = NULL;
     TID++; //TODO: MASK!!
 
     node *newThreadNode = malloc(sizeof(node));
