@@ -70,22 +70,13 @@ void Log (int ticks, int OPERATION, int TID, int PRIORITY);    // logs a message
 int schedule();
 void printList();
 void initMainTCB(int policy);
+ucontext_t *newContext(ucontext_t *uc_link, sigset_t uc_sigmask, void (*func)(void *), void* arg);
 TCB* newTCB(int TID, int CPUUsage, int priority, int state, TCB *joined);
 node* newNode(TCB *tcb, node* next, node* prev);
 
 int thread_libinit(int policy) {
     mainTCB = newTCB(-1, 0, 1, READY, NULL);
     getcontext(mainTCB->ucontext);
-
-//    running = malloc(sizeof(node));
-//    running->tcb = malloc(sizeof(TCB));
-//    ((TCB *) running->tcb)->ucontext = malloc(sizeof(ucontext_t));
-//    ((TCB *) running->tcb)->joined = malloc(sizeof(node));
-//    running->tcb = mainTCB; //TODO: determine if I need a deep copy here? (no)
-//    ((TCB *) running->tcb)->ucontext = mainTCB->ucontext;
-//    ((TCB *) running->tcb)->joined = mainTCB->joined;
-//    running->next = NULL;
-//    running->prev = NULL;
 
     running = newNode(mainTCB, NULL, NULL);
     mainTCB->state = RUNNING;
@@ -144,13 +135,17 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
     int currentTID = TID;
 
     //TODO: mask access to global variable!
-    ucontext_t *newThread = malloc(sizeof(ucontext_t)); //TODO: error check malloc
-    getcontext(newThread);
-    newThread->uc_link = NULL;
-    newThread->uc_stack.ss_sp = malloc(STACKSIZE);
-    newThread->uc_stack.ss_size = STACKSIZE;
-    makecontext(newThread, (void (*)(void)) stub, 2, func, arg);
-    //TODO: figure out what to do with masking here??
+    ucontext_t *newThread = newContext(NULL, NULL, func, arg);
+
+//            = malloc(sizeof(ucontext_t)); //TODO: error check malloc
+//    getcontext(newThread);
+//    newThread->uc_link = NULL;
+//    newThread->uc_stack.ss_sp = malloc(STACKSIZE);
+//    newThread->uc_stack.ss_size = STACKSIZE;
+//    makecontext(newThread, (void (*)(void)) stub, 2, func, arg);
+//    //TODO: figure out what to do with masking here??
+
+
 
     TCB *newThreadTCB = malloc(sizeof(TCB));
     newThreadTCB->TID = currentTID;
@@ -441,6 +436,20 @@ void printList() {
     printf("\n");
 }
 
+ucontext_t *newContext(ucontext_t *uc_link, sigset_t uc_sigmask, void (*func)(void *), void* arg) {
+    //TODO: mask access to global variable!
+    ucontext_t *returnValue = malloc(sizeof(ucontext_t)); //TODO: error check malloc
+    getcontext(returnValue);
+    returnValue->uc_link = uc_link;
+    returnValue->uc_sigmask = uc_sigmask;
+    returnValue->uc_stack.ss_sp = malloc(STACKSIZE);
+    returnValue->uc_stack.ss_size = STACKSIZE;
+    makecontext(returnValue, (void (*)(void)) stub, 2, func, arg);
+    //TODO: figure out what to do with masking here??
+}
+
+
+//TODO: masking
 TCB* newTCB(int TID, int CPUUsage, int priority, int state, TCB *joined) {
     TCB *returnValue = malloc(sizeof(TCB));
     returnValue->ucontext = malloc(sizeof(ucontext_t));
