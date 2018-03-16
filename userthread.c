@@ -389,6 +389,7 @@ int schedule() {
     printf("schedule called\n");
 //    (*(((TCB *) running->tcb)->policy)) = 0; //TODO: replace this here once policy is saved correctly
     printf("POLICY in schedule: %d\n", POLICY);
+    printList();
 
     //TODO: ensure this interaction is masked
     node *currentNode = readyList->head;
