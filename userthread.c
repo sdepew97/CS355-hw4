@@ -55,29 +55,29 @@ typedef struct linkedList {
 
 //linkedList for non-preemptive
 static linkedList *readyList = NULL;
-static linkedList *lowList = NULL;
-static linkedList *mediumList = NULL;
-static linkedList *highList = NULL;
+//static linkedList *lowList = NULL;
+//static linkedList *mediumList = NULL;
+//static linkedList *highList = NULL;
 
 //the TCB for the main thread
-TCB *mainTCB = NULL;
+static TCB *mainTCB = NULL;
 
 //the current running thread's node
-node *running = NULL;
+static node *running = NULL;
 
 //the ucontext for the scheduler method that we switch to as needed
-ucontext_t *scheduler = NULL;
+static ucontext_t *scheduler = NULL;
 
 //extra local helper method declarations
-void stub(void (*func)(void *), void *arg);
-long getTicks();
-void Log (int ticks, int OPERATION, int TID, int PRIORITY);    // logs a message to LOGFILE
-void schedule();
-void printList(); //TODO: remove, since for debugging
-ucontext_t *newContext(ucontext_t *uc_link, void (*func)(void *), void* arg);
-TCB* newTCB(int TID, int CPUUsage, int priority, int state, TCB *joined);
-node* newNode(TCB *tcb, node* next, node* prev);
-void addNode(TCB *tcb);
+static void stub(void (*func)(void *), void *arg);
+static long getTicks();
+static void Log (int ticks, int OPERATION, int TID, int PRIORITY);    // logs a message to LOGFILE
+static void schedule();
+static void printList(); //TODO: remove, since for debugging
+static ucontext_t *newContext(ucontext_t *uc_link, void (*func)(void *), void* arg);
+static TCB* newTCB(int TID, int CPUUsage, int priority, int state, TCB *joined);
+static node* newNode(TCB *tcb, node* next, node* prev);
+static void addNode(TCB *tcb);
 
 int thread_libinit(int policy) {
     //this is when the program officially started
