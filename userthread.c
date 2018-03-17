@@ -306,7 +306,7 @@ int thread_join(int tid) {
 
     if (POLICY == FIFO || POLICY == SJF) {
         //move main to tail, since this must be the first join
-        if(running->tcb->TID == -1 && readyList->head->tcb->TID == -1) { //TODO: ensure this works for SJF as well!
+//        if(running->tcb->TID == -1 && readyList->head->tcb->TID == -1) { //TODO: ensure this works for SJF as well!
             printf("got into if in join\n");
             readyList->head = running->next;
             readyList->head->prev = NULL;
@@ -314,7 +314,7 @@ int thread_join(int tid) {
             running->prev = readyList->tail;
             readyList->tail->next = running;
             readyList->tail = running;
-        }
+//        }
         printList();
 
         printf("got into FIFO or SJF\n");
