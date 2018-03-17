@@ -347,6 +347,7 @@ int thread_join(int tid) {
             else {
                 //case 3: TID does exist and thread is ready to go! (set calling thread to waiting by this thread and set joined pointer)
                 printf("third case\n");
+                printList();
                 ((TCB *) running->tcb)->state = WAITING;
                 ((TCB *) currentNode->tcb)->joined = running->tcb;
                 //schedule();
