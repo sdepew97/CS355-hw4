@@ -55,9 +55,9 @@ typedef struct linkedList {
 
 //linkedList for non-preemptive
 static linkedList *readyList = NULL;
-//static linkedList *lowList = NULL;
-//static linkedList *mediumList = NULL;
-//static linkedList *highList = NULL;
+static linkedList *lowList = NULL;
+static linkedList *mediumList = NULL;
+static linkedList *highList = NULL;
 
 //the TCB for the main thread
 static TCB *mainTCB = NULL;
@@ -77,7 +77,7 @@ static void printList(); //TODO: remove, since for debugging
 static ucontext_t *newContext(ucontext_t *uc_link, void (*func)(void *), void* arg);
 static TCB* newTCB(int TID, int CPUUsage, int priority, int state, TCB *joined);
 static node* newNode(TCB *tcb, node* next, node* prev);
-static void addNode(TCB *tcb);
+static int addNode(TCB *tcb, linkedList list);
 
 int thread_libinit(int policy) {
     //this is when the program officially started
@@ -101,13 +101,6 @@ int thread_libinit(int policy) {
         return FAILURE;
     }
 
-    //create main's node and set main to running
-    running = newNode(mainTCB, NULL, NULL);
-    if(running == NULL) {
-        return FAILURE;
-    }
-    mainTCB->state = RUNNING;
-
     //set the global policy value
     POLICY = policy;
 
@@ -125,9 +118,10 @@ int thread_libinit(int policy) {
         }
 
         //set ready list's value to running and update the size as necessary
-        readyList->head = running;
-        readyList->tail = running;
-        readyList->size++;
+        if(addNode(mainTCB, readyList) == FAILURE) {
+            return FAILURE;
+        }
+        mainTCB->state = RUNNING;
 
         //LOG main's creation
         Log((int) getTicks() - startTime, CREATED, -1, -1);
@@ -180,69 +174,44 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
         newThreadTCB->ucontext = newThread;
         TID++; //TODO: MASK!!
 
-        addNode(newThreadTCB);
+        if(addNode(newThreadTCB, readyList) == FAILURE) {
+            return FAILURE;
+        }
         Log((int) getTicks() - startTime, CREATED, currentTID, -1);
         printList();
         return currentTID;
-    }
-    /*
-     * else { //we are priority scheduling
+    } else { //we are priority scheduling
+        ucontext_t *newThread = newContext(NULL, func, arg);
+        if(newThread == NULL) {
+            return FAILURE;
+        }
+
+        makecontext(newThread, (void (*)(void)) stub, 2, func, arg);
+
+        TCB *newThreadTCB = newTCB(currentTID, 0, priority, READY, NULL); //For preemptive, don't require a join to run the thread, since the scheduler is called with SIGALARM
+        newThreadTCB->ucontext = newThread;
+        TID++; //TODO: MASK!!
+
         if (priority == -1) {
-            //first node ever on the list
-            if (lowList->size == 0) {
-                node *newThreadNode = newNode(newThreadTCB, NULL, NULL);
-                lowList->head = newThreadNode;
-                lowList->tail = newThreadNode;
-                lowList->size++;
-                newThreadNode->next = NULL;
-                newThreadNode->prev = NULL;
-            } else { //there are other nodes on the list
-                node *tailNode = lowList->tail;
-                tailNode->next = newThreadNode;
-                tailNode->prev = tailNode;
-                lowList->tail = newThreadNode;
-                lowList->size++;
+            if(addNode(newThreadTCB, lowList) == FAILURE) {
+                return FAILURE;
             }
         } else if (priority == 0) {
-            //first node ever on the list
-            if (mediumList->size == 0) {
-                node *newThreadNode = newNode(newThreadTCB, NULL, NULL);
-                mediumList->head = newThreadNode;
-                mediumList->tail = newThreadNode;
-                mediumList->size++;
-                newThreadNode->next = NULL;
-                newThreadNode->prev = NULL;
-            } else { //there are other nodes on the list
-                node *tailNode = mediumList->tail;
-                tailNode->next = newThreadNode;
-                tailNode->prev = tailNode;
-                mediumList->tail = newThreadNode;
+            if(addNode(newThreadTCB, mediumList) == FAILURE) {
+                return FAILURE;
             }
         } else if (priority == 1) {
-            //first node ever on the list
-            if (highList->size == 0) {
-                node *newThreadNode = newNode(newThreadTCB, NULL, NULL);
-                highList->head = newThreadNode;
-                highList->tail = newThreadNode;
-                highList->size++;
-                newThreadNode->next = NULL;
-                newThreadNode->prev = NULL;
-            } else { //there are other nodes on the list
-                node *tailNode = highList->tail;
-                tailNode->next = newThreadNode;
-                tailNode->prev = tailNode;
-                highList->tail = newThreadNode;
-                highList->size++;
+            if(addNode(newThreadTCB, highList) == FAILURE) {
+                return FAILURE;
             }
         } else {
             //priority is invalid
             return FAILURE;
         }
-        */
 
-//        Log((int) getTicks() - startTime, CREATED, currentTID, -1);
-//        return currentTID;
-//    }
+        Log((int) getTicks() - startTime, CREATED, currentTID, -1);
+        return currentTID;
+    }
 
     return FAILURE;
 }
@@ -520,22 +489,30 @@ node* newNode(TCB *tcb, node* next, node* prev) {
     return returnValue;
 }
 
-void addNode(TCB *tcb) {
+int addNode(TCB *tcb, linkedList list) {
     //TODO: mask this linked list interaction
 
     //NOTE: this case should not occur, as long as libinit has been called
     if (readyList->size == 0) {
         node *newThreadNode = newNode(tcb, NULL, NULL);
-        readyList->head = newThreadNode;
-        readyList->tail = newThreadNode;
-        readyList->size++;
+        if(newThreadNode == NULL) {
+            return FAILURE;
+        }
+        list->head = newThreadNode;
+        list->tail = newThreadNode;
+        list->size++;
     } else { //there are other nodes on the list, so this node should be added to the tail, since it arrived last (best for FIFO)
-        node *tailNode = readyList->tail;
+        node *tailNode = list->tail;
         node *newThreadNode = newNode(tcb, NULL, tailNode);
+        if(newThreadNode == NULL) {
+            return FAILURE;
+        }
         tailNode->next = newThreadNode;
         tailNode->prev = tailNode;
-        readyList->tail = newThreadNode;
-        readyList->size++;
+        list->tail = newThreadNode;
+        list->size++;
     }
+
+    return SUCCESS;
 }
 
