@@ -296,12 +296,12 @@ int thread_yield(void) {
 
 int thread_join(int tid) {
     printf("join called for %d\n", tid);
-    printf("currently running %d\n", running->tcb->TID);
 
     //This means that we have not called threadlib_init first, which is required
     if(running == NULL) {
         return FAILURE;
     }
+    printf("currently running %d\n", running->tcb->TID);
     printList();
 
     if (POLICY == FIFO || POLICY == SJF) {
