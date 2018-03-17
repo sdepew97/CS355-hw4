@@ -84,14 +84,12 @@ int thread_libinit(int policy) {
     startTime = (int) getTicks();
 
     //create context for scheduler
-    scheduler = newContext(NULL, scheduler, NULL);
+    scheduler = newContext(NULL, (void (*)(void)) scheduler, NULL);
     if(scheduler == NULL) {
         return FAILURE;
     }
 
-    if(makecontext(scheduler, (void (*)(void)) schedule, 0) == FAILURE) {
-        return FAILURE;
-    }
+    makecontext(scheduler, (void (*)(void)) schedule, 0);
 
     //create main's TCB
     mainTCB = newTCB(-1, 0, 1, READY, NULL);
@@ -176,9 +174,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
             return FAILURE;
         }
 
-        if(makecontext(returnValue, (void (*)(void)) stub, 2, func, arg) == FAILURE) {
-            return FAILURE;
-        }
+        makecontext(returnValue, (void (*)(void)) stub, 2, func, arg);
 
         TCB *newThreadTCB = newTCB(currentTID, 0, priority, BLOCKED, NULL);
         newThreadTCB->ucontext = newThread;
