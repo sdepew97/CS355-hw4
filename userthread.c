@@ -325,7 +325,8 @@ int thread_join(int tid) {
         }
 
         if(currentNode != NULL) {
-            ((TCB *) currentNode->tcb)->state = READY; //change to ready, since it's been joined and can run as a result
+
+//            currentNode->tcb->state = READY; //change to ready, since it's been joined and can run as a result unless it's already waiting
 //            getcontext(
 //                    ((TCB *) running)->ucontext); //as soon as calls thread join, get context, since this is where we want to return
 
