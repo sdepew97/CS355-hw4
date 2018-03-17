@@ -337,6 +337,7 @@ int thread_join(int tid) {
                     Log((int) getTicks() - startTime, STOPPED, ((TCB *) running->tcb)->TID, -1);
                     ((TCB *) currentNode->tcb)->joined = running->tcb;
 //                    schedule();
+                    swapcontext(running->tcb->ucontext, scheduler);
                 } else {
                     //attempting a circular join
                     printf("failed on circular\n");
