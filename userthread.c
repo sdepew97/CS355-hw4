@@ -174,7 +174,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
             return FAILURE;
         }
 
-        makecontext(returnValue, (void (*)(void)) stub, 2, func, arg);
+        makecontext(newThread, (void (*)(void)) stub, 2, func, arg);
 
         TCB *newThreadTCB = newTCB(currentTID, 0, priority, BLOCKED, NULL);
         newThreadTCB->ucontext = newThread;
