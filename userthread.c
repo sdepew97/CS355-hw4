@@ -121,6 +121,7 @@ int thread_libinit(int policy) {
         if(addNode(mainTCB, readyList) == FAILURE) {
             return FAILURE;
         }
+        running = readyList->head;
         mainTCB->state = RUNNING;
 
         //LOG main's creation
