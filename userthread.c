@@ -344,12 +344,14 @@ int thread_join(int tid) {
                     return FAILURE;
                 }
             }
-            //case 3: TID does exist and thread is ready to go! (set calling thread to waiting by this thread and set joined pointer)
-            printf("third case\n");
-            ((TCB *) running->tcb)->state = WAITING;
-            ((TCB *) currentNode->tcb)->joined = running->tcb;
-            //schedule();
-            swapcontext(running->tcb->ucontext, scheduler);
+            else {
+                //case 3: TID does exist and thread is ready to go! (set calling thread to waiting by this thread and set joined pointer)
+                printf("third case\n");
+                ((TCB *) running->tcb)->state = WAITING;
+                ((TCB *) currentNode->tcb)->joined = running->tcb;
+                //schedule();
+                swapcontext(running->tcb->ucontext, scheduler);
+            }
 
             return SUCCESS;
         }
