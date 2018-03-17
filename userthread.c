@@ -69,7 +69,7 @@ node *running = NULL;
 ucontext_t *scheduler = NULL;
 
 //extra local helper method declarations
-int stub(void (*func)(void *), void *arg);
+void stub(void (*func)(void *), void *arg);
 long getTicks();
 void Log (int ticks, int OPERATION, int TID, int PRIORITY);    // logs a message to LOGFILE
 void schedule();
@@ -377,23 +377,20 @@ int thread_join(int tid) {
     return FAILURE;
 }
 
-int stub(void (*func)(void *), void *arg) {
+void stub(void (*func)(void *), void *arg) {
     printf("entered stub\n");
     // thread starts here
     func(arg); // call root function
     //TODO: thread clean up mentioned in assignment guidelines on page 3
     printf("thread done\n");
-//    printList();
     Log((int) getTicks() - startTime, FINISHED, ((TCB *) running->tcb)->TID, -1);
     running->tcb->state = DONE;
     printList();
     if (running->tcb->joined != NULL) {
         running->tcb->joined->state = READY;
     }
-//    printList();
-//    schedule();
+    //current thread is done, so we must get a new thread to run
     setcontext(scheduler);
-//    exit(0); // all threads are done, so process should exit
 }
 
 long getTicks() {
