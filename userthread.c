@@ -489,7 +489,7 @@ node* newNode(TCB *tcb, node* next, node* prev) {
     return returnValue;
 }
 
-int addNode(TCB *tcb, linkedList list) {
+int addNode(TCB *tcb, linkedList *list) {
     //TODO: mask this linked list interaction
 
     //NOTE: this case should not occur, as long as libinit has been called
