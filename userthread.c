@@ -84,7 +84,7 @@ int thread_libinit(int policy) {
     startTime = (int) getTicks();
 
     //create context for scheduler
-    scheduler = newContext(NULL, (void (*)(void)) scheduler, NULL);
+    scheduler = newContext(NULL, (void (*)(void *)) scheduler, NULL);
     if(scheduler == NULL) {
         return FAILURE;
     }
