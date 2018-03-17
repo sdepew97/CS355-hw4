@@ -313,6 +313,7 @@ int thread_join(int tid) {
             readyList->tail->next = running;
             readyList->tail = running;
         }
+        printList();
 
         printf("got into FIFO or SJF\n");
         node *currentNode = readyList->head;
