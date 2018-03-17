@@ -204,6 +204,7 @@ int main(void) {
     // can either return 0 or -1... but shouldn't cause any thing weird.
 //    thread_libterminate();
 //    thread_libterminate();
+    printf("thread_libinit\n");
     if (thread_libinit(FIFO) == -1)
         exit(EXIT_FAILURE);
 
