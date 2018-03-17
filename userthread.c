@@ -350,6 +350,7 @@ int thread_join(int tid) {
                 ((TCB *) running->tcb)->state = WAITING;
                 ((TCB *) currentNode->tcb)->joined = running->tcb;
                 //schedule();
+                printList();
                 swapcontext(running->tcb->ucontext, scheduler);
             }
 
