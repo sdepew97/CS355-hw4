@@ -77,7 +77,7 @@ static void printList(); //TODO: remove, since for debugging
 static ucontext_t *newContext(ucontext_t *uc_link, void (*func)(void *), void* arg);
 static TCB* newTCB(int TID, int CPUUsage, int priority, int state, TCB *joined);
 static node* newNode(TCB *tcb, node* next, node* prev);
-static int addNode(TCB *tcb, linkedList list);
+static int addNode(TCB *tcb, linkedList *list);
 
 int thread_libinit(int policy) {
     //this is when the program officially started
