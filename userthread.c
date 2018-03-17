@@ -1,7 +1,3 @@
-//
-// Created by Sarah Depew on 3/13/18.
-//
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <ucontext.h>
@@ -15,17 +11,17 @@
 #define SUCCESS 0
 #define TRUE 1
 #define FALSE 0
-#define LOGFILE	"scheduleLogger.txt\0"     // all Log(); messages will be appended to this file
+#define LOGFILE	"log.txt\0"     // all Log(); messages will be appended to this file
 
 //globals for logging
 enum {CREATED, SCHEDULED, STOPPED, FINISHED};
 char* states[] = {"CREATED\0", "SCHEDULED\0", "STOPPED\0", "FINISHED\0"};
 
 //global variable to store the scheduling policy
-static int POLICY; //policy for scheduling that the user passed //TODO: figure out why this is being deleted
-static int TID = 1;
+static int POLICY; //policy for scheduling that the user passed
+static int TID = 1; //start TID at 1 and get new TID's after that
 static int startTime;
-static int LogCreated = FALSE;
+static int LogCreated = FALSE; //know if we append or not to the log.txt file
 
 //structs used in program
 typedef struct TCB {
@@ -37,13 +33,13 @@ typedef struct TCB {
     struct TCB *joined;
 } TCB;
 
-typedef enum {
+enum {
     READY = 0, //ready when joined
     WAITING = 1, //waiting when has joined something that's now ready to run
     RUNNING = 2, //running when it has been joined
-    BLOCKED = 3, //created and blocked, since not joined
-    DONE = 4 //when thread is done running
-} status;
+    BLOCKED = 3, //created and blocked in non-preemptive, since not joined in non-preemptive and when not joined in non-preemptive, then we don't run the thread!
+    DONE = 4 //when thread is done running and it should be removed from the ready queue
+};
 
 typedef struct node {
     struct TCB *tcb;
@@ -57,58 +53,88 @@ typedef struct linkedList {
     unsigned int size;
 } linkedList;
 
+//linkedList for non-preemptive
 static linkedList *readyList = NULL;
 static linkedList *lowList = NULL;
 static linkedList *mediumList = NULL;
 static linkedList *highList = NULL;
 
+//the TCB for the main thread
 TCB *mainTCB = NULL;
+
+//the current running thread's node
 node *running = NULL;
+
+//the ucontext for the scheduler method that we switch to as needed
 ucontext_t *scheduler = NULL;
 
+//extra local helper method declarations
 int stub(void (*func)(void *), void *arg);
 long getTicks();
 void Log (int ticks, int OPERATION, int TID, int PRIORITY);    // logs a message to LOGFILE
 void schedule();
-void printList();
-void initMainTCB(int policy);
+void printList(); //TODO: remove, since for debugging
 ucontext_t *newContext(ucontext_t *uc_link, void (*func)(void *), void* arg);
 TCB* newTCB(int TID, int CPUUsage, int priority, int state, TCB *joined);
 node* newNode(TCB *tcb, node* next, node* prev);
+void addNode(TCB *tcb);
 
 int thread_libinit(int policy) {
-    //create context for scheduler
-    scheduler = malloc(sizeof(ucontext_t)); //TODO: error check malloc
-    getcontext(scheduler);
-    scheduler->uc_link = NULL;
-    scheduler->uc_stack.ss_sp = malloc(STACKSIZE);
-    scheduler->uc_stack.ss_size = STACKSIZE;
-    makecontext(scheduler, (void (*)(void)) schedule, 0);
-
-    //TODO: log here for main being created
-
-    mainTCB = newTCB(-1, 0, 1, READY, NULL);
-    getcontext(mainTCB->ucontext);
-
-    running = newNode(mainTCB, NULL, NULL);
-    mainTCB->state = RUNNING;
-
+    //this is when the program officially started
     startTime = (int) getTicks();
 
+    //create context for scheduler
+    scheduler = newContext(NULL, scheduler, NULL);
+    if(scheduler == NULL) {
+        return FAILURE;
+    }
+
+    if(makecontext(scheduler, (void (*)(void)) schedule, 0) == FAILURE) {
+        return FAILURE;
+    }
+
+    //create main's TCB
+    mainTCB = newTCB(-1, 0, 1, READY, NULL);
+    if(mainTCB == NULL) {
+        return FAILURE;
+    }
+
+    if(getcontext(mainTCB->ucontext) == FAILURE) {
+        return FAILURE;
+    }
+
+    //create main's node and set main to running
+    running = newNode(mainTCB, NULL, NULL);
+    if(running == NULL) {
+        return FAILURE;
+    }
+    mainTCB->state = RUNNING;
+
+    //set the global policy value
     POLICY = policy;
 
+    //if we are scheduling in a non-preemptive fashion
     if (policy == FIFO || policy == SJF) {
-        //TODO: free memory malloced here!
+
+        //TODO: free memory malloced here at the end!
+
+        //create the ready list
         readyList = malloc(sizeof(linkedList));
 
+        //if malloc failed, return FAILURE
         if (readyList == NULL) {
             return FAILURE;
         }
 
+        //set ready list's value to running and update the size as necessary
         readyList->head = running;
         readyList->tail = running;
         readyList->size++;
 
+        //LOG main's creation
+        Log((int) getTicks() - startTime, CREATED, -1, -1);
+
+        //everything went fine, so return success
         return SUCCESS;
     } else if (policy == PRIORITY) {
         //TODO: setup queues here
@@ -140,43 +166,25 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
         return FAILURE;
     }
     printList();
-    //check type of scheduling
 
-    //create a new context and TCB for the thread
-
-    //get context and make context here to create the thread
-
-    //assign a thread ID...use a global counter to keep track of TID's?
-
-    //add to the ready queue for the job type
-
-    //return the TID or the failure value
+    //TODO: mask access to global variable!?
     int currentTID = TID;
 
-    //TODO: mask access to global variable!
-    ucontext_t *newThread = newContext(NULL, func, arg);
-
-    TCB *newThreadTCB = newTCB(currentTID, 0, priority, BLOCKED, NULL);
-//    TCB *newThreadTCB = newTCB(currentTID, 0, priority, READY, NULL);
-    newThreadTCB->ucontext = newThread;
-    TID++; //TODO: MASK!!
-
     if (POLICY == FIFO || POLICY == SJF) {
-        //TODO: mask this linked list interaction
-        //first node ever on the list
-        if (readyList->size == 0) {
-            node *newThreadNode = newNode(newThreadTCB, NULL, NULL);
-            readyList->head = newThreadNode;
-            readyList->tail = newThreadNode;
-            readyList->size++;
-        } else { //there are other nodes on the list
-            node *tailNode = readyList->tail;
-            node *newThreadNode = newNode(newThreadTCB, NULL, tailNode);
-            tailNode->next = newThreadNode;
-            tailNode->prev = tailNode;
-            readyList->tail = newThreadNode;
-            readyList->size++;
+        ucontext_t *newThread = newContext(NULL, func, arg);
+        if(newThread == NULL) {
+            return FAILURE;
         }
+
+        if(makecontext(returnValue, (void (*)(void)) stub, 2, func, arg) == FAILURE) {
+            return FAILURE;
+        }
+
+        TCB *newThreadTCB = newTCB(currentTID, 0, priority, BLOCKED, NULL);
+        newThreadTCB->ucontext = newThread;
+        TID++; //TODO: MASK!!
+
+        addNode(newThreadTCB);
         Log((int) getTicks() - startTime, CREATED, currentTID, -1);
         printList();
         return currentTID;
@@ -466,36 +474,75 @@ void printList() {
 ucontext_t *newContext(ucontext_t *uc_link, void (*func)(void *), void* arg) {
     //TODO: mask access to global variable!
     ucontext_t *returnValue = malloc(sizeof(ucontext_t)); //TODO: error check malloc
-    getcontext(returnValue);
+    if(returnValue == NULL) {
+        return NULL;
+    }
+    if(getcontext(returnValue) == FAILURE) {
+        return NULL;
+    }
+
     returnValue->uc_link = uc_link;
-//    returnValue->uc_sigmask = uc_sigmask;
     returnValue->uc_stack.ss_sp = malloc(STACKSIZE);
+    if(returnValue->uc_stack.ss_sp == NULL) {
+        return NULL;
+    }
     returnValue->uc_stack.ss_size = STACKSIZE;
-    //count list values //TODO: change 2 to argc (which is length of arg)
-//    int argc;
-    makecontext(returnValue, (void (*)(void)) stub, 2, func, arg);
-//    makecontext(returnValue, (void (*)(void)) func, 1, arg);
     //TODO: figure out what to do with masking here??
+
     return returnValue;
 }
 
-//TODO: masking
+//TODO: masking and error checking, here
 TCB* newTCB(int TID, int CPUUsage, int priority, int state, TCB *joined) {
     TCB *returnValue = malloc(sizeof(TCB));
+    if(returnValue == NULL) {
+        return NULL;
+    }
     returnValue->ucontext = malloc(sizeof(ucontext_t));
+    if(returnValue->ucontext == NULL) {
+        return NULL;
+    }
     returnValue->TID = TID;
     returnValue->CPUusage = CPUUsage;
     returnValue->priority = priority;
     returnValue->joined = malloc(sizeof(TCB));
+    if(returnValue->joined == NULL) {
+        return  NULL;
+    }
     returnValue->joined = joined;
     returnValue->state = state;
+
     return returnValue;
 }
 
 node* newNode(TCB *tcb, node* next, node* prev) {
     node *returnValue = malloc(sizeof(node));
+    if(returnValue == NULL) {
+        return NULL;
+    }
     returnValue->tcb = tcb;
     returnValue->next = next;
     returnValue->prev = prev;
+
     return returnValue;
 }
+
+void addNode(TCB *tcb) {
+    //TODO: mask this linked list interaction
+
+    //NOTE: this case should not occur, as long as libinit has been called
+    if (readyList->size == 0) {
+        node *newThreadNode = newNode(tcb, NULL, NULL);
+        readyList->head = newThreadNode;
+        readyList->tail = newThreadNode;
+        readyList->size++;
+    } else { //there are other nodes on the list, so this node should be added to the tail, since it arrived last (best for FIFO)
+        node *tailNode = readyList->tail;
+        node *newThreadNode = newNode(tcb, NULL, tailNode);
+        tailNode->next = newThreadNode;
+        tailNode->prev = tailNode;
+        readyList->tail = newThreadNode;
+        readyList->size++;
+    }
+}
+

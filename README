@@ -1,0 +1,7 @@
+Assumptions when Coding:
+* In the non-preemptive scheduling algorithms, FIFO and SJF, when a new thread is created, it is blocked. If we do not join the thread,
+then it remains blocked and will never run. Only upon a thread_join is the thread able to run and the scheduler called.
+
+Nodes:
+* My log is found in log.txt
+
