@@ -296,6 +296,7 @@ int thread_yield(void) {
 
 int thread_join(int tid) {
     printf("join called for %d\n", tid);
+    printf("currently running %d\n", running->tcb->TID);
 
     //This means that we have not called threadlib_init first, which is required
     if(running == NULL) {
@@ -332,10 +333,10 @@ int thread_join(int tid) {
 
 
             //case 2: TID does exist and found thread is waiting already, which would mean you'd get stuck forever, perhaps?
-            if (((TCB *) currentNode->tcb)->state == WAITING) {
+            if (currentNode->tcb->state == WAITING) {
                 if (currentNode->tcb->joined->TID != running->tcb->TID) {
                     running->tcb->state = WAITING;
-                    Log((int) getTicks() - startTime, STOPPED, ((TCB *) running->tcb)->TID, -1);
+                    Log((int) getTicks() - startTime, STOPPED, running->tcb->TID, -1);
                     ((TCB *) currentNode->tcb)->joined = running->tcb;
 //                    schedule();
                     swapcontext(running->tcb->ucontext, scheduler);
