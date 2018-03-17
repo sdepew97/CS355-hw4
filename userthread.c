@@ -12,6 +12,7 @@
 #define TRUE 1
 #define FALSE 0
 #define LOGFILE	"log.txt\0"     // all Log(); messages will be appended to this file
+#define QUANTA 100
 
 //globals for logging
 enum {CREATED, SCHEDULED, STOPPED, FINISHED};
@@ -22,11 +23,17 @@ static int POLICY; //policy for scheduling that the user passed
 static int TID = 1; //start TID at 1 and get new TID's after that
 static int startTime;
 static int LogCreated = FALSE; //know if we append or not to the log.txt file
+static int totalRuntime = 0;
+static int totalRuns = 0;
 
 //structs used in program
 typedef struct TCB {
     int TID;
     ucontext_t *ucontext;
+    unsigned int last;
+    unsigned int secondToLast;
+    unsigned int thirdToLast;
+    unsigned int average; //sum of last, secondToLast, and thirdToLast over three
     unsigned int CPUusage;
     unsigned int priority;
     unsigned int state;
@@ -121,7 +128,7 @@ int thread_libinit(int policy) {
         if(addNode(mainTCB, readyList) == FAILURE) {
             return FAILURE;
         }
-        running = readyList->head;
+        running = readyList->head; //have to set running to the proper node, main, here
         mainTCB->state = RUNNING;
 
         //LOG main's creation
@@ -171,7 +178,8 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
 
         makecontext(newThread, (void (*)(void)) stub, 2, func, arg);
 
-        TCB *newThreadTCB = newTCB(currentTID, 0, priority, BLOCKED, NULL);
+//        TCB *newThreadTCB = newTCB(currentTID, 0, priority, BLOCKED, NULL);
+        TCB *newThreadTCB = newTCB(currentTID, 0, priority, READY, NULL);
         newThreadTCB->ucontext = newThread;
         TID++; //TODO: MASK!!
 
