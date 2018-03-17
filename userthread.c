@@ -305,7 +305,7 @@ int thread_join(int tid) {
 
     if (POLICY == FIFO || POLICY == SJF) {
         //move main to tail, since this must be the first join
-        if(running->tcb->TID == -1 && readyList->head->tcb->TID != -1) { //TODO: ensure this works for SJF as well!
+        if(running->tcb->TID == -1 && readyList->head->tcb->TID == -1) { //TODO: ensure this works for SJF as well!
             readyList->head = running->next;
             readyList->head->prev = NULL;
             running->next = NULL;
