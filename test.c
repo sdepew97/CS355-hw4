@@ -239,30 +239,30 @@
 
 //}
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include "userthread.h"
-
-void inner_foo(void *arg) {
-    thread_yield();
-}
-
-
-void foo(void *arg) {
-    int tid;
-    for (int i = 0; i < 5; ++i)
-    {
-        int tid = thread_create(inner_foo, NULL, 1);
-
-        if (tid < 0)
-            exit(EXIT_FAILURE);
-
-        if (thread_join(tid) < 0)
-            exit(EXIT_FAILURE);
-    }
-
-}
+//#include <stdio.h>
+//#include <stdlib.h>
+//#include <stdint.h>
+//#include "userthread.h"
+//
+//void inner_foo(void *arg) {
+//    thread_yield();
+//}
+//
+//
+//void foo(void *arg) {
+//    int tid;
+//    for (int i = 0; i < 5; ++i)
+//    {
+//        int tid = thread_create(inner_foo, NULL, 1);
+//
+//        if (tid < 0)
+//            exit(EXIT_FAILURE);
+//
+//        if (thread_join(tid) < 0)
+//            exit(EXIT_FAILURE);
+//    }
+//
+//}
 
 //
 /// /**
