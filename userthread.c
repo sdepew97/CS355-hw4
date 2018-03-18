@@ -439,6 +439,7 @@ void schedule() {
         }
 
         //now currentNode is the node with min runtime, so run this node
+        currentNode = minRuntimeNode;
         running = currentNode;
         Log((int) getTicks() - startTime, SCHEDULED, currentNode->tcb->TID, -1);
         //start timing here
