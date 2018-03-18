@@ -248,7 +248,7 @@ int thread_yield(void) {
             return FAILURE;
         } else {
             running->tcb->state = READY;
-            Log((int) getTicks() - startTime, STOPPED, ((TCB *) currentRunning->tcb)->TID, -1);
+            Log((int) getTicks() - startTime, STOPPED, running->tcb->TID, -1);
             swapcontext(running->tcb->ucontext, scheduler);
             return SUCCESS;
         }
@@ -407,7 +407,7 @@ void schedule() {
 void printList() {
     node *currentNode = readyList->head;
     while (currentNode != NULL) {
-        printf("%d, state %d, policy %d->", ((TCB *) currentNode->tcb)->TID, ((TCB *) currentNode->tcb)->state, POLICY);
+        printf("%d, state %d, policy %d->", currentNode->tcb->TID, currentNode->tcb->state, POLICY);
 
         currentNode = currentNode->next;
     }
@@ -531,4 +531,3 @@ int moveToEnd(node *nodeToMove) {
 
     return FAILURE;
 }
-
