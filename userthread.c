@@ -434,6 +434,7 @@ void schedule() {
                     minRuntimeNode = currentNode;
                     currentNode = currentNode->next;
                 }
+                currentNode = currentNode->next;
             }
         }
 
