@@ -310,7 +310,6 @@ int main(void) {
         exit(EXIT_FAILURE);
 
     printf("This is a FIFO test where main is tested as a thread.\n");
-    printf("Should run main->%d->%d and print Hello World, Back in Main, and Hello World if successful.\n");
 
     int tid1 = thread_create(printHello, NULL, PRIORITY);
     if (thread_join(tid1) == FAILURE)
@@ -324,6 +323,8 @@ int main(void) {
     int tid2 = thread_create(printHello, NULL, PRIORITY);
     if (thread_join(tid2) == FAILURE)
         exit(EXIT_FAILURE);
+
+    printf("Should run main->%d->%d and print Hello World, Back in Main, and Hello World if successful.\n", tid1, tid2);
 
     if (thread_libterminate() == FAILURE)
         exit(EXIT_FAILURE);
