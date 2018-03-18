@@ -247,7 +247,7 @@ int thread_yield(void) {
         if (moveToEnd(running) == FAILURE) {
             return FAILURE;
         } else {
-            currentRunning->tcb->state = READY;
+            running->tcb->state = READY;
             Log((int) getTicks() - startTime, STOPPED, ((TCB *) currentRunning->tcb)->TID, -1);
             swapcontext(running->tcb->ucontext, scheduler);
             return SUCCESS;
@@ -512,7 +512,7 @@ int moveToEnd(node *nodeToMove) {
         nodeToMove->next = NULL;
         currentTail->next = nodeToMove;
         nodeToMove->prev = currentTail;
-        readyList->tail = currentRunning;
+        readyList->tail = nodeToMove;
 
         return SUCCESS;
     } else if(readyList->tail->tcb->TID == nodeToMove->tcb->TID) {
@@ -526,7 +526,7 @@ int moveToEnd(node *nodeToMove) {
         currentTail->next = nodeToMove;
         prev->next = next;
         next->prev = prev;
-        readyList->tail = currentRunning;
+        readyList->tail = nodeToMove;
     }
 
     return FAILURE;
