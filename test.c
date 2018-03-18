@@ -317,9 +317,6 @@ int main(void) {
 
     printf("Back in Main\n");
 
-    if (thread_join(tid1) == FAILURE)
-        exit(EXIT_FAILURE);
-
     int tid2 = thread_create(printHello, NULL, PRIORITY);
     if (thread_join(tid2) == FAILURE)
         exit(EXIT_FAILURE);
