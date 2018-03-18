@@ -91,7 +91,7 @@ static int moveToEnd(node *nodeToMove);
 static void shiftUsages(int newUsageValue, TCB *tcb);
 static int computeAverage(TCB *tcb);
 
-//TODO: Ask rachel about FIFO scheduling, ask her about masking for the methods, ask her about SJF and ask her about testing? and all comments in body
+//TODO: Ask rachel about FIFO scheduling, ask her about masking for the methods (DONE), ask her about SJF and ask her about testing? and all comments in body
 
 int thread_libinit(int policy) {
     //this is when the program officially started
@@ -107,7 +107,7 @@ int thread_libinit(int policy) {
 
     //create main's TCB
     mainTCB = newTCB(-1, 0, 0, 0, QUANTA/2, 0, 0, 0, 1, READY, NULL);
-    totalRuntime += QUANTA/2; //TODO: ask about this here
+    totalRuntime += QUANTA/2; //TODO: ask about this here (DONE)
     totalRuns++;
 
     if(mainTCB == NULL) {
@@ -187,7 +187,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
         }
 
         makecontext(newThread, (void (*)(void)) stub, 2, func, arg);
-        TCB *newThreadTCB = newTCB(currentTID, 0, 0, 0, (totalRuntime/totalRuns), 0, 0, 0, priority, READY, NULL); //TODO: ask Rachel about this tonight
+        TCB *newThreadTCB = newTCB(currentTID, 0, 0, 0, (totalRuntime/totalRuns), 0, 0, 0, priority, READY, NULL); //TODO: ask Rachel about this tonight (DONE)
         newThreadTCB->ucontext = newThread;
         TID++; //TODO: MASK!!
 
@@ -259,7 +259,7 @@ int thread_yield(void) {
             running->tcb->stop = (int) getTicks();
             totalRuntime += running->tcb->stop - running->tcb->start;
             totalRuns++;
-            //TODO: ask Rachel here about shifting and averaging and the whole runtime thing...since this changes the runtime with the zero's going into computing the average
+            //TODO: ask Rachel here about shifting and averaging and the whole runtime thing...since this changes the runtime with the zero's going into computing the average (Mark's idea is to use latest if 1 or 2, but then average if three or more)
             shiftUsages(running->tcb->stop - running->tcb->start, running->tcb);
             computeAverage(running->tcb);
             swapcontext(running->tcb->ucontext, scheduler);
@@ -370,6 +370,7 @@ void stub(void (*func)(void *), void *arg) {
 long getTicks() {
     struct timeval time;
     gettimeofday(&time, NULL);
+    //TODO: fix timing here
     return time.tv_usec;
 }
 
