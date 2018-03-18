@@ -30,11 +30,13 @@ static int totalRuns = 0;
 typedef struct TCB {
     int TID;
     ucontext_t *ucontext;
-    unsigned int last;
-    unsigned int secondToLast;
-    unsigned int thirdToLast;
-    unsigned int average; //sum of last, secondToLast, and thirdToLast over three
+    unsigned int usage1;
+    unsigned int usage2;
+    unsigned int usage3;
+    unsigned int averageOfUsages; //sum of last, secondToLast, and thirdToLast over three
     unsigned int CPUusage;
+    unsigned int start;
+    unsigned int stop;
     unsigned int priority;
     unsigned int state;
     struct TCB *joined;
@@ -82,10 +84,12 @@ static void Log (int ticks, int OPERATION, int TID, int PRIORITY);    // logs a 
 static void schedule();
 static void printList(); //TODO: remove, since for debugging
 static ucontext_t *newContext(ucontext_t *uc_link, void (*func)(void *), void* arg);
-static TCB* newTCB(int TID, int CPUUsage, int priority, int state, TCB *joined);
+static TCB* newTCB(int TID, int usage1, int usage2, int usage3, int averageOfUsages, int CPUUsage, int start, int stop, int priority, int state, TCB *joined);
 static node* newNode(TCB *tcb, node* next, node* prev);
 static int addNode(TCB *tcb, linkedList *list);
 static int moveToEnd(node *nodeToMove);
+static void shiftUsages(int newUsageValue, TCB *tcb);
+static int computeAverage(TCB *tcb);
 
 int thread_libinit(int policy) {
     //this is when the program officially started
@@ -100,7 +104,10 @@ int thread_libinit(int policy) {
     makecontext(scheduler, (void (*)(void)) schedule, 0);
 
     //create main's TCB
-    mainTCB = newTCB(-1, 0, 1, READY, NULL);
+    mainTCB = newTCB(-1, 0, 0, 0, QUANTA/2, 0, 0, 0, 1, READY, NULL);
+    totalRuntime += QUANTA/2; //TODO: ask about this here
+    totalRuns++;
+
     if(mainTCB == NULL) {
         return FAILURE;
     }
@@ -178,9 +185,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
         }
 
         makecontext(newThread, (void (*)(void)) stub, 2, func, arg);
-
-//        TCB *newThreadTCB = newTCB(currentTID, 0, priority, BLOCKED, NULL);
-        TCB *newThreadTCB = newTCB(currentTID, 0, priority, READY, NULL);
+        TCB *newThreadTCB = newTCB(currentTID, 0, 0, 0, (totalRuntime/totalRuns), 0, 0, 0, priority, READY, NULL); //TODO: ask Rachel about this tonight
         newThreadTCB->ucontext = newThread;
         TID++; //TODO: MASK!!
 
@@ -198,7 +203,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
 
         makecontext(newThread, (void (*)(void)) stub, 2, func, arg);
 
-        TCB *newThreadTCB = newTCB(currentTID, 0, priority, READY, NULL); //For preemptive, don't require a join to run the thread, since the scheduler is called with SIGALARM
+        TCB *newThreadTCB = newTCB(currentTID, 0, 0, 0, (totalRuntime/totalRuns), 0, 0, 0, priority, READY, NULL); //For preemptive, don't require a join to run the thread, since the scheduler is called with SIGALARM
         newThreadTCB->ucontext = newThread;
         TID++; //TODO: MASK!!
 
@@ -249,6 +254,12 @@ int thread_yield(void) {
         } else {
             running->tcb->state = READY;
             Log((int) getTicks() - startTime, STOPPED, running->tcb->TID, -1);
+            running->tcb->stop = (int) getTicks();
+            totalRuntime += running->tcb->stop - running->tcb->start;
+            totalRuns++;
+            //TODO: ask Rachel here about shifting and averaging and the whole runtime thing...since this changes the runtime with the zero's going into computing the average
+            shiftUsages(running->tcb->stop - running->tcb->start, running->tcb);
+            computeAverage(running->tcb);
             swapcontext(running->tcb->ucontext, scheduler);
             return SUCCESS;
         }
@@ -296,6 +307,11 @@ int thread_join(int tid) {
                 if (running->tcb->joined->TID != currentNode->tcb->TID) {
                     running->tcb->state = WAITING;
                     Log((int) getTicks() - startTime, STOPPED, running->tcb->TID, -1);
+                    running->tcb->stop = (int) getTicks();
+                    totalRuntime += running->tcb->stop-running->tcb->start;
+                    totalRuns++;
+                    shiftUsages(running->tcb->stop-running->tcb->start, running->tcb);
+                    computeAverage(running->tcb);
                     currentNode->tcb->joined = running->tcb;
                     swapcontext(running->tcb->ucontext, scheduler);
                 } else {
@@ -309,6 +325,11 @@ int thread_join(int tid) {
                 running->tcb->state = WAITING;
                 currentNode->tcb->joined = running->tcb;
                 Log((int) getTicks() - startTime, STOPPED, running->tcb->TID, -1);
+                running->tcb->stop = (int) getTicks();
+                totalRuntime += running->tcb->stop-running->tcb->start;
+                totalRuns++;
+                shiftUsages(running->tcb->stop-running->tcb->start, running->tcb);
+                computeAverage(running->tcb);
                 printList();
                 swapcontext(running->tcb->ucontext, scheduler);
             }
@@ -390,6 +411,8 @@ void schedule() {
         //now current node is ready to run, so have to run it here
         running = currentNode;
         Log((int) getTicks() - startTime, SCHEDULED, ((TCB *) currentNode->tcb)->TID, -1);
+        //start timing here
+        running->tcb->start = (int) getTicks(); //TODO: Ask Rachel: milliseconds of same time?? account for seconds?
         running->tcb->state = RUNNING;
         printf("running TID %d\n", ((TCB *) running->tcb)->TID);
         printf("POLICY in schedule two: %d\n", POLICY);
@@ -437,7 +460,7 @@ ucontext_t *newContext(ucontext_t *uc_link, void (*func)(void *), void* arg) {
 }
 
 //TODO: masking and error checking, here
-TCB* newTCB(int TID, int CPUUsage, int priority, int state, TCB *joined) {
+TCB* newTCB(int TID, int usage1, int usage2, int usage3, int averageOfUsages, int CPUUsage, int start, int stop, int priority, int state, TCB *joined) {
     TCB *returnValue = malloc(sizeof(TCB));
     if(returnValue == NULL) {
         return NULL;
@@ -447,7 +470,13 @@ TCB* newTCB(int TID, int CPUUsage, int priority, int state, TCB *joined) {
         return NULL;
     }
     returnValue->TID = TID;
+    returnValue->usage1 = usage1;
+    returnValue->usage2 = usage2;
+    returnValue->usage3 = usage3;
+    returnValue->averageOfUsages = averageOfUsages;
     returnValue->CPUusage = CPUUsage;
+    returnValue->start = start;
+    returnValue->stop = stop;
     returnValue->priority = priority;
     returnValue->joined = malloc(sizeof(TCB));
     if(returnValue->joined == NULL) {
@@ -530,4 +559,14 @@ int moveToEnd(node *nodeToMove) {
     }
 
     return FAILURE;
+}
+
+void shiftUsages(int newUsageValue, TCB *tcb) {
+    tcb->usage3 = tcb->usage2;
+    tcb->usage2 = tcb->usage1;
+    tcb->usage1 = newUsageValue;
+}
+
+int computeAverage(TCB *tcb) {
+    return ((tcb->usage1+tcb->usage2+tcb->usage3)/3);
 }
