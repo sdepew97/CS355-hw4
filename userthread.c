@@ -432,6 +432,7 @@ void schedule() {
                 if(currentNode->tcb->averageOfUsages < minRuntime) {
                     minRuntime = currentNode->tcb->averageOfUsages;
                     minRuntimeNode = currentNode;
+                    currentNode = currentNode->next;
                 }
             }
         }
