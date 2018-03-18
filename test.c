@@ -239,92 +239,53 @@
 
 //}
 
-//#include <stdio.h>
-//#include <stdlib.h>
-//#include <stdint.h>
-//#include "userthread.h"
-//
-//void inner_foo(void *arg) {
-//    thread_yield();
-//}
-//
-//
-//void foo(void *arg) {
-//    int tid;
-//    for (int i = 0; i < 5; ++i)
-//    {
-//        int tid = thread_create(inner_foo, NULL, 1);
-//
-//        if (tid < 0)
-//            exit(EXIT_FAILURE);
-//
-//        if (thread_join(tid) < 0)
-//            exit(EXIT_FAILURE);
-//    }
-//
-//}
-
-//
-/// /**
-// * Nested FIFO test
-// */
-//int main(void) {
-//    if (thread_libinit(FIFO) == -1)
-//        exit(EXIT_FAILURE);
-//
-//    char *arg = "Yay!";
-//
-//    int tid1 = thread_create(foo, arg, 1);
-//
-//    printf("More complicated FIFO test, with threads creating other threads.\n");
-//    printf("Assuming that the first thread is tid 1, it should finish in order\n");
-//    printf("2 -> 3 -> 4 -> 5 -> 6 -> 1\n");
-//
-//    if (thread_join(tid1) < 0)
-//        exit(EXIT_FAILURE);
-//
-//    if (thread_libterminate() == -1)
-//        exit(EXIT_FAILURE);
-//
-//
-//    exit(EXIT_SUCCESS);
-//}
-
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include "userthread.h"
 
-#define SUCCESS 0
-#define FAILURE -1
-#define PRIORITY 1
+void inner_foo(void *arg) {
+    thread_yield();
+}
 
-void printHello() {
-    printf("Hello World\n");
+
+void foo(void *arg) {
+    int tid;
+    for (int i = 0; i < 5; ++i)
+    {
+        int tid = thread_create(inner_foo, NULL, 1);
+
+        if (tid < 0)
+            exit(EXIT_FAILURE);
+
+        if (thread_join(tid) < 0)
+            exit(EXIT_FAILURE);
+    }
+
 }
 
 /*
- * Simple FIFO test with main's functionality as a thread is tested.
+ * Nested FIFO test
  */
 int main(void) {
-    if (thread_libinit(FIFO) == FAILURE)
+    if (thread_libinit(FIFO) == -1)
         exit(EXIT_FAILURE);
 
-    printf("This is a FIFO test where main is tested as a thread.\n");
+    char *arg = "Yay!";
 
-    int tid1 = thread_create(printHello, NULL, PRIORITY);
-    if (thread_join(tid1) == FAILURE)
+    int tid1 = thread_create(foo, arg, 1);
+
+    printf("More complicated FIFO test, with threads creating other threads.\n");
+    printf("Assuming that the first thread is tid 1, it should finish in order\n");
+    printf("2 -> 3 -> 4 -> 5 -> 6 -> 1\n");
+
+    if (thread_join(tid1) < 0)
         exit(EXIT_FAILURE);
 
-    printf("Back in Main\n");
-
-    int tid2 = thread_create(printHello, NULL, PRIORITY);
-    if (thread_join(tid2) == FAILURE)
+    if (thread_libterminate() == -1)
         exit(EXIT_FAILURE);
 
-    printf("Should run main->%d->%d and print Hello World, Back in Main, and Hello World if successful.\n", tid1, tid2);
-
-    if (thread_libterminate() == FAILURE)
-        exit(EXIT_FAILURE);
 
     exit(EXIT_SUCCESS);
 }
+
