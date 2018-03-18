@@ -321,42 +321,32 @@ int thread_join(int tid) {
         node *currentNode = readyList->head;
 
         //find the node to join
-        while(currentNode!=NULL && ((TCB *) currentNode->tcb)->TID !=tid) {
+        while(currentNode!=NULL && currentNode->tcb->TID != tid) {
             currentNode = currentNode->next;
         }
 
         if(currentNode != NULL) {
-
-//            currentNode->tcb->state = READY; //change to ready, since it's been joined and can run as a result unless it's already waiting
-//            getcontext(
-//                    ((TCB *) running)->ucontext); //as soon as calls thread join, get context, since this is where we want to return
-
-
-            //case 2: TID does exist and found thread is waiting already, which would mean you'd get stuck forever, perhaps?
-//            if (currentNode->tcb->state == WAITING) {
-
-//                if (currentNode->tcb->joined->TID != running->tcb->TID) {
-//                    running->tcb->state = WAITING;
-//                    Log((int) getTicks() - startTime, STOPPED, running->tcb->TID, -1);
-//                    ((TCB *) currentNode->tcb)->joined = running->tcb;
-////                    schedule();
-//                    swapcontext(running->tcb->ucontext, scheduler);
-//                } else {
-//                    //attempting a circular join
-//                    printf("failed on circular\n");
-//                    return FAILURE;
-//                }
-//            }
-//            else {
+            // case 2: TID does exist and running thread is waiting already, which would mean you'd get stuck forever, perhaps?
+            if (running->tcb->joined != NULL && running->tcb->joined->state == WAITING) {
+                if (running->tcb->joined->TID != currentNode->tcb->TID) {
+                    running->tcb->state = WAITING;
+                    Log((int) getTicks() - startTime, STOPPED, running->tcb->TID, -1);
+                    currentNode->tcb->joined = running->tcb;
+                    swapcontext(running->tcb->ucontext, scheduler);
+                } else {
+                    //attempting a circular join, so a failure should occur
+                    printf("failed on circular\n");
+                    return FAILURE;
+                }
+            }
+            else {
                 //case 3: TID does exist and thread is ready to go! (set calling thread to waiting by this thread and set joined pointer)
-                printf("third case\n");
-                printList();
-                ((TCB *) running->tcb)->state = WAITING;
-                ((TCB *) currentNode->tcb)->joined = running->tcb;
-                //schedule();
+                running->tcb->state = WAITING;
+                currentNode->tcb->joined = running->tcb;
+                Log((int) getTicks() - startTime, STOPPED, running->tcb->TID, -1);
                 printList();
                 swapcontext(running->tcb->ucontext, scheduler);
-//            }
+            }
 
             return SUCCESS;
         }
@@ -367,8 +357,6 @@ int thread_join(int tid) {
                 printf("failed on null/node with %d doesn't exist\n", tid);
                 return FAILURE;
             }
-            //not found
-//            return FAILURE;
         }
     }
     printf("got to end here\n");
