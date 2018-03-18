@@ -5,3 +5,6 @@ then it remains blocked and will never run. Only upon a thread_join is the threa
 Nodes:
 * My log is found in log.txt
 
+Known Bugs:
+* I know that Dylan's test for ___ and kxu's test for ___ don't quite work correctly. My FIFO does ___ and theirs does this___.
+
