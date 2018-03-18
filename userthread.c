@@ -91,6 +91,8 @@ static int moveToEnd(node *nodeToMove);
 static void shiftUsages(int newUsageValue, TCB *tcb);
 static int computeAverage(TCB *tcb);
 
+//TODO: Ask rachel about FIFO scheduling, ask her about masking for the methods, ask her about SJF and ask her about testing? and all comments in body
+
 int thread_libinit(int policy) {
     //this is when the program officially started
     startTime = (int) getTicks();
@@ -410,18 +412,40 @@ void schedule() {
     if (POLICY == FIFO) {
         //now current node is ready to run, so have to run it here
         running = currentNode;
-        Log((int) getTicks() - startTime, SCHEDULED, ((TCB *) currentNode->tcb)->TID, -1);
+        Log((int) getTicks() - startTime, SCHEDULED, currentNode->tcb->TID, -1);
+        //start timing here
+        running->tcb->start = (int) getTicks(); //TODO: Ask Rachel: milliseconds of same time?? account for seconds?
+        running->tcb->state = RUNNING;
+        printf("running TID %d\n", running->tcb->TID);
+        printf("POLICY in schedule two: %d\n", POLICY);
+        printList();
+        setcontext(((TCB *) running->tcb)->ucontext);
+    } else if (POLICY == SJF) {
+        node *currentNode = readyList->head;
+        int minRuntime = currentNode->tcb->averageOfUsages;
+        node *minRuntimeNode = currentNode;
+        while (currentNode != NULL){
+            if(currentNode->tcb->state != READY) {
+                currentNode = currentNode->next;
+            }
+            else {
+                if(currentNode->tcb->averageOfUsages < minRuntime) {
+                    minRuntime = currentNode->tcb->averageOfUsages;
+                    minRuntimeNode = currentNode;
+                }
+            }
+        }
+
+        //now currentNode is the node with min runtime, so run this node
+        running = currentNode;
+        Log((int) getTicks() - startTime, SCHEDULED, currentNode->tcb->TID, -1);
         //start timing here
         running->tcb->start = (int) getTicks(); //TODO: Ask Rachel: milliseconds of same time?? account for seconds?
         running->tcb->state = RUNNING;
         printf("running TID %d\n", ((TCB *) running->tcb)->TID);
         printf("POLICY in schedule two: %d\n", POLICY);
         printList();
-//        if (((TCB *) running->tcb)->ucontext != NULL) {
-        setcontext(((TCB *) running->tcb)->ucontext);
-//        }
-    } else if (POLICY == SJF) {
-
+        setcontext(running->tcb->ucontext);
     } else if (POLICY == PRIORITY) {
 
     }
