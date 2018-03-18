@@ -243,49 +243,12 @@ int thread_yield(void) {
 
     if (POLICY == FIFO || POLICY == SJF) {
         //running node is in the list, so have to 1) find it (have a pointer to it rn), 2) move it to the tail
-        node *currentRunning = running;
-        node *currentRunningPrev = running->prev;
-        node *currentRunningNext = running->next;
-        node *currentTail = readyList->tail;
 
-        //running is head
-        if (currentRunningPrev == NULL) {
-            readyList->head = currentRunningNext;
-            readyList->head->prev = NULL;
-            currentRunning->next = NULL;
-            currentTail->next = currentRunning;
-            currentRunning->prev = currentTail;
-            readyList->tail = currentRunning;
-            ((TCB *) currentRunning->tcb)->state = READY;
+
+            currentRunning->tcb->state = READY;
             Log((int) getTicks() - startTime, STOPPED, ((TCB *) currentRunning->tcb)->TID, -1);
-//            schedule();
             swapcontext(running->tcb->ucontext, scheduler);
-        }
 
-            //running is tail (do nothing)
-        else if (currentRunningNext == NULL) {
-            //node is already at the tail, so mark as ready and then call scheduler
-            ((TCB *) currentRunning->tcb)->state = READY;
-            Log((int) getTicks() - startTime, STOPPED, ((TCB *) currentRunning->tcb)->TID, -1);
-//            schedule();
-            swapcontext(running->tcb->ucontext, scheduler);
-        }
-
-            //running is middle node
-        else {
-            currentRunning->next = NULL;
-            currentRunning->prev = currentTail;
-            currentRunningPrev->next = currentRunningNext;
-            currentRunningNext->prev = currentRunningPrev;
-            readyList->tail = currentRunning;
-            ((TCB *) currentRunning->tcb)->state = READY;
-            Log((int) getTicks() - startTime, STOPPED, ((TCB *) currentRunning->tcb)->TID, -1);
-//            schedule();
-            swapcontext(running->tcb->ucontext, scheduler);
-        }
-
-//        schedule();
-//        swapcontext(running->tcb->ucontext, scheduler);
         return SUCCESS;
     } else {
         //TODO: fill in code here for priority
@@ -531,5 +494,39 @@ int addNode(TCB *tcb, linkedList *list) {
     }
 
     return SUCCESS;
+}
+
+int moveToEnd(node *nodeToMove) {
+    node *prev = nodeToMove->prev;
+    node *next = nodeToMove->next;
+    node *currentTail = readyList->tail;
+
+    //moving head to tail
+    if (readyList->head->tcb->TID == nodeToMove->tcb->TID) {
+        readyList->head = next;
+        readyList->head->prev = NULL;
+        //can keep the new head's next pointer
+
+        nodeToMove->next = NULL;
+        currentTail->next = nodeToMove;
+        nodeToMove->prev = currentTail;
+        readyList->tail = currentRunning;
+
+        return SUCCESS;
+    } else if(readyList->tail->tcb->TID == nodeToMove->tcb->TID) {
+        //do nothing, since node to move is already the tail
+
+        return SUCCESS;
+    } else {
+        //node to move is a middle node, so have to reset pointers accordingly
+        nodeToMove->next = NULL;
+        nodeToMove->prev = currentTail;
+        currentTail->next = nodeToMove;
+        prev->next = next;
+        next->prev = prev;
+        readyList->tail = currentRunning;
+    }
+
+    return FAILURE;
 }
 
