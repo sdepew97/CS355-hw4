@@ -325,7 +325,7 @@ int thread_join(int tid) {
             currentNode = currentNode->next;
         }
 
-        if(currentNode != NULL) {
+        if(currentNode != NULL && currentNode->tcb->state != DONE) {
             // case 2: TID does exist and running thread is waiting already, which would mean you'd get stuck forever, perhaps?
             if (running->tcb->joined != NULL && running->tcb->joined->state == WAITING) {
                 if (running->tcb->joined->TID != currentNode->tcb->TID) {
