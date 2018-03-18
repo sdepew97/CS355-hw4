@@ -85,6 +85,7 @@ static ucontext_t *newContext(ucontext_t *uc_link, void (*func)(void *), void* a
 static TCB* newTCB(int TID, int CPUUsage, int priority, int state, TCB *joined);
 static node* newNode(TCB *tcb, node* next, node* prev);
 static int addNode(TCB *tcb, linkedList *list);
+static int moveToEnd(node *nodeToMove);
 
 int thread_libinit(int policy) {
     //this is when the program officially started
@@ -229,7 +230,7 @@ int thread_yield(void) {
     printf("yield hit\n");
 
     //This means that we have not called threadlib_init first, which is required
-    if(running == NULL) {
+    if (running == NULL) {
         return FAILURE;
     }
 
@@ -243,13 +244,14 @@ int thread_yield(void) {
 
     if (POLICY == FIFO || POLICY == SJF) {
         //running node is in the list, so have to 1) find it (have a pointer to it rn), 2) move it to the tail
-
-
+        if (moveToEnd(running) == FAILURE) {
+            return FAILURE;
+        } else {
             currentRunning->tcb->state = READY;
             Log((int) getTicks() - startTime, STOPPED, ((TCB *) currentRunning->tcb)->TID, -1);
             swapcontext(running->tcb->ucontext, scheduler);
-
-        return SUCCESS;
+            return SUCCESS;
+        }
     } else {
         //TODO: fill in code here for priority
     }
