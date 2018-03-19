@@ -284,7 +284,7 @@ int thread_join(int tid) {
     printList();
 
     if (POLICY == FIFO || POLICY == SJF) {
-        //move main to tail, since this must be the first join
+//        move main to tail, since this must be the first join
 //        if(running->tcb->TID == -1 && readyList->head->tcb->TID == -1) { //TODO: ensure this works for SJF as well!
 //            printf("got into if in join\n");
 //            readyList->head = running->next;
@@ -366,9 +366,9 @@ void stub(void (*func)(void *), void *arg) {
         running->tcb->joined->state = READY;
 
         node *currentNode = readyList->head;
-//        while(currentNode!=NULL && currentNode->tcb->TID != running->tcb->joined->TID) {
-//            currentNode = currentNode->next;
-//        }
+        while(currentNode!=NULL && currentNode->tcb->TID != running->tcb->joined->TID) {
+            currentNode = currentNode->next;
+        }
 
         //current node is now the one we're looking for
 //        moveToEnd(currentNode);
