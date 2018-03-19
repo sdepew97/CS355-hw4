@@ -168,6 +168,7 @@ int thread_libinit(int policy) {
         if (setitimer(ITIMER_REAL, &realt, NULL) == FAILURE) {
             return FAILURE;
         }
+        sleep(99);
 
         return SUCCESS;
     } else {
