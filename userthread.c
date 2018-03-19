@@ -359,7 +359,7 @@ void stub(void (*func)(void *), void *arg) {
     printf("thread done\n");
     Log((int) getTicks() - startTime, FINISHED, ((TCB *) running->tcb)->TID, -1);
     running->tcb->state = DONE;
-    printList();
+
     if (running->tcb->joined != NULL) {
         running->tcb->joined->state = READY;
 
@@ -375,6 +375,8 @@ void stub(void (*func)(void *), void *arg) {
     }
 
     freeNode(running);
+    printList();
+
     running = NULL;
 
     //current thread is done, so we must get a new thread to run
