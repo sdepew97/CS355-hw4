@@ -296,7 +296,7 @@ int thread_join(int tid) {
         }
 
         if(currentNode != NULL && currentNode->tcb->state != DONE) {
-            // case 2: TID does exist and running thread is waiting already, which would mean you'd get stuck forever, perhaps?
+            // case TID does exist and running thread is waiting already, which would mean you'd get stuck forever, perhaps?
             if (running->tcb->joined != NULL && running->tcb->joined->state == WAITING) {
                 if (running->tcb->joined->TID != currentNode->tcb->TID) {
                     running->tcb->state = WAITING;
@@ -331,9 +331,13 @@ int thread_join(int tid) {
             return SUCCESS;
         }
         else {
-            //case TID doesn't exist/thread already finished
-            if (currentNode == NULL) {
-                printf("failed on null/node with %d doesn't exist\n", tid);
+            //case TID doesn't exist/thread with that TID wasn't created
+            if(currentNode == NULL && tid <= TID) {
+                //shouldn't raise an error if trying to join a prior created thread that's already finished
+                return SUCCESS;
+            }
+            else if (currentNode == NULL) {
+                printf("failed on null with node %d\n", tid);
                 return FAILURE;
             }
         }
