@@ -374,11 +374,12 @@ void stub(void (*func)(void *), void *arg) {
     setcontext(scheduler);
 }
 
-long getTicks() {
+ int getTicks() {
     struct timeval time;
     gettimeofday(&time, NULL);
     //TODO: fix timing here
-    return time.tv_usec;
+    int time_in_mill = (tv.tv_sec) * 1000 + (tv.tv_usec) / 1000 ;
+    return time_in_mill;
 }
 
 void Log (int ticks, int OPERATION, int TID, int PRIORITY) {
