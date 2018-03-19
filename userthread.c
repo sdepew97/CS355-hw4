@@ -435,9 +435,13 @@ void schedule() {
     } else if (POLICY == SJF) {
         node *currentNode = readyList->head;
         int minRuntime = mainTCB->averageOfUsages;
-        node *minRuntimeNode = NULL; //TODO: should be set to main here
+        node *minRuntimeNode = NULL; //TODO: should be set to main here and gonna get segfault if not!!
         while (currentNode != NULL){
             printf("Current node tid %d\n", currentNode->tcb->TID);
+            if(currentNode->tcb->TID == mainTCB->TID) {
+                minRuntimeNode = currentNode; //make sure minRuntimeNode gets a value
+            }
+
             if(currentNode->tcb->state != READY) {
                 currentNode = currentNode->next;
             }
