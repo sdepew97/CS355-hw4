@@ -438,7 +438,7 @@ void schedule() {
         node *minRuntimeNode = NULL; //TODO: should be set to main here and gonna get segfault if not!!
 
         //use a loop to find a ready candidate here in the list of nodes to use as a initial value
-        while(currentNode != NULL && currentNode != READY) { //TODO: ask rachel if thread here can be scheduled as running in SJF?
+        while(currentNode != NULL && currentNode->tcb->state != READY) { //TODO: ask rachel if thread here can be scheduled as running in SJF?
             printf("Current node %d and state %d\n", currentNode->tcb->TID, currentNode->tcb->state);
             currentNode = currentNode->next;
         }
