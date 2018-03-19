@@ -373,7 +373,7 @@ void stub(void (*func)(void *), void *arg) {
         printf("Current node TID %d, running node joined TID %d\n", currentNode->tcb->TID, running->tcb->joined->TID);
 
         //current node is now the one we're looking for
-//        moveToEnd(currentNode);
+        moveToEnd(currentNode);
     }
     //current thread is done, so we must get a new thread to run
     setcontext(scheduler);
