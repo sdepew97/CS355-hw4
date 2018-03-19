@@ -610,7 +610,6 @@ void freeNode(node *nodeToFree) {
 int removeNode(node *nodeToRemove) {
     node *prev = nodeToRemove->prev;
     node *next = nodeToRemove->next;
-    node *free = nodeToRemove;
 
     if(readyList->head->tcb->TID == readyList->tail->tcb->TID && readyList->head->tcb->TID == nodeToRemove->tcb->TID) {
         //the node is the only one in the list, so we can simply remove it here
@@ -631,7 +630,7 @@ int removeNode(node *nodeToRemove) {
         readyList->size--;
 
         return SUCCESS;
-    } else if(readyList->tail->tcb->TID == nodeToMove->tcb->TID) { //remove node from tail
+    } else if(readyList->tail->tcb->TID == nodeToRemove->tcb->TID) { //remove node from tail
         readyList->tail = prev;
         readyList->tail->next = NULL;
         //can keep the new tail's prev pointer
