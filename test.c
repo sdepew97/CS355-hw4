@@ -17,7 +17,7 @@ int main() {
 //    thread_libinit(FIFO);
     thread_libinit(SJF);
     thread_create(printHello, NULL, -1);
-//    thread_create(tryYield, NULL, -1);
+    thread_create(tryYield, NULL, -1);
 //    thread_create(printHello, NULL, -1);
 
     //expected is that 2 runs last...
@@ -26,8 +26,8 @@ int main() {
 //    thread_join(thread_create(printHello, NULL, -1));
 //    thread_join(thread_create(printHello, NULL, -1));
 //    thread_join(thread_create(printHello, NULL, -1));
-//    printf("joining 2\n");
-//    thread_join(2);
+    printf("joining 2\n");
+    thread_join(2);
     printf("joining 1\n");
     thread_join(1);
 
