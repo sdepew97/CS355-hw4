@@ -568,7 +568,7 @@ int addNode(TCB *tcb, linkedList *list) {
 }
 
 int moveToEnd(node *nodeToMove) {
-    printList();
+//    printList();
     node *prev = nodeToMove->prev;
     node *next = nodeToMove->next;
     node *currentTail = readyList->tail;
@@ -597,6 +597,7 @@ int moveToEnd(node *nodeToMove) {
         prev->next = next;
         next->prev = prev;
         readyList->tail = nodeToMove;
+        return SUCCESS;
     }
 
     return FAILURE;
