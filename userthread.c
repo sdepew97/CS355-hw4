@@ -4,6 +4,7 @@
 #include <sys/time.h>
 #include <stdarg.h>
 #include <signal.h>
+#include <unistd.h>
 #include "userthread.h"
 #include "logger.h"
 
@@ -168,7 +169,7 @@ int thread_libinit(int policy) {
         if (setitimer(ITIMER_REAL, &realt, NULL) == FAILURE) {
             return FAILURE;
         }
-        sleep(99);
+        sleep(1);
 
         return SUCCESS;
     } else {
