@@ -97,6 +97,7 @@ static int computeAverage(TCB *tcb);
 static void freeNode(node *nodeToFree);
 static int removeNode(node *nodeToRemove);
 static void setAverage(TCB *tcb);
+void setrtimer(struct itimerval *ivPtr);
 static int setupSignals(void);
 static void sigHandler(int j, siginfo_t *si, void *old_context);
 
