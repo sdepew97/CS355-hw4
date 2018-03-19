@@ -366,12 +366,12 @@ void stub(void (*func)(void *), void *arg) {
         running->tcb->joined->state = READY;
 
         node *currentNode = readyList->head;
-        while(currentNode!=NULL && currentNode->tcb->TID != running->tcb->joined->TID) {
-            currentNode = currentNode->next;
-        }
+//        while(currentNode!=NULL && currentNode->tcb->TID != running->tcb->joined->TID) {
+//            currentNode = currentNode->next;
+//        }
 
         //current node is now the one we're looking for
-        moveToEnd(currentNode);
+//        moveToEnd(currentNode);
     }
     //current thread is done, so we must get a new thread to run
     setcontext(scheduler);
