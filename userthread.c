@@ -331,6 +331,7 @@ int thread_join(int tid) {
             return SUCCESS;
         }
         else {
+            printf("in else\n");
             //case TID doesn't exist/thread with that TID wasn't created
             if(currentNode == NULL && tid <= TID) {
                 //shouldn't raise an error if trying to join a prior created thread that's already finished
