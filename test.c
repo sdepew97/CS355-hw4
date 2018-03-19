@@ -1,3 +1,57 @@
+//
+// Created by Sarah Depew on 3/19/18.
+//
+
+#include <stdio.h>
+#include <stdlib.h>
+#include "userthread.h"
+
+#define SUCCESS 0
+#define FAILURE -1
+#define PRIORITY 1
+
+void printHello() {
+    printf("Hello World\n");
+}
+
+/*
+ * Simple FIFO test with main's functionality as a thread is tested.
+ */
+int main(void) {
+    if (thread_libinit(PRIORITY) == FAILURE)
+        exit(EXIT_FAILURE);
+
+    printf("This is a FIFO test where main is tested as a thread.\n");
+
+    int tid1 = thread_create(printHello, NULL, PRIORITY);
+
+    if (tid1 == FAILURE)
+        exit(EXIT_FAILURE);
+
+    if (thread_join(tid1) == FAILURE)
+        exit(EXIT_FAILURE);
+
+    printf("Back in Main\n");
+    printf("Should run main->%d->%d and print Hello World, Back in Main, and Hello World if successful.\n", tid1, tid2);
+
+    if (thread_libterminate() == FAILURE)
+        exit(EXIT_FAILURE);
+
+    exit(EXIT_SUCCESS);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 //#include <stdio.h>
 //#include "userthread.h"
 //#include "logger.h"
@@ -264,37 +318,37 @@
 //
 //    exit(EXIT_SUCCESS);
 //}
-
-#include <stdio.h>
-#include <stdlib.h>
-#include "userthread.h"
-
-int tid_1, tid_2;
-
-void hello(void *arg) {
-    thread_join(tid_2);
-    printf("%s\n", arg);
-}
-
-void hello2(void *arg) {
-    thread_join(tid_1);
-    printf("%s\n", arg);
-}
-
-int main(void) {
-    if (thread_libinit(FIFO) == -1) exit(EXIT_FAILURE);
-
-    char *hello_str = "Hello, world!";
-    tid_1 = thread_create(hello, hello_str, 0);
-    tid_2 = thread_create(hello, hello_str, 0);
-
-    printf("Test case for FIFO. 2 threads join each other to create deadlock.\n");
-    printf("The program gets stuck and prints nothing on success.\n");
-
-    if (thread_join(tid_1) < 0) exit(EXIT_FAILURE);
-    if (thread_join(tid_2) < 0) exit(EXIT_FAILURE);
-
-    if (thread_libterminate() == -1) exit(EXIT_FAILURE);
-
-    exit(EXIT_SUCCESS);
-}
+//
+//#include <stdio.h>
+//#include <stdlib.h>
+//#include "userthread.h"
+//
+//int tid_1, tid_2;
+//
+//void hello(void *arg) {
+//    thread_join(tid_2);
+//    printf("%s\n", arg);
+//}
+//
+//void hello2(void *arg) {
+//    thread_join(tid_1);
+//    printf("%s\n", arg);
+//}
+//
+//int main(void) {
+//    if (thread_libinit(FIFO) == -1) exit(EXIT_FAILURE);
+//
+//    char *hello_str = "Hello, world!";
+//    tid_1 = thread_create(hello, hello_str, 0);
+//    tid_2 = thread_create(hello, hello_str, 0);
+//
+//    printf("Test case for FIFO. 2 threads join each other to create deadlock.\n");
+//    printf("The program gets stuck and prints nothing on success.\n");
+//
+//    if (thread_join(tid_1) < 0) exit(EXIT_FAILURE);
+//    if (thread_join(tid_2) < 0) exit(EXIT_FAILURE);
+//
+//    if (thread_libterminate() == -1) exit(EXIT_FAILURE);
+//
+//    exit(EXIT_SUCCESS);
+//}

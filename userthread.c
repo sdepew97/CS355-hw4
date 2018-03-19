@@ -13,6 +13,10 @@
 #define FALSE 0
 #define LOGFILE	"log.txt\0"     // all Log(); messages will be appended to this file
 #define QUANTA 100
+#define INTERVAL_SECS 		0
+#define INTERVAL_MICROSECS 	100000
+#define VALUE_SECS 		0
+#define VALUE_MICROSECS 100000
 
 //globals for logging
 enum {CREATED, SCHEDULED, STOPPED, FINISHED};
@@ -92,7 +96,9 @@ static void shiftUsages(int newUsageValue, TCB *tcb);
 static int computeAverage(TCB *tcb);
 static void freeNode(node *nodeToFree);
 static int removeNode(node *nodeToRemove);
-void setAverage(TCB *tcb);
+static void setAverage(TCB *tcb);
+static int setupSignals(void);
+static void sigHandler(int j, siginfo_t *si, void *old_context);
 
 //TODO: Ask rachel about FIFO scheduling (DONE), ask her about masking for the methods (DONE), ask her about SJF and ask her about testing? (DONE) and all comments in body
 
@@ -126,7 +132,6 @@ int thread_libinit(int policy) {
 
     //if we are scheduling in a non-preemptive fashion
     if (policy == FIFO || policy == SJF) {
-
         //TODO: free memory malloced here at the end!
 
         //create the ready list
@@ -150,7 +155,17 @@ int thread_libinit(int policy) {
         //everything went fine, so return success
         return SUCCESS;
     } else if (policy == PRIORITY) {
-        //TODO: setup queues here
+        //TODO: setup queues here and the signal handler
+        if(setupSignals() == FAILURE) {
+            return FAILURE;
+        }
+
+        struct itimerval realt;
+        setrtimer(&realt);
+
+        if (setitimer(ITIMER_REAL, &realt, NULL) == FAILURE) {
+            return FAILURE;
+        }
 
         return SUCCESS;
     } else {
@@ -689,4 +704,42 @@ int computeAverage(TCB *tcb) {
 
 void setAverage(TCB *tcb) {
     tcb->averageOfUsages = computeAverage(tcb);
+}
+
+/*
+  Initialize the ITIMER_REAL interval timer.
+  Its interval is 100 milliseconds.  Its initial value is 100 milliseconds.
+*/
+void setrtimer(struct itimerval *ivPtr) {
+    ivPtr->it_interval.tv_sec = INTERVAL_SECS;
+    ivPtr->it_interval.tv_usec = INTERVAL_MICROSECS;
+    ivPtr->it_value.tv_sec = VALUE_SECS;
+    ivPtr->it_interval.tv_usec = VALUE_MICROSECS;
+}
+
+/* Set up SIGALRM signal handler */
+//referenced https://gist.github.com/DanGe42/7148946
+//referenced https://gist.github.com/aspyct/3462238
+int setupSignals(void) {
+    struct sigaction act;
+
+    act.sa_sigaction = sigHandler;
+    sigemptyset(&act.sa_mask);
+    act.sa_flags = SA_SIGINFO; //TODO: see if I also want SIGRESTART or any other flags here (texted Rachel...)
+
+    sigemptyset(&set);
+    sigaddset(&set, SIGALRM);
+
+    if (sigaction(SIGALRM, &act, NULL) != 0) {
+        return FAILURE;
+    }
+
+    return SUCCESS;
+}
+
+void sigHandler(int j, siginfo_t *si, void *old_context) {
+    printf("hello world\n");
+    Log(getTicks(), FINISHED, mainTCB->TID, 1);
+    //save thread and go to scheduler
+//    swapcontext(running->tcb->ucontext, scheduler); //TODO: bring this back...
 }

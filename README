@@ -2,8 +2,9 @@ Assumptions when Coding:
 * In the non-preemptive scheduling algorithms, FIFO and SJF, when a new thread is created, it is blocked. If we do not join the thread,
 then it remains blocked and will never run. Only upon a thread_join is the thread able to run and the scheduler called.
 
-Nodes:
+Notes:
 * My log is found in log.txt
+* I ran the Ziting tests and took care of the deadlocking cases by returning errors for these cases; I didn't want to deadlock, so I addressed the issues and simply did not permit the joins to occur
 
 Known Bugs:
 * I know that Dylan's test for ___ and kxu's test for ___ don't quite work correctly. My FIFO does ___ and theirs does this___.
