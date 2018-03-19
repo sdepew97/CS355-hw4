@@ -142,7 +142,7 @@ void foo200() {
  * A simple test for SJF
  */
 int main(void) {
-    if (thread_libinit(PRIORITY) == -1)
+    if (thread_libinit(SJF) == -1)
         exit(EXIT_FAILURE);
 
     int tid1 = thread_create(foo1, NULL, 1);
