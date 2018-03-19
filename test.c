@@ -85,9 +85,10 @@ int main(void) {
     printf(" * Threads should end in this order ");
     printf(" %d -> %d -> %d", created_tids[0], created_tids[1], created_tids[2]);
     printf(" -> %d -> %d -> %d \n", tid1, tid2, tid3);
+//
+//    if (thread_libterminate() == -1)
+//        exit(EXIT_FAILURE);
 
-    if (thread_libterminate() == -1)
-        exit(EXIT_FAILURE);
-
+    printf("working\n");
     exit(EXIT_SUCCESS);
 }
