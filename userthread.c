@@ -374,7 +374,7 @@ void stub(void (*func)(void *), void *arg) {
         moveToEnd(currentNode);
     }
 
-    printf("Free node result %d", freeNode(running));
+    printf("Free node result %d\n", freeNode(running));
     printList();
 
     running = NULL;
