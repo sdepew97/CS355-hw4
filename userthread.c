@@ -431,8 +431,8 @@ void schedule() {
         setcontext(((TCB *) running->tcb)->ucontext);
     } else if (POLICY == SJF) {
         node *currentNode = readyList->head;
-        int minRuntime = currentNode->tcb->averageOfUsages;
-        node *minRuntimeNode = currentNode;
+        int minRuntime = mainTCB->averageOfUsages;
+        node *minRuntimeNode = NULL; //TODO: should be set to main here
         while (currentNode != NULL){
             printf("Current node tid %d\n", currentNode->tcb->TID);
             if(currentNode->tcb->state != READY) {
