@@ -370,6 +370,8 @@ void stub(void (*func)(void *), void *arg) {
             currentNode = currentNode->next;
         }
 
+        printf("Current node TID %d, running node joined TID %d\n", currentNode->tcb->TID, running->tcb->joined->TID);
+
         //current node is now the one we're looking for
 //        moveToEnd(currentNode);
     }
