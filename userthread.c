@@ -474,7 +474,7 @@ void schedule() {
 void printList() {
     node *currentNode = readyList->head;
     while (currentNode != NULL) {
-        printf("%d, state %d, policy %d->", currentNode->tcb->TID, currentNode->tcb->state, POLICY);
+        printf("%d, state %d, policy %d, average %d->", currentNode->tcb->TID, currentNode->tcb->state, POLICY, currentNode->tcb->averageOfUsages);
 
         currentNode = currentNode->next;
     }
