@@ -590,7 +590,7 @@ int moveToEnd(node *nodeToMove) {
     node *next = nodeToMove->next;
     node *currentTail = readyList->tail;
 
-    if (readyList->head->tcb->TID == readyList->tail->tcb->TID && readyList->head->tcb->TID == nodeToRemove->tcb->TID) {
+    if (readyList->head->tcb->TID == readyList->tail->tcb->TID && readyList->head->tcb->TID == nodeToMove->tcb->TID) {
         //node is the only one in the list, so do nothing
         return SUCCESS;
     } else if (readyList->tail->tcb->TID == nodeToMove->tcb->TID) {
