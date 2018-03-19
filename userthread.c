@@ -109,7 +109,7 @@ int thread_libinit(int policy) {
     makecontext(scheduler, (void (*)(void)) schedule, 0);
 
     //create main's TCB
-    mainTCB = newTCB(-1, 0, 0, 0, QUANTA/2, 0, 0, 0, 1, READY, NULL);
+    mainTCB = newTCB(-1, 0, 0, 0, QUANTA/2, 0, (int) getTicks(), 0, 1, READY, NULL);
     totalRuntime += QUANTA/2; //TODO: ask about this here (DONE)
     totalRuns++;
 
