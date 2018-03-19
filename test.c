@@ -62,26 +62,25 @@ void tryYield() {
 }
 
 int main() {
-    if(thread_libinit(SJF) == FAILURE)
+    if (thread_libinit(SJF) == FAILURE)
         exit(EXIT_FAILURE);
 
     int tid1 = thread_create(printHello, NULL, -1);
 
-    if(tid1 == FAILURE)
+    if (tid1 == FAILURE)
+        exit(EXIT_FAILURE);
+
+    printf("joining 1\n");
+    if (thread_join(tid1) == FAILURE)
         exit(EXIT_FAILURE);
 
     int tid2 = thread_create(tryYield, NULL, -1);
 
-    if(tid2 == FAILURE)
+    if (tid2 == FAILURE)
         exit(EXIT_FAILURE);
 
     printf("joining 2\n");
-    if(thread_join(tid2) == FAILURE)
-        exit(EXIT_FAILURE);
-
-    printf("joining 1\n");
-
-    if(thread_join(tid1) == FAILURE)
+    if (thread_join(tid2) == FAILURE)
         exit(EXIT_FAILURE);
 
     printf("Back to main\n");
