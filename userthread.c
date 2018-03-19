@@ -92,7 +92,7 @@ static void shiftUsages(int newUsageValue, TCB *tcb);
 static int computeAverage(TCB *tcb);
 static void freeNode(node *nodeToFree);
 static int removeNode(node *nodeToRemove);
-
+void setAverage(TCB *tcb);
 
 //TODO: Ask rachel about FIFO scheduling (DONE), ask her about masking for the methods (DONE), ask her about SJF and ask her about testing? (DONE) and all comments in body
 
@@ -264,7 +264,7 @@ int thread_yield(void) {
             totalRuns++;
             //TODO: (Yes, do this) ask Rachel here about shifting and averaging and the whole runtime thing...since this changes the runtime with the zero's going into computing the average (Mark's idea is to use latest if 1 or 2, but then average if three or more)
             shiftUsages(running->tcb->stop - running->tcb->start, running->tcb);
-            computeAverage(running->tcb);
+            setAverage(running->tcb);
             swapcontext(running->tcb->ucontext, scheduler);
             return SUCCESS;
         }
@@ -308,7 +308,7 @@ int thread_join(int tid) {
                     totalRuntime += running->tcb->stop-running->tcb->start;
                     totalRuns++;
                     shiftUsages(running->tcb->stop-running->tcb->start, running->tcb);
-                    computeAverage(running->tcb);
+                    setAverage(running->tcb);
                     currentNode->tcb->joined = running->tcb;
                     swapcontext(running->tcb->ucontext, scheduler);
                 } else {
@@ -326,7 +326,7 @@ int thread_join(int tid) {
                 totalRuntime += running->tcb->stop-running->tcb->start;
                 totalRuns++;
                 shiftUsages(running->tcb->stop-running->tcb->start, running->tcb);
-                computeAverage(running->tcb);
+                setAverage(running->tcb);
                 printList();
                 swapcontext(running->tcb->ucontext, scheduler);
             }
@@ -667,4 +667,8 @@ void shiftUsages(int newUsageValue, TCB *tcb) {
 
 int computeAverage(TCB *tcb) {
     return ((tcb->usage1+tcb->usage2+tcb->usage3)/3);
+}
+
+void setAverage(TCB *tcb) {
+    tcb->averageOfUsages = computeAverage(tcb);
 }
