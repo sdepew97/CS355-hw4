@@ -29,6 +29,7 @@ static int startTime;
 static int LogCreated = FALSE; //know if we append or not to the log.txt file
 static int totalRuntime = 0;
 static int totalRuns = 0;
+static sigset_t set;
 
 //structs used in program
 typedef struct TCB {
