@@ -175,7 +175,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
     if(running == NULL) {
         return FAILURE;
     }
-    printList();
+//    printList();
 
     //TODO: mask access to global variable!?
     int currentTID = TID;
@@ -195,7 +195,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
             return FAILURE;
         }
         Log((int) getTicks() - startTime, CREATED, currentTID, -1);
-        printList();
+//        printList();
         return currentTID;
     } else { //we are priority scheduling
         ucontext_t *newThread = newContext(NULL, func, arg);
@@ -281,7 +281,7 @@ int thread_join(int tid) {
         return FAILURE;
     }
     printf("currently running %d\n", running->tcb->TID);
-    printList();
+//    printList();
 
     if (POLICY == FIFO || POLICY == SJF) {
 //        move main to tail, since this must be the first join
@@ -295,7 +295,7 @@ int thread_join(int tid) {
 //            readyList->tail = running;
 //        }
         moveToEnd(running);
-        printList();
+//        printList();
 
         printf("got into FIFO or SJF\n");
         node *currentNode = readyList->head;
@@ -334,7 +334,7 @@ int thread_join(int tid) {
                 totalRuns++;
                 shiftUsages(running->tcb->stop-running->tcb->start, running->tcb);
                 computeAverage(running->tcb);
-                printList();
+//                printList();
                 swapcontext(running->tcb->ucontext, scheduler);
             }
 
@@ -361,7 +361,7 @@ void stub(void (*func)(void *), void *arg) {
     printf("thread done\n");
     Log((int) getTicks() - startTime, FINISHED, ((TCB *) running->tcb)->TID, -1);
     running->tcb->state = DONE;
-    printList();
+//    printList();
     if (running->tcb->joined != NULL) {
         running->tcb->joined->state = READY;
 
@@ -414,7 +414,7 @@ void schedule() {
     getcontext(scheduler);
     printf("schedule called\n");
     printf("POLICY in schedule: %d\n", POLICY);
-    printList();
+//    printList();
 
     //TODO: ensure this interaction is masked
     node *currentNode = readyList->head;
@@ -431,7 +431,7 @@ void schedule() {
         running->tcb->state = RUNNING;
         printf("running TID %d\n", running->tcb->TID);
         printf("POLICY in schedule two: %d\n", POLICY);
-        printList();
+//        printList();
         setcontext(((TCB *) running->tcb)->ucontext);
     } else if (POLICY == SJF) {
         node *currentNode = readyList->head;
@@ -460,7 +460,7 @@ void schedule() {
         running->tcb->state = RUNNING;
         printf("running TID %d\n", ((TCB *) running->tcb)->TID);
         printf("POLICY in schedule two: %d\n", POLICY);
-        printList();
+//        printList();
         setcontext(running->tcb->ucontext);
     } else if (POLICY == PRIORITY) {
 
