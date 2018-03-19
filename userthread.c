@@ -281,21 +281,11 @@ int thread_join(int tid) {
         return FAILURE;
     }
     printf("currently running %d\n", running->tcb->TID);
-//    printList();
+    printList();
 
     if (POLICY == FIFO || POLICY == SJF) {
-//        move main to tail, since this must be the first join
-//        if(running->tcb->TID == -1 && readyList->head->tcb->TID == -1) { //TODO: ensure this works for SJF as well!
-//            printf("got into if in join\n");
-//            readyList->head = running->next;
-//            readyList->head->prev = NULL;
-//            running->next = NULL;
-//            running->prev = readyList->tail;
-//            readyList->tail->next = running;
-//            readyList->tail = running;
-//        }
         moveToEnd(running);
-//        printList();
+        printList();
 
         printf("got into FIFO or SJF\n");
         node *currentNode = readyList->head;
@@ -341,8 +331,7 @@ int thread_join(int tid) {
             return SUCCESS;
         }
         else {
-
-            //case 1: TID doesn't exist/thread already finished
+            //case TID doesn't exist/thread already finished
             if (currentNode == NULL) {
                 printf("failed on null/node with %d doesn't exist\n", tid);
                 return FAILURE;
