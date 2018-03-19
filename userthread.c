@@ -568,6 +568,7 @@ int addNode(TCB *tcb, linkedList *list) {
 }
 
 int moveToEnd(node *nodeToMove) {
+    printList();
     node *prev = nodeToMove->prev;
     node *next = nodeToMove->next;
     node *currentTail = readyList->tail;
