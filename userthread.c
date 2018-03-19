@@ -259,7 +259,7 @@ int thread_yield(void) {
             running->tcb->stop = (int) getTicks();
             totalRuntime += running->tcb->stop - running->tcb->start;
             totalRuns++;
-            //TODO: ask Rachel here about shifting and averaging and the whole runtime thing...since this changes the runtime with the zero's going into computing the average (Mark's idea is to use latest if 1 or 2, but then average if three or more)
+            //TODO: (Yes, do this) ask Rachel here about shifting and averaging and the whole runtime thing...since this changes the runtime with the zero's going into computing the average (Mark's idea is to use latest if 1 or 2, but then average if three or more)
             shiftUsages(running->tcb->stop - running->tcb->start, running->tcb);
             computeAverage(running->tcb);
             swapcontext(running->tcb->ucontext, scheduler);
@@ -274,6 +274,7 @@ int thread_yield(void) {
 
 int thread_join(int tid) {
     printf("join called for %d\n", tid);
+    //TODO: ignore if joined something that is done/had been scheduled
 
     //This means that we have not called threadlib_init first, which is required
     if(running == NULL) {
@@ -363,6 +364,14 @@ void stub(void (*func)(void *), void *arg) {
     printList();
     if (running->tcb->joined != NULL) {
         running->tcb->joined->state = READY;
+
+        node *currentNode = readyList->head;
+        while(currentNode!=NULL && currentNode->tcb->TID != running->tcb->joined->TID) {
+            currentNode = currentNode->next;
+        }
+
+        //current node is now the one we're looking for
+        moveToEnd(currentNode);
     }
     //current thread is done, so we must get a new thread to run
     setcontext(scheduler);
