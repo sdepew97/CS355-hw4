@@ -32,7 +32,7 @@ int main(void) {
         exit(EXIT_FAILURE);
 
     printf("Back in Main\n");
-    printf("Should run main->%d->%d and print Hello World, Back in Main, and Hello World if successful.\n", tid1, tid2);
+    printf("Should run main->%d and print Hello World and Back in Main if successful.\n", tid1);
 
     if (thread_libterminate() == FAILURE)
         exit(EXIT_FAILURE);
