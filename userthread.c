@@ -439,6 +439,7 @@ void schedule() {
 
         //use a loop to find a ready candidate here in the list of nodes to use as a initial value
         while(currentNode != NULL && currentNode != READY) { //TODO: ask rachel if thread here can be scheduled as running in SJF?
+            printf("Current node %d and state %d\n", currentNode->tcb->TID, currentNode->tcb->state);
             currentNode = currentNode->next;
         }
         //current node is now in a ready state, since at least one node must be ready to run in the list
