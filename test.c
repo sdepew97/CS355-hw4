@@ -92,46 +92,29 @@
 //    exit(EXIT_SUCCESS);
 //}
 
-/*
-Test for user thread library
-Uses FIFO scheduling policy
-Makes 1st thread wait for 2nd thread to finish
-Expected output:
-from f2
-from f1
-terminated
-*/
-
-#include <ucontext.h>
-#include <sys/types.h>
-#include <signal.h>
 #include <stdio.h>
-#include <unistd.h>
 #include <stdlib.h>
-
 #include "userthread.h"
 
-void f1() {
-    printf("\nfrom f1\n\n");
+int tid_1;
+
+void hello(void *arg) {
+    thread_join(tid_1);
+    printf("%s\n", arg);
 }
-void f2() {
-    printf("\nfrom f2\n\n");
-}
 
-int main() {
-    int tid, tid2;
+int main(void) {
+    if (thread_libinit(FIFO) == -1) exit(EXIT_FAILURE);
 
-    thread_libinit(FIFO);
+    char *hello_str = "Hello, world!";
+    tid_1 = thread_create(hello, hello_str, 0);
 
-    // create threads with functions f1, f2
-    tid = thread_create(f1, NULL, 0);
-    tid2 = thread_create(f2, NULL, 0);
+    printf("Test case for FIFO. Let one thread join itself.\n");
+    printf("The program gets stuck and prints nothing on success.\n");
 
-    // join f2 thread first so it finishes before f1
-    thread_join(tid2);
-    thread_join(tid);
+    if (thread_join(tid_1) < 0) exit(EXIT_FAILURE);
 
-    thread_libterminate();
-    printf("terminated\n");
-    return 0;
+    if (thread_libterminate() == -1) exit(EXIT_FAILURE);
+
+    exit(EXIT_SUCCESS);
 }
