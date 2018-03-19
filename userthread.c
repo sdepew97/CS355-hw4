@@ -590,8 +590,15 @@ int moveToEnd(node *nodeToMove) {
     node *next = nodeToMove->next;
     node *currentTail = readyList->tail;
 
-    //moving head to tail
-    if (readyList->head->tcb->TID == nodeToMove->tcb->TID) {
+    if (readyList->head->tcb->TID == readyList->tail->tcb->TID && readyList->head->tcb->TID == nodeToRemove->tcb->TID) {
+        //node is the only one in the list, so do nothing
+        return SUCCESS;
+    } else if (readyList->tail->tcb->TID == nodeToMove->tcb->TID) {
+        //do nothing, since node to move is already the tail
+        return SUCCESS;
+    }
+        //moving head to tail
+    else if (readyList->head->tcb->TID == nodeToMove->tcb->TID) {
         readyList->head = next;
         readyList->head->prev = NULL;
         //can keep the new head's next pointer
@@ -600,10 +607,6 @@ int moveToEnd(node *nodeToMove) {
         currentTail->next = nodeToMove;
         nodeToMove->prev = currentTail;
         readyList->tail = nodeToMove;
-
-        return SUCCESS;
-    } else if(readyList->tail->tcb->TID == nodeToMove->tcb->TID) {
-        //do nothing, since node to move is already the tail
 
         return SUCCESS;
     } else {
