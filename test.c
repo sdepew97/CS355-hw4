@@ -179,61 +179,117 @@
 
 
 
-#include "userthread.h"
+//#include "userthread.h"
+//#include <stdio.h>
+//#include <unistd.h>
+//#include <stdlib.h>
+//
+//typedef struct {int num; char* arg;} PAIR;
+//
+//void printArg(void* argv){
+//    PAIR* in = (PAIR* )argv;
+//    char* word = in->arg;
+//    int num = in->num;
+//    //		poll(NULL, 0, 100);
+//    printf("num: %d; string: %s\n", num, word);
+//
+//    //while(1);{printf("task: %d\n", num);}
+//}
+//
+//
+//int testLl() {
+//    printf("\n\nTesting user functions with arguments\n");
+//    printf("Should print the number and string passed in\n\n\n");
+//
+//
+//    thread_libinit(SJF); // FIFO SJF PRIORITY
+//
+//    PAIR ins, ins2, ins3;
+//    ins.num = 1;
+//    ins.arg = "the message1";
+//
+//    ins2.num = 2;
+//    ins2.arg = "the message2";
+//
+//    ins3.num = 3;
+//    ins3.arg = "the message3";
+//
+//    //create
+//    int tid1 = thread_create(printArg, &ins, 0);
+//    int tid2 = thread_create(printArg, &ins2, -1);
+//    int tid3 = thread_create(printArg, &ins3, 1);
+//
+//
+//    // join
+//    thread_join(tid1);
+//    thread_join(tid2);
+//    thread_join(tid3);
+//
+//
+//    // term
+//    thread_libterminate();
+//
+//    return 1;
+//}
+//
+//
+//int main() {
+//    testLl();
+//    exit(EXIT_SUCCESS);
+//}
+
+#include <poll.h>
 #include <stdio.h>
-#include <unistd.h>
 #include <stdlib.h>
+#include "userthread.h"
 
-typedef struct {int num; char* arg;} PAIR;
-
-void printArg(void* argv){
-    PAIR* in = (PAIR* )argv;
-    char* word = in->arg;
-    int num = in->num;
-    //		poll(NULL, 0, 100);
-    printf("num: %d; string: %s\n", num, word);
-
-    //while(1);{printf("task: %d\n", num);}
+void hello_100(void *arg) {
+    poll(NULL, 0, 100);
+    thread_yield();
+    poll(NULL, 0, 100);
+    thread_yield();
+    poll(NULL, 0, 100);
+    thread_yield();
+    printf("%s 100\n", arg);
 }
 
-
-int testLl() {
-    printf("\n\nTesting user functions with arguments\n");
-    printf("Should print the number and string passed in\n\n\n");
-
-
-    thread_libinit(SJF); // FIFO SJF PRIORITY
-
-    PAIR ins, ins2, ins3;
-    ins.num = 1;
-    ins.arg = "the message1";
-
-    ins2.num = 2;
-    ins2.arg = "the message2";
-
-    ins3.num = 3;
-    ins3.arg = "the message3";
-
-    //create
-    int tid1 = thread_create(printArg, &ins, 0);
-    int tid2 = thread_create(printArg, &ins2, -1);
-    int tid3 = thread_create(printArg, &ins3, 1);
-
-
-    // join
-    thread_join(tid1);
-    thread_join(tid2);
-    thread_join(tid3);
-
-
-    // term
-    thread_libterminate();
-
-    return 1;
+void hello_150(void *arg) {
+    poll(NULL, 0, 150);
+    thread_yield();
+    poll(NULL, 0, 150);
+    thread_yield();
+    poll(NULL, 0, 150);
+    thread_yield();
+    printf("%s 150\n", arg);
 }
 
+void hello_200(void *arg) {
+    poll(NULL, 0, 200);
+    thread_yield();
+    poll(NULL, 0, 200);
+    thread_yield();
+    poll(NULL, 0, 200);
+    thread_yield();
+    printf("%s 200\n", arg);
+}
 
-int main() {
-    testLl();
+int main(void) {
+    if (thread_libinit(SJF) == -1) exit(EXIT_FAILURE);
+
+    char *hello_str = "Hello, world!";
+    int tid_1 = thread_create(hello_100, hello_str, 0);
+    int tid_2 = thread_create(hello_150, hello_str, 0);
+    int tid_3 = thread_create(hello_200, hello_str, 0);
+
+    printf("Test case for SJF.\n");
+    printf("Print \"Hello, world! 100\", \"Hello, world! 150\", \"Hello, world! 200\" on success.\n");
+    printf("The order cannot be inverted.\n");
+
+    if (thread_join(tid_1) < 0) exit(EXIT_FAILURE);
+    if (thread_join(tid_2) < 0) exit(EXIT_FAILURE);
+    if (thread_join(tid_3) < 0) exit(EXIT_FAILURE);
+
+    if (thread_libterminate() == -1) exit(EXIT_FAILURE);
+
     exit(EXIT_SUCCESS);
 }
