@@ -559,7 +559,7 @@ int addNode(TCB *tcb, linkedList *list) {
             return FAILURE;
         }
         tailNode->next = newThreadNode;
-        tailNode->prev = tailNode;
+        newThreadNode->prev = tailNode;
         list->tail = newThreadNode;
         list->size++;
     }
@@ -568,7 +568,7 @@ int addNode(TCB *tcb, linkedList *list) {
 }
 
 int moveToEnd(node *nodeToMove) {
-//    printList();
+    printList();
     node *prev = nodeToMove->prev;
     node *next = nodeToMove->next;
     node *currentTail = readyList->tail;
