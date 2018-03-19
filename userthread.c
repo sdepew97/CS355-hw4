@@ -373,6 +373,10 @@ void stub(void (*func)(void *), void *arg) {
         //current node is now the one we're looking for
         moveToEnd(currentNode);
     }
+
+    freeNode(running);
+    running = NULL;
+
     //current thread is done, so we must get a new thread to run
     setcontext(scheduler);
 }
