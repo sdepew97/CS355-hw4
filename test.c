@@ -178,45 +178,52 @@
 //}
 
 
+
 #include "userthread.h"
 #include <stdio.h>
 #include <unistd.h>
-#include <poll.h>
 #include <stdlib.h>
 
+typedef struct {int num; char* arg;} PAIR;
 
-void func(){
-    for(int i=0;i<10;i++)
-        poll(NULL, 0, 20);
+void printArg(void* argv){
+    PAIR* in = (PAIR* )argv;
+    char* word = in->arg;
+    int num = in->num;
+    //		poll(NULL, 0, 100);
+    printf("num: %d; string: %s\n", num, word);
+
+    //while(1);{printf("task: %d\n", num);}
 }
 
 
-int testLl(){
-    printf("\n\nTesting thread_create() after the scheduler has been activated by thread_join()\n" );
-    printf("thread 1, 2, 3 should finish before 4, 5, 6 \n\n\n" );
+int testLl() {
+    printf("\n\nTesting user functions with arguments\n");
+    printf("Should print the number and string passed in\n\n\n");
 
 
-    thread_libinit(FIFO); // FIFO SJF PRIORITY
+    thread_libinit(SJF); // FIFO SJF PRIORITY
+
+    PAIR ins, ins2, ins3;
+    ins.num = 1;
+    ins.arg = "the message1";
+
+    ins2.num = 2;
+    ins2.arg = "the message2";
+
+    ins3.num = 3;
+    ins3.arg = "the message3";
 
     //create
-    int tid1 = thread_create(func, NULL, 0);
-    int tid2 = thread_create(func, NULL, -1);
-    int tid3 = thread_create(func, NULL, 1);
+    int tid1 = thread_create(printArg, &ins, 0);
+    int tid2 = thread_create(printArg, &ins2, -1);
+    int tid3 = thread_create(printArg, &ins3, 1);
 
 
     // join
     thread_join(tid1);
     thread_join(tid2);
     thread_join(tid3);
-
-    int tid4 = thread_create(func, NULL, 1);
-    int tid5 = thread_create(func, NULL, 1);
-    int tid6 = thread_create(func, NULL, 1);
-
-    thread_join(tid4);
-    thread_join(tid5);
-    thread_join(tid6);
-
 
 
     // term
@@ -226,7 +233,7 @@ int testLl(){
 }
 
 
-int main(){
+int main() {
     testLl();
     exit(EXIT_SUCCESS);
 }
