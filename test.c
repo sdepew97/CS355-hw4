@@ -190,7 +190,7 @@ int main(void) {
            tid1, tid2 ,tid3, tid4, tid5, tid6);
 
     // more misuses...
-    thread_libterminate();
+//    thread_libterminate();
     thread_join(123132);
     exit(EXIT_SUCCESS);
 }
