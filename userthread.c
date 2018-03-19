@@ -434,6 +434,7 @@ void schedule() {
         int minRuntime = currentNode->tcb->averageOfUsages;
         node *minRuntimeNode = currentNode;
         while (currentNode != NULL){
+            printf("Current node tid %d\n", currentNode->tcb->TID);
             if(currentNode->tcb->state != READY) {
                 currentNode = currentNode->next;
             }
