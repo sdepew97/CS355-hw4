@@ -90,6 +90,9 @@ static int addNode(TCB *tcb, linkedList *list);
 static int moveToEnd(node *nodeToMove);
 static void shiftUsages(int newUsageValue, TCB *tcb);
 static int computeAverage(TCB *tcb);
+static void freeNode(node *nodeToFree);
+static int removeNode(node *nodeToRemove);
+
 
 //TODO: Ask rachel about FIFO scheduling (DONE), ask her about masking for the methods (DONE), ask her about SJF and ask her about testing? (DONE) and all comments in body
 
@@ -594,6 +597,59 @@ int moveToEnd(node *nodeToMove) {
         prev->next = next;
         next->prev = prev;
         readyList->tail = nodeToMove;
+        return SUCCESS;
+    }
+
+    return FAILURE;
+}
+
+void freeNode(node *nodeToFree) {
+    //TODO: fill in body here
+}
+
+int removeNode(node *nodeToRemove) {
+    node *prev = nodeToRemove->prev;
+    node *next = nodeToRemove->next;
+    node *free = nodeToRemove;
+
+    if(readyList->head->tcb->TID == readyList->tail->tcb->TID && readyList->head->tcb->TID == nodeToRemove->tcb->TID) {
+        //the node is the only one in the list, so we can simply remove it here
+        readyList->head = NULL;
+        readyList->tail = NULL;
+        freeNode(nodeToRemove);
+        readyList->size--;
+    }
+    //removing head with more than one node in the list (don't have to reset the tail)
+    else if (readyList->head->tcb->TID == nodeToRemove->tcb->TID) {
+        readyList->head = next;
+        readyList->head->prev = NULL;
+        //can keep the new head's next pointer
+
+        nodeToRemove->next = NULL;
+        nodeToRemove->prev = NULL;
+        freeNode(nodeToRemove);
+        readyList->size--;
+
+        return SUCCESS;
+    } else if(readyList->tail->tcb->TID == nodeToMove->tcb->TID) { //remove node from tail
+        readyList->tail = prev;
+        readyList->tail->next = NULL;
+        //can keep the new tail's prev pointer
+
+        nodeToRemove->next = NULL;
+        nodeToRemove->prev = NULL;
+        freeNode(nodeToRemove);
+        readyList->size--;
+        return SUCCESS;
+    } else {
+        //node to move is a middle node, so have to reset pointers accordingly
+        prev->next = next;
+        next->prev = prev;
+
+        nodeToRemove->next = NULL;
+        nodeToRemove->prev = NULL;
+        freeNode(nodeToRemove);
+        readyList->size--;
         return SUCCESS;
     }
 
