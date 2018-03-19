@@ -434,14 +434,20 @@ void schedule() {
         setcontext(((TCB *) running->tcb)->ucontext);
     } else if (POLICY == SJF) {
         node *currentNode = readyList->head;
-        int minRuntime = mainTCB->averageOfUsages;
+        int minRuntime = 0 ;
         node *minRuntimeNode = NULL; //TODO: should be set to main here and gonna get segfault if not!!
+
+        //use a loop to find a ready candidate here in the list of nodes to use as a initial value
+        while(currentNode != NULL && currentNode != READY) { //TODO: ask rachel if thread here can be scheduled as running in SJF?
+            currentNode = currentNode->next;
+        }
+        //current node is now in a ready state, since at least one node must be ready to run in the list
+        minRuntime = currentNode->tcb->averageOfUsages;
+        minRuntimeNode = currentNode;
+
+        currentNode = readyList->head;
         while (currentNode != NULL){
             printf("Current node tid %d\n", currentNode->tcb->TID);
-            if(currentNode->tcb->TID == mainTCB->TID) {
-                minRuntimeNode = currentNode; //make sure minRuntimeNode gets a value
-            }
-
             if(currentNode->tcb->state != READY) {
                 currentNode = currentNode->next;
             }
