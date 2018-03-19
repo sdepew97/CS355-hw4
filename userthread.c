@@ -279,8 +279,8 @@ int thread_join(int tid) {
     printf("join called for %d\n", tid);
     //TODO: ignore if joined something that is done/had been scheduled
 
-    //This means that we have not called threadlib_init first, which is required
-    if(running == NULL) {
+    //This means that we have not called threadlib_init first, which is required or thread is trying to join itself
+    if(running == NULL || running->tcb->TID == tid) {
         return FAILURE;
     }
     printf("currently running %d\n", running->tcb->TID);
