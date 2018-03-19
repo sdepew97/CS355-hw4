@@ -159,6 +159,7 @@ int thread_libinit(int policy) {
         return SUCCESS;
     } else if (policy == PRIORITY) {
         //TODO: setup queues here and the signal handler
+        printf("priority\n");
         if(setupSignals() == FAILURE) {
             return FAILURE;
         }
