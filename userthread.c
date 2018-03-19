@@ -175,7 +175,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
     printf("creating new thread %d\n", TID);
 
     //This means that we have not called threadlib_init first, which is required
-    if(running == NULL) {
+    if(running == NULL || func == NULL) {
         return FAILURE;
     }
     printList();

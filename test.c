@@ -106,7 +106,7 @@ int main(void) {
     char *hello_str = "Hello, world!";
     int tid_1 = thread_create(NULL, hello_str, 0);
 
-    printf("Test case for FIFO given NULL as the funciton pointer.\n");
+    printf("Test case for FIFO given NULL as the function pointer.\n");
     printf("Print \"Fail to create thread.\" on success.\n");
 
     if (tid_1 == -1) {
