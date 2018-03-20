@@ -672,12 +672,15 @@ void schedule() {
             running->tcb->state = READY;
             if (running->tcb->priority == HIGH) {
                 moveToEnd(running, highList);
+                printf("moved to end\n");
                 printList();
             } else if (running->tcb->priority == MEDIUM) {
                 moveToEnd(running, mediumList);
+                printf("moved to end\n");
                 printList();
             } else if (running->tcb->priority == LOW) {
                 moveToEnd(running, lowList);
+                printf("moved to end\n");
                 printList();
             }
         }
