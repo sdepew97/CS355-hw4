@@ -839,6 +839,7 @@ void schedule() {
 
         //Do the scheduling and looping here based of it we have found a valid, ready thread to schedule!
         while (toSchedule == NULL) {
+            printf("enter loop\n");
             randomEntry = rand_r(&(secs)) % 19; //number between 0 and 18
             priorityToSchedule = scheduling[randomEntry];
 
