@@ -118,14 +118,14 @@ int thread_libinit(int policy) {
     //TODO: add masking to stop race conditions! :)
     sigset_t mask;
 
-    if (sigemptyset(&mask) == ERROR) {
+    if (sigemptyset(&mask) == FAILURE) {
         return FAILURE;
     }
 
-    if (sigaddset(&mask, SIGALRM) == ERROR) {
+    if (sigaddset(&mask, SIGALRM) == FAILURE) {
         return FAILURE;
     }
-    if (sigprocmask(SIG_BLOCK, &mask, NULL) == ERROR) {
+    if (sigprocmask(SIG_BLOCK, &mask, NULL) == FAILURE) {
         return FAILURE;
     }
 
@@ -249,7 +249,7 @@ int thread_libinit(int policy) {
     }
     return FAILURE;
 
-    if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == ERROR) {
+    if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
         return FAILURE;
     }
 }
@@ -258,14 +258,14 @@ int thread_libinit(int policy) {
 int thread_libterminate(void) {
     sigset_t mask;
 
-    if (sigemptyset(&mask) == ERROR) {
+    if (sigemptyset(&mask) == FAILURE) {
         return FAILURE;
     }
 
-    if (sigaddset(&mask, SIGALRM) == ERROR) {
+    if (sigaddset(&mask, SIGALRM) == FAILURE) {
         return FAILURE;
     }
-    if (sigprocmask(SIG_BLOCK, &mask, NULL) == ERROR) {
+    if (sigprocmask(SIG_BLOCK, &mask, NULL) == FAILURE) {
         return FAILURE;
     }
 
@@ -278,7 +278,7 @@ int thread_libterminate(void) {
     //mark main as finished and free
     return FAILURE;
 
-    if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == ERROR) {
+    if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
         return FAILURE;
     }
 }
@@ -289,14 +289,14 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
 
     sigset_t mask;
 
-    if (sigemptyset(&mask) == ERROR) {
+    if (sigemptyset(&mask) == FAILURE) {
         return FAILURE;
     }
 
-    if (sigaddset(&mask, SIGALRM) == ERROR) {
+    if (sigaddset(&mask, SIGALRM) == FAILURE) {
         return FAILURE;
     }
-    if (sigprocmask(SIG_BLOCK, &mask, NULL) == ERROR) {
+    if (sigprocmask(SIG_BLOCK, &mask, NULL) == FAILURE) {
         return FAILURE;
     }
 
@@ -328,7 +328,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
         printList();
 
 
-        if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == ERROR) {
+        if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
             return FAILURE;
         }
         return currentTID;
@@ -366,13 +366,13 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
         printList();
 
 
-        if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == ERROR) {
+        if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
             return FAILURE;
         }
         return currentTID;
     }
 
-    if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == ERROR) {
+    if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
         return FAILURE;
     }
 
@@ -384,14 +384,14 @@ int thread_yield(void) {
 
     sigset_t mask;
 
-    if (sigemptyset(&mask) == ERROR) {
+    if (sigemptyset(&mask) == FAILURE) {
         return FAILURE;
     }
 
-    if (sigaddset(&mask, SIGALRM) == ERROR) {
+    if (sigaddset(&mask, SIGALRM) == FAILURE) {
         return FAILURE;
     }
-    if (sigprocmask(SIG_BLOCK, &mask, NULL) == ERROR) {
+    if (sigprocmask(SIG_BLOCK, &mask, NULL) == FAILURE) {
         return FAILURE;
     }
 
@@ -442,13 +442,13 @@ int thread_yield(void) {
         setAverage(running->tcb);
         swapcontext(running->tcb->ucontext, scheduler);
 
-        if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == ERROR) {
+        if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
             return FAILURE;
         }
         return SUCCESS;
     }
 
-    if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == ERROR) {
+    if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
         return FAILURE;
     }
     return FAILURE;
@@ -1102,19 +1102,19 @@ void sigHandler(int j, siginfo_t *si, void *old_context) {
 ////TODO: add masking to stop race conditions! :)
 //sigset_t mask;
 //
-//if (sigemptyset(&mask) == ERROR) {
+//if (sigemptyset(&mask) == FAILURE) {
 //    return FAILURE;
 //}
 //
-//if (sigaddset(&mask, SIGALRM) == ERROR) {
+//if (sigaddset(&mask, SIGALRM) == FAILURE) {
 //    return FAILURE;
 //}
-//if (sigprocmask(SIG_BLOCK, &mask, NULL) == ERROR) {
+//if (sigprocmask(SIG_BLOCK, &mask, NULL) == FAILURE) {
 //    return FAILURE;
 //}
 //
 ////TODO: add critical section here
 //
-//if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == ERROR) {
+//if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
 //    return FAILURE;
 //}
