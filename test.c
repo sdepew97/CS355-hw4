@@ -487,5 +487,7 @@ int main(void) {
     if (thread_libterminate() == FAIL)
         exit(EXIT_FAILURE);
 
+    printf("Success!\n");
+
     exit(EXIT_SUCCESS);
 }
