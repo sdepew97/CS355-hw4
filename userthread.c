@@ -165,6 +165,8 @@ int thread_libinit(int policy) {
         //everything went fine, so return success
         return SUCCESS;
     } else if (policy == PRIORITY) {
+        alarm(1);
+
         //TODO: setup queues here and the signal handler (DONE)
         if (setupSignals() == FAILURE) {
             return FAILURE;
