@@ -173,7 +173,9 @@ int thread_libinit(int policy) {
             return FAILURE;
         }
 
+        printf("got here\n");
         signal(SIGALRM, sigHandler);
+        printf("got here\n");
 
         while(1) {
             pause();
