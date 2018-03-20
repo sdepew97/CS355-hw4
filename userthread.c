@@ -100,6 +100,8 @@ static void freeNode(node *nodeToFree);
 static int removeNode(node *nodeToRemove, linkedList *list);
 static void setAverage(TCB *tcb);
 void setrtimer(struct itimerval *ivPtr);
+void setMask(sigset_t *mask);
+int removeMask(sigset_t *mask);
 static int setupSignals(void);
 static void sigHandler(int j, siginfo_t *si, void *old_context);
 
@@ -107,17 +109,8 @@ static void sigHandler(int j, siginfo_t *si, void *old_context);
  * Masking the entire method, since it uses globals on almost every line and I didn't want to end up in an inconsistent state
  */
 int thread_libinit(int policy) {
-    sigset_t mask;
-    if (sigemptyset(&mask) == FAILURE) {
-        return FAILURE;
-    }
-
-    if (sigaddset(&mask, SIGALRM) == FAILURE) {
-        return FAILURE;
-    }
-    if (sigprocmask(SIG_BLOCK, &mask, NULL) == FAILURE) {
-        return FAILURE;
-    }
+    sigset_t *mask = malloc ;
+    setMask(mask);
 
     //this is when the program officially started
     startTime = (int) getTicks();
@@ -132,7 +125,8 @@ int thread_libinit(int policy) {
 
     //create main's TCB
     mainTCB = newTCB(MAINTID, 0, 0, 0, QUANTA / 2, (int) getTicks(), 0, MAINPRIORITY, READY, NULL);
-    totalRuntime += QUANTA / 2;
+    totalRuntime += QUA
+    NTA / 2;
     totalRuns++;
 
     if (mainTCB == NULL) {
@@ -219,28 +213,18 @@ int thread_libinit(int policy) {
     }
     return FAILURE;
 
-    if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
+    if (removeMask(mask) == FAILURE) {
         return FAILURE;
     }
 }
 
 //TODO: free all memory here
 int thread_libterminate(void) {
-    sigset_t mask;
+    sigset_t *mask = malloc(sizeof(sigset_t));
     node *currentNode = NULL;
     node *nextNode = NULL;
 
-    if (sigemptyset(&mask) == FAILURE) {
-        return FAILURE;
-    }
-
-    if (sigaddset(&mask, SIGALRM) == FAILURE) {
-        return FAILURE;
-    }
-    if (sigprocmask(SIG_BLOCK, &mask, NULL) == FAILURE) {
-        return FAILURE;
-    }
-
+    setMask(mask);
     //free all queues
 
     //free all thread memory malloced
@@ -296,7 +280,7 @@ int thread_libterminate(void) {
         return SUCCESS;
     }
 
-    if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
+    if (removeMask(mask) == FAILURE) {
         return FAILURE;
     }
 
@@ -305,22 +289,12 @@ int thread_libterminate(void) {
 
 //TODO: masking, then done!
 int thread_create(void (*func)(void *), void *arg, int priority) {
-    sigset_t mask;
-
-    if (sigemptyset(&mask) == FAILURE) {
-        return FAILURE;
-    }
-
-    if (sigaddset(&mask, SIGALRM) == FAILURE) {
-        return FAILURE;
-    }
-    if (sigprocmask(SIG_BLOCK, &mask, NULL) == FAILURE) {
-        return FAILURE;
-    }
+    sigset_t *mask = malloc(sizeof(sigset_t));
+    setMask(mask);
 
     //This means that we have not called threadlib_init first, which is required
     if (running == NULL || func == NULL) {
-        if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
+        if (removeMask(mask) == FAILURE) {
             return FAILURE;
         }
         return FAILURE;
@@ -346,7 +320,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
 
 
 
-        if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
+        if (removeMask(mask) == FAILURE) {
             return FAILURE;
         }
         return currentTID;
@@ -381,30 +355,20 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
 
         Log((int) getTicks() - startTime, CREATED, currentTID, priority);
 
-        if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
+        if (removeMask(mask) == FAILURE) {
             return FAILURE;
         }
         return currentTID;
     }
-    if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
+    if (removeMask(mask) == FAILURE) {
         return FAILURE;
     }
     return FAILURE;
 }
 
 int thread_yield(void) {
-    sigset_t mask;
-
-    if (sigemptyset(&mask) == FAILURE) {
-        return FAILURE;
-    }
-
-    if (sigaddset(&mask, SIGALRM) == FAILURE) {
-        return FAILURE;
-    }
-    if (sigprocmask(SIG_BLOCK, &mask, NULL) == FAILURE) {
-        return FAILURE;
-    }
+    sigset_t *mask = malloc(sizeof(sigset_t));
+    setMask(mask);
 
     //This means that we have not called threadlib_init first, which is required
     if (running == NULL) {
@@ -423,7 +387,7 @@ int thread_yield(void) {
             totalRuns++;
             shiftUsages(running->tcb->stop - running->tcb->start, running->tcb);
             setAverage(running->tcb);
-            if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
+            if (removeMask(mask) == FAILURE) {
                 return FAILURE;
             }
             swapcontext(running->tcb->ucontext, scheduler);
@@ -452,14 +416,14 @@ int thread_yield(void) {
         totalRuns++;
         shiftUsages(running->tcb->stop - running->tcb->start, running->tcb);
         setAverage(running->tcb);
-        if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
+        if (removeMask(mask) == FAILURE) {
             return FAILURE;
         }
         swapcontext(running->tcb->ucontext, scheduler);
         return SUCCESS;
     }
 
-    if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
+    if (removeMask(mask) == FAILURE) {
         return FAILURE;
     }
     return FAILURE;
@@ -467,18 +431,8 @@ int thread_yield(void) {
 
 int thread_join(int tid) {
     //TODO: ignore if joined something that is done/had been scheduled
-    sigset_t mask;
-
-    if (sigemptyset(&mask) == FAILURE) {
-        return FAILURE;
-    }
-
-    if (sigaddset(&mask, SIGALRM) == FAILURE) {
-        return FAILURE;
-    }
-    if (sigprocmask(SIG_BLOCK, &mask, NULL) == FAILURE) {
-        return FAILURE;
-    }
+    sigset_t *mask = malloc(sizeof(sigset_t));
+    setMask(mask);
 
     node *currentNode = NULL;
 
@@ -531,7 +485,7 @@ int thread_join(int tid) {
             }
         }
     } else {
-        if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
+        if (removeMask(mask) == FAILURE) {
             return FAILURE;
         }
 
@@ -550,13 +504,13 @@ int thread_join(int tid) {
                 shiftUsages(running->tcb->stop - running->tcb->start, running->tcb);
                 setAverage(running->tcb);
                 currentNode->tcb->joined = running->tcb;
-                if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
+                if (removeMask(mask) == FAILURE) {
                     return FAILURE;
                 }
                 swapcontext(running->tcb->ucontext, scheduler);
             } else {
                 //attempting a circular join, so a failure should occur
-                if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
+                if (removeMask(mask) == FAILURE) {
                     return FAILURE;
                 }
 
@@ -573,12 +527,12 @@ int thread_join(int tid) {
             shiftUsages(running->tcb->stop - running->tcb->start, running->tcb);
             setAverage(running->tcb);
 
-            if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
+            if (removeMask(mask) == FAILURE) {
                 return FAILURE;
             }
             swapcontext(running->tcb->ucontext, scheduler); //TODO: see if this needs to be replaced, here
         }
-        if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
+        if (removeMask(mask) == FAILURE) {
             return FAILURE;
         }
 
@@ -589,14 +543,14 @@ int thread_join(int tid) {
             //shouldn't raise an error if trying to join a prior created thread that's already finished
             return SUCCESS;
         } else if (currentNode == NULL) {
-            if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
+            if (removeMask(mask) == FAILURE) {
                 return FAILURE;
             }
 
             return FAILURE;
         }
     }
-    if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
+    if (removeMask(mask) == FAILURE) {
         return FAILURE;
     }
 
@@ -608,10 +562,7 @@ void stub(void (*func)(void *), void *arg) {
     func(arg); // call root function //Allow this function to be interrupted
     //TODO: thread clean up mentioned in assignment guidelines on page 3
 
-    sigset_t mask;
-    sigemptyset(&mask);
-    sigaddset(&mask, SIGALRM);
-    sigprocmask(SIG_BLOCK, &mask, NULL);
+
 
     Log((int) getTicks() - startTime, FINISHED, running->tcb->TID, running->tcb->priority);
     running->tcb->state = DONE; //mark as done running
@@ -671,10 +622,21 @@ void stub(void (*func)(void *), void *arg) {
     }
     //TODO: free node here with freenode function
     running = NULL;
-    sigprocmask(SIG_UNBLOCK, &mask, NULL);
+    removeMask(mask);
 
     //current thread is done, so we must get a new thread to run
     setcontext(scheduler);
+}
+
+void setMask(sigset_t *mask) {
+    sigemptyset(mask);
+    sigaddset(mask, SIGALRM);
+    sigprocmask(SIG_BLOCK, mask, NULL);
+}
+
+int removeMask(sigset_t *mask) {
+    sigprocmask(SIG_UNBLOCK, &mask, NULL);
+    free(mask);
 }
 
  long getTicks() {
@@ -709,10 +671,8 @@ void Log (int ticks, int OPERATION, int TID, int PRIORITY) {
 
 /* Method with the scheduling algorithms */
 void schedule() {
-    sigset_t mask;
-    sigemptyset(&mask);
-    sigaddset(&mask, SIGALRM);
-    sigprocmask(SIG_BLOCK, &mask, NULL);
+    sigset_t *mask = malloc(sizeof(sigset_t));
+    setMask(mask);
 
     getcontext(scheduler);
 
@@ -731,7 +691,7 @@ void schedule() {
         //start timing here
         running->tcb->start = (int) getTicks(); //TODO: Ask Rachel: milliseconds of same time?? account for seconds?
         running->tcb->state = RUNNING;
-        sigprocmask(SIG_UNBLOCK, &mask, NULL);
+        removeMask(mask);
         setcontext(running->tcb->ucontext);
     } else if (POLICY == SJF) {
         node *currentNode = readyList->head;
@@ -770,7 +730,7 @@ void schedule() {
         running->tcb->start = (int) getTicks(); //TODO: Ask Rachel: milliseconds of same time?? account for seconds?
         running->tcb->state = RUNNING;
 
-        sigprocmask(SIG_UNBLOCK, &mask, NULL);
+        removeMask(mask);
         setcontext(running->tcb->ucontext);
     } else if (POLICY == PRIORITY) {
         //get random entry into array for the priority to be scheduled
@@ -843,7 +803,7 @@ void schedule() {
         //start timing here
         running->tcb->start = (int) getTicks(); //TODO: Ask Rachel: milliseconds of same time?? account for seconds?
         running->tcb->state = RUNNING;
-        sigprocmask(SIG_UNBLOCK, &mask, NULL);
+        removeMask(mask);
         setcontext(running->tcb->ucontext);
     }
 }
@@ -1095,7 +1055,7 @@ int setupSignals(void) {
 
     act.sa_sigaction = sigHandler;
     sigemptyset(&act.sa_mask);
-//    sigaddset(&act.sa_mask, SIGALRM);
+    sigaddset(&act.sa_mask, SIGALRM);
     act.sa_flags = SA_RESTART | SA_SIGINFO;
 
     if (sigaction(SIGALRM, &act, NULL) != 0) {
