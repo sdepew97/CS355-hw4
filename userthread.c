@@ -37,6 +37,7 @@ static int totalRuntime = 0;
 static int totalRuns = 0;
 static sigset_t set;
 static struct itimerval realt;
+static int scheduling[] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, -1, -1, -1, -1}; //2.25:1.5:1 ratio here, so randomly picking an entry allows us to know we get proper ratio of priorities
 
 //structs used in program
 typedef struct TCB {
@@ -218,6 +219,7 @@ int thread_libinit(int policy) {
 
         //LOG main's creation
         Log((int) getTicks() - startTime, CREATED, MAINTID, MAINPRIORITY);
+        pause(); //to test sighandler with working
 
         //everything went fine, so return success
         return SUCCESS;
@@ -449,9 +451,7 @@ int thread_join(int tid) {
                 shiftUsages(running->tcb->stop - running->tcb->start, running->tcb);
                 setAverage(running->tcb);
                 currentNode->tcb->joined = running->tcb;
-                if(PRIORITY == FIFO || PRIORITY == SJF) {
-                    swapcontext(running->tcb->ucontext, scheduler);
-                }
+                swapcontext(running->tcb->ucontext, scheduler);
             } else {
                 //attempting a circular join, so a failure should occur
                 printf("failed on circular\n");
@@ -468,9 +468,7 @@ int thread_join(int tid) {
             shiftUsages(running->tcb->stop - running->tcb->start, running->tcb);
             setAverage(running->tcb);
             printList();
-            if(PRIORITY == FIFO || PRIORITY == SJF) {
-                swapcontext(running->tcb->ucontext, scheduler);
-            }
+            swapcontext(running->tcb->ucontext, scheduler);
         }
         return SUCCESS;
     } else {
