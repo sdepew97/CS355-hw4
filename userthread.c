@@ -730,7 +730,7 @@ int setupSignals(void) {
 
     act.sa_sigaction = sigHandler;
     sigemptyset(&act.sa_mask);
-    sigaddset(&act.sa_mask, SIGALARM);
+    sigaddset(&act.sa_mask, SIGALRM);
 //    act.sa_flags = SA_SIGINFO; //TODO: see if I also want SIGRESTART or any other flags here (texted Rachel...she said yes...)
     act.sa_flags = SA_RESTART | SA_SIGINFO;
 
