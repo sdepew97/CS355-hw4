@@ -271,8 +271,6 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
         return currentTID;
     } else { //we are priority scheduling
 
-        printf("we are creating in priority\n");
-
         ucontext_t *newThread = newContext(NULL, func, arg);
         if(newThread == NULL) {
             return FAILURE;
@@ -283,6 +281,8 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
         TCB *newThreadTCB = newTCB(currentTID, 0, 0, 0, (totalRuntime/totalRuns), 0, 0, 0, priority, READY, NULL); //For preemptive, don't require a join to run the thread, since the scheduler is called with SIGALARM
         newThreadTCB->ucontext = newThread;
         TID++; //TODO: MASK!!
+
+        printf("we are creating in priority\n");
 
         if (priority == LOW) {
             if(addNode(newThreadTCB, lowList) == FAILURE) {
