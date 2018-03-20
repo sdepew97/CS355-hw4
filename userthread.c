@@ -608,6 +608,20 @@ void stub(void (*func)(void *), void *arg) {
     func(arg); // call root function
     //TODO: thread clean up mentioned in assignment guidelines on page 3
     printf("thread done\n");
+
+    sigset_t mask;
+
+    if (sigemptyset(&mask) == FAILURE) {
+        return FAILURE;
+    }
+
+    if (sigaddset(&mask, SIGALRM) == FAILURE) {
+        return FAILURE;
+    }
+    if (sigprocmask(SIG_BLOCK, &mask, NULL) == FAILURE) {
+        return FAILURE;
+    }
+
     Log((int) getTicks() - startTime, FINISHED, running->tcb->TID, running->tcb->priority);
     running->tcb->state = DONE; //mark as done running
 
@@ -668,6 +682,9 @@ void stub(void (*func)(void *), void *arg) {
 
     //current thread is done, so we must get a new thread to run
     setcontext(scheduler);
+    if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
+        return FAILURE;
+    }
 }
 
  long getTicks() {
@@ -702,6 +719,19 @@ void Log (int ticks, int OPERATION, int TID, int PRIORITY) {
 
 /* Method with the scheduling algorithms */
 void schedule() {
+    sigset_t mask;
+
+    if (sigemptyset(&mask) == FAILURE) {
+        return FAILURE;
+    }
+
+    if (sigaddset(&mask, SIGALRM) == FAILURE) {
+        return FAILURE;
+    }
+    if (sigprocmask(SIG_BLOCK, &mask, NULL) == FAILURE) {
+        return FAILURE;
+    }
+
     getcontext(scheduler);
     printf("schedule called\n");
     printf("POLICY in schedule: %d\n", POLICY);
