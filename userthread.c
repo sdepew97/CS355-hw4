@@ -867,9 +867,12 @@ void schedule() {
                 toSchedule = currentNode;
                 break; //node is what we want or it is NULL;
             }
-            if(toSchedule != NULL) {
+            if (toSchedule != NULL) {
                 printf("To Schedule %d\n", toSchedule->tcb->TID);
             }
+        }
+        if(toSchedule == NULL) {
+            printf("loop failed\n");
         }
 
         printf("to schedule %d\n", toSchedule->tcb->TID);
