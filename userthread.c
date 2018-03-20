@@ -275,7 +275,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
         if(addNode(newThreadTCB, readyList) == FAILURE) {
             return FAILURE;
         }
-        Log((int) getTicks() - startTime, CREATED, currentTID, -1);
+        Log((int) getTicks() - startTime, CREATED, currentTID, priority);
         printList();
         return currentTID;
     } else { //we are priority scheduling
@@ -308,7 +308,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
             return FAILURE;
         }
 
-        Log((int) getTicks() - startTime, CREATED, currentTID, -1);
+        Log((int) getTicks() - startTime, CREATED, currentTID, priority);
         printList();
         return currentTID;
     }
@@ -330,7 +330,7 @@ int thread_yield(void) {
             return FAILURE;
         } else {
             running->tcb->state = READY;
-            Log((int) getTicks() - startTime, STOPPED, running->tcb->TID, -1);
+            Log((int) getTicks() - startTime, STOPPED, running->tcb->TID, running->tcb->priority);
             running->tcb->stop = (int) getTicks();
             totalRuntime += running->tcb->stop - running->tcb->start;
             totalRuns++;
@@ -358,7 +358,7 @@ int thread_yield(void) {
         }
 
         running->tcb->state = READY;
-        Log((int) getTicks() - startTime, STOPPED, running->tcb->TID, -1);
+        Log((int) getTicks() - startTime, STOPPED, running->tcb->TID, running->tcb->priority);
         running->tcb->stop = (int) getTicks();
         totalRuntime += running->tcb->stop - running->tcb->start;
         totalRuns++;
@@ -438,7 +438,7 @@ int thread_join(int tid) {
         if (running->tcb->joined != NULL && running->tcb->joined->state == WAITING) {
             if (running->tcb->joined->TID != currentNode->tcb->TID) {
                 running->tcb->state = WAITING;
-                Log((int) getTicks() - startTime, STOPPED, running->tcb->TID, -1);
+                Log((int) getTicks() - startTime, STOPPED, running->tcb->TID, running->tcb->priority);
                 running->tcb->stop = (int) getTicks();
                 totalRuntime += running->tcb->stop - running->tcb->start;
                 totalRuns++;
@@ -455,7 +455,7 @@ int thread_join(int tid) {
             //case where TID does exist and thread is ready to go! (set calling thread to waiting by this thread and set joined pointer)
             running->tcb->state = WAITING;
             currentNode->tcb->joined = running->tcb;
-            Log((int) getTicks() - startTime, STOPPED, running->tcb->TID, -1);
+            Log((int) getTicks() - startTime, STOPPED, running->tcb->TID, running->tcb->priority);
             running->tcb->stop = (int) getTicks();
             totalRuntime += running->tcb->stop - running->tcb->start;
             totalRuns++;
@@ -488,20 +488,40 @@ void stub(void (*func)(void *), void *arg) {
     func(arg); // call root function
     //TODO: thread clean up mentioned in assignment guidelines on page 3
     printf("thread done\n");
-    Log((int) getTicks() - startTime, FINISHED, ((TCB *) running->tcb)->TID, -1);
-    running->tcb->state = DONE;
+    Log((int) getTicks() - startTime, FINISHED, running->tcb->TID, running->tcb->priority);
+    running->tcb->state = DONE; //mark as done running
 
-    if (running->tcb->joined != NULL) {
+    if (running->tcb->joined != NULL) { //running is joined to another thread...so need to set that joined thread to ready
         running->tcb->joined->state = READY;
 
-        node *currentNode = readyList->head;
-        while (currentNode != NULL && currentNode->tcb->TID != running->tcb->joined->TID) {
-            currentNode = currentNode->next;
+        node *currentNode;
+        if(POLICY == FIFO || POLICY == SJF) {
+            currentNode = readyList->head;
+            while (currentNode != NULL && currentNode->tcb->TID != running->tcb->joined->TID) {
+                currentNode = currentNode->next;
+            }
+        } else if(POLICY == PRIORITY) {
+            currentNode = highList->head;
+            while (currentNode != NULL && currentNode->tcb->TID != running->tcb->joined->TID) {
+                currentNode = currentNode->next;
+            }
+            if (currentNode == NULL) {
+                currentNode = mediumList->head;
+                while (currentNode != NULL && currentNode->tcb->TID != running->tcb->joined->TID) {
+                    currentNode = currentNode->next;
+                }
+                if (currentNode == NULL) {
+                    currentNode = lowList->head;
+                    while (currentNode != NULL && currentNode->tcb->TID != running->tcb->joined->TID) {
+                        currentNode = currentNode->next;
+                    }
+                }
+            }
         }
 
         printf("Current node TID %d, running node joined TID %d\n", currentNode->tcb->TID, running->tcb->joined->TID);
 
-        //current node is now the one we're looking for
+        //current node is now the one we're looking for to move to the end of the list
         if (POLICY == FIFO || POLICY == SJF) {
             moveToEnd(currentNode, readyList);
             printf("Free node result %d\n", removeNode(running, readyList));
@@ -577,7 +597,7 @@ void schedule() {
 
         //now current node is ready to run, so have to run it here
         running = currentNode;
-        Log((int) getTicks() - startTime, SCHEDULED, currentNode->tcb->TID, -1);
+        Log((int) getTicks() - startTime, SCHEDULED, currentNode->tcb->TID, currentNode->tcb->priority);
         //start timing here
         running->tcb->start = (int) getTicks(); //TODO: Ask Rachel: milliseconds of same time?? account for seconds?
         running->tcb->state = RUNNING;
@@ -619,7 +639,7 @@ void schedule() {
         //now currentNode is the node with min runtime, so run this node
         currentNode = minRuntimeNode;
         running = currentNode;
-        Log((int) getTicks() - startTime, SCHEDULED, currentNode->tcb->TID, -1);
+        Log((int) getTicks() - startTime, SCHEDULED, currentNode->tcb->TID, currentNode->tcb->priority);
         //start timing here
         running->tcb->start = (int) getTicks(); //TODO: Ask Rachel: milliseconds of same time?? account for seconds?
         running->tcb->state = RUNNING;
@@ -630,13 +650,7 @@ void schedule() {
     } else if (POLICY == PRIORITY) {
         //TODO: ensure thread runs for 100 miliseconds, so reset timer here each time I schedule a thread??
         printf("schedule priority\n");
-//        running = mediumList->head;
-//        mediumList->head->tcb->state = RUNNING;
-//        setcontext(mediumList->head->tcb->ucontext); //TODO: add scheduling logic here
-
         //TODO: think about complex joining logic..if no threads of one type are available in one queue, then do you schedule in a different queue??? Also think about joining across..wait for Rachel answer
-        //TODO: reset timer here to ensure full 100 milliseconds are given
-
 
         //get random entry into array for the priority to be scheduled
         struct timeval now;
@@ -651,9 +665,11 @@ void schedule() {
         node *currentNode = NULL;
 
         //now priorityToSchedule holds the list from which to schedule round robin
-        if (running == NULL) { //the thread finished, so it does not need to be placed back on the queue for round robin
+        if (running ==
+            NULL) { //the prior running thread finished and was removed, so it does not need to be placed back on the queue for round robin
 
-        } else { //current thread needs to be put at the end of it's queue, since round robin
+        } else { //current thread needs to be put at the end of it's queue, since round robin and be set to ready to run again, since it shouldn't be running right now
+            running->tcb->state = READY;
             if (running->tcb->priority == HIGH) {
                 moveToEnd(running, highList);
                 printList();
@@ -697,14 +713,31 @@ void schedule() {
             }
         }
 
+        //TODO: reset timer here to ensure full 100 milliseconds are given
+        struct itimerval realt;
+
+        setrtimer(&realt);
+        if (setitimer(ITIMER_REAL, &realt, NULL) == FAILURE) {
+            return FAILURE;
+        }
+
         //toSchedule is the node we want at this point
+        currentNode = toSchedule;
+        running = currentNode;
+        Log((int) getTicks() - startTime, SCHEDULED, currentNode->tcb->TID, currentNode->tcb->priority);
+        //start timing here
+        running->tcb->start = (int) getTicks(); //TODO: Ask Rachel: milliseconds of same time?? account for seconds?
+        running->tcb->state = RUNNING;
+        printf("running TID %d\n", running->tcb->TID);
+        printList();
+        setcontext(running->tcb->ucontext);
     }
 }
 
 void printList() {
     node *currentNode = NULL;
 
-    if(PRIORITY == FIFO || PRIORITY == SJF) {
+    if(POLICY == FIFO || POLICY == SJF) {
         currentNode = readyList->head;
 
         while (currentNode != NULL) {
