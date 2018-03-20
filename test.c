@@ -9,7 +9,7 @@
 
 #define SUCCESS 0
 #define FAILURE -1
-#define POLICY 0 //FIFO
+#define POLICY 2 //FIFO PRIORITY
 
 void printHello() {
 //    printf("Hello World\n");
