@@ -58,8 +58,7 @@ enum {
     READY = 0, //ready when joined
     WAITING = 1, //waiting when has joined something that's now ready to run
     RUNNING = 2, //running when it has been joined
-    BLOCKED = 3, //created and blocked in non-preemptive, since not joined in non-preemptive and when not joined in non-preemptive, then we don't run the thread!
-    DONE = 4 //when thread is done running and it should be removed from the ready queue
+    DONE = 3 //when thread is done running and it should be removed from the ready queue
 };
 
 typedef struct node {
@@ -748,11 +747,12 @@ void schedule() {
         node *currentNode = NULL;
 
         //now priorityToSchedule holds the list from which to schedule round robin
-        if (running ==
-            NULL) { //the prior running thread finished and was removed, so it does not need to be placed back on the queue for round robin
+        if (running == NULL) { //the prior running thread finished and was removed, so it does not need to be placed back on the queue for round robin
 
         } else { //current thread needs to be put at the end of it's queue, since round robin and be set to ready to run again, since it shouldn't be running right now
-            running->tcb->state = READY;
+            if(running->tcb->state != WAITING) {
+                running->tcb->state = READY;
+            }
             if (running->tcb->priority == HIGH) {
                 moveToEnd(running, highList);
                 printf("moved to end\n");
