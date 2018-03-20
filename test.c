@@ -458,7 +458,7 @@
 
 void big(void *arg)
 {
-    poll(NULL, 0, 500);
+    poll(NULL, 0, 200);
 }
 
 int main(void) {
