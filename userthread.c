@@ -8,7 +8,7 @@
 #include "userthread.h"
 #include "logger.h"
 
-#define MAINPRIORITY 1
+#define MAINPRIORITY -1
 #define MAINTID -1
 #define FAILURE -1
 #define SUCCESS 0
@@ -20,9 +20,9 @@
 #define INTERVAL_MICROSECS 	100000
 #define VALUE_SECS 		0
 #define VALUE_MICROSECS 100000
-#define LOW -1
+#define LOW 1
 #define MEDIUM 0
-#define HIGH 1
+#define HIGH -1
 
 //globals for logging
 enum {CREATED, SCHEDULED, STOPPED, FINISHED};
@@ -486,7 +486,7 @@ int thread_join(int tid) {
     return FAILURE;
 }
 
-//TODO: clean up here
+//TODO: clean up here and modify for sigalarm and for priority!
 void stub(void (*func)(void *), void *arg) {
     printf("entered stub\n");
     // thread starts here
