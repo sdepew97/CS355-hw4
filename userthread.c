@@ -316,7 +316,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
         }
 
         makecontext(newThread, (void (*)(void)) stub, 2, func, arg);
-
+        int currentTID = TID;
         TCB *newThreadTCB = newTCB(currentTID, 0, 0, 0, (totalRuntime / totalRuns), 0, 0, 0, priority, READY,
                                    NULL); //For preemptive, don't require a join to run the thread, since the scheduler is called with SIGALARM
         newThreadTCB->ucontext = newThread;
