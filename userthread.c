@@ -623,7 +623,7 @@ int addNode(TCB *tcb, linkedList *list) {
     //TODO: mask this linked list interaction
 
     //NOTE: this case should not occur, as long as libinit has been called
-    if (readyList->size == 0) {
+    if (list->size == 0) {
         node *newThreadNode = newNode(tcb, NULL, NULL);
         if(newThreadNode == NULL) {
             return FAILURE;
