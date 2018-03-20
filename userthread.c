@@ -914,8 +914,8 @@ void setrtimer(struct itimerval *ivPtr) {
 ////    ivPtr->it_interval.tv_usec = 100000;
 //    ivPtr->it_value.tv_sec = 1;
 ////    ivPtr->it_interval.tv_usec = 100000;
-    ivPtr->it_interval.tv_sec = ivPtr->it_value.tv_sec = 1;
-    ivPtr->it_interval.tv_usec = ivPtr->it_value.tv_usec = 0;
+    ivPtr->it_interval.tv_sec = ivPtr->it_value.tv_sec = 0;
+    ivPtr->it_interval.tv_usec = ivPtr->it_value.tv_usec = 100000;
 }
 
 /* Set up SIGALRM signal handler */
