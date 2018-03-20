@@ -195,17 +195,25 @@ int thread_libinit(int policy) {
             if (addNode(mainTCB, highList) == FAILURE) {
                 return FAILURE;
             }
+            else {
+                running = highList->head; //have to set running to the proper node, main, here
+            }
         } else if (MAINTID == MEDIUM) {
             if (addNode(mainTCB, mediumList) == FAILURE) {
                 return FAILURE;
+            }
+            else {
+                running = mediumList->head; //have to set running to the proper node, main, here
             }
         } else if (MAINTID == LOW) {
             if (addNode(mainTCB, lowList) == FAILURE) {
                 return FAILURE;
             }
+            else {
+                running = lowList->head; //have to set running to the proper node, main, here
+            }
         }
 
-        running = readyList->head; //have to set running to the proper node, main, here
         mainTCB->state = RUNNING;
 
         //LOG main's creation
