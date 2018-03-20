@@ -449,7 +449,9 @@ int thread_join(int tid) {
                 shiftUsages(running->tcb->stop - running->tcb->start, running->tcb);
                 setAverage(running->tcb);
                 currentNode->tcb->joined = running->tcb;
-                swapcontext(running->tcb->ucontext, scheduler);
+                if(PRIORITY == FIFO || PRIORITY == SJF) {
+                    swapcontext(running->tcb->ucontext, scheduler);
+                }
             } else {
                 //attempting a circular join, so a failure should occur
                 printf("failed on circular\n");
@@ -466,7 +468,9 @@ int thread_join(int tid) {
             shiftUsages(running->tcb->stop - running->tcb->start, running->tcb);
             setAverage(running->tcb);
             printList();
-            swapcontext(running->tcb->ucontext, scheduler);
+            if(PRIORITY == FIFO || PRIORITY == SJF) {
+                swapcontext(running->tcb->ucontext, scheduler);
+            }
         }
         return SUCCESS;
     } else {
