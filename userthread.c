@@ -834,7 +834,7 @@ void schedule() {
                     currentNode = currentNode->next;
                 }
                 toSchedule = currentNode;
-                break; //node is what we want or it is NULL;
+                continue; //node is what we want or it is NULL;
             } else if (priorityToSchedule == MEDIUM) {
                 currentNode = mediumList->head;
 
@@ -842,7 +842,7 @@ void schedule() {
                     currentNode = currentNode->next;
                 }
                 toSchedule = currentNode;
-                break; //node is what we want or it is NULL;
+                continue; //node is what we want or it is NULL;
             } else if (priorityToSchedule == LOW) {
                 currentNode = lowList->head;
 
@@ -850,12 +850,13 @@ void schedule() {
                     currentNode = currentNode->next;
                 }
                 toSchedule = currentNode;
-                break; //node is what we want or it is NULL;
+                continue; //node is what we want or it is NULL;
             }
             if (toSchedule != NULL) {
                 printf("To Schedule %d\n", toSchedule->tcb->TID);
             }
         }
+
         if(toSchedule == NULL) {
             printf("loop failed\n");
         }
