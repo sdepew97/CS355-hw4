@@ -168,9 +168,9 @@ int thread_libinit(int policy) {
         setrtimer(&realt);
 
         if (setitimer(ITIMER_REAL, &realt, NULL) == FAILURE) {
+            printf("priority\n");
             return FAILURE;
         }
-        printf("priority\n");
 
         return SUCCESS;
     } else {
