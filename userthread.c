@@ -113,7 +113,22 @@ static void sigHandler(int j, siginfo_t *si, void *old_context);
 //TODO: Ask rachel about FIFO scheduling (DONE), ask her about masking for the methods (DONE), ask her about SJF and ask her about testing? (DONE) and all comments in body
 
 //TODO: masking, then done!
+//Wanted to mask entire method, since this is using globals very freely
 int thread_libinit(int policy) {
+    //TODO: add masking to stop race conditions! :)
+    sigset_t mask;
+
+    if (sigemptyset(&mask) == ERROR) {
+        return FAILURE;
+    }
+
+    if (sigaddset(&mask, SIGALRM) == ERROR) {
+        return FAILURE;
+    }
+    if (sigprocmask(SIG_BLOCK, &mask, NULL) == ERROR) {
+        return FAILURE;
+    }
+
     //this is when the program officially started
     startTime = (int) getTicks(); //TODO: move this for correct timing
 
@@ -204,21 +219,22 @@ int thread_libinit(int policy) {
             else {
                 running = highList->head; //have to set running to the proper node, main, here
             }
-        } else if (MAINPRIORITY == MEDIUM) {
-            if (addNode(mainTCB, mediumList) == FAILURE) {
-                return FAILURE;
-            }
-            else {
-                running = mediumList->head; //have to set running to the proper node, main, here
-            }
-        } else if (MAINPRIORITY == LOW) {
-            if (addNode(mainTCB, lowList) == FAILURE) {
-                return FAILURE;
-            }
-            else {
-                running = lowList->head; //have to set running to the proper node, main, here
-            }
         }
+//        else if (MAINPRIORITY == MEDIUM) {
+//            if (addNode(mainTCB, mediumList) == FAILURE) {
+//                return FAILURE;
+//            }
+//            else {
+//                running = mediumList->head; //have to set running to the proper node, main, here
+//            }
+//        } else if (MAINPRIORITY == LOW) {
+//            if (addNode(mainTCB, lowList) == FAILURE) {
+//                return FAILURE;
+//            }
+//            else {
+//                running = lowList->head; //have to set running to the proper node, main, here
+//            }
+//        }
 
         mainTCB->state = RUNNING;
 
@@ -231,12 +247,28 @@ int thread_libinit(int policy) {
         //passed in an invalid scheduling policy, which was stated to not occur, but could occur
         return FAILURE;
     }
-
     return FAILURE;
+
+    if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == ERROR) {
+        return FAILURE;
+    }
 }
 
 //TODO: free all memory here
 int thread_libterminate(void) {
+    sigset_t mask;
+
+    if (sigemptyset(&mask) == ERROR) {
+        return FAILURE;
+    }
+
+    if (sigaddset(&mask, SIGALRM) == ERROR) {
+        return FAILURE;
+    }
+    if (sigprocmask(SIG_BLOCK, &mask, NULL) == ERROR) {
+        return FAILURE;
+    }
+
     //free all queues
 
     //free all thread memory malloced
@@ -245,11 +277,28 @@ int thread_libterminate(void) {
 
     //mark main as finished and free
     return FAILURE;
+
+    if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == ERROR) {
+        return FAILURE;
+    }
 }
 
 //TODO: masking, then done!
 int thread_create(void (*func)(void *), void *arg, int priority) {
     printf("creating new thread %d\n", TID);
+
+    sigset_t mask;
+
+    if (sigemptyset(&mask) == ERROR) {
+        return FAILURE;
+    }
+
+    if (sigaddset(&mask, SIGALRM) == ERROR) {
+        return FAILURE;
+    }
+    if (sigprocmask(SIG_BLOCK, &mask, NULL) == ERROR) {
+        return FAILURE;
+    }
 
     //This means that we have not called threadlib_init first, which is required
     if(running == NULL || func == NULL) {
@@ -277,6 +326,11 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
         }
         Log((int) getTicks() - startTime, CREATED, currentTID, priority);
         printList();
+
+
+        if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == ERROR) {
+            return FAILURE;
+        }
         return currentTID;
     } else { //we are priority scheduling
         printf("we are creating in priority\n");
@@ -310,7 +364,16 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
 
         Log((int) getTicks() - startTime, CREATED, currentTID, priority);
         printList();
+
+
+        if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == ERROR) {
+            return FAILURE;
+        }
         return currentTID;
+    }
+
+    if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == ERROR) {
+        return FAILURE;
     }
 
     return FAILURE;
@@ -318,6 +381,19 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
 
 int thread_yield(void) {
     printf("yield hit\n");
+
+    sigset_t mask;
+
+    if (sigemptyset(&mask) == ERROR) {
+        return FAILURE;
+    }
+
+    if (sigaddset(&mask, SIGALRM) == ERROR) {
+        return FAILURE;
+    }
+    if (sigprocmask(SIG_BLOCK, &mask, NULL) == ERROR) {
+        return FAILURE;
+    }
 
     //This means that we have not called threadlib_init first, which is required
     if (running == NULL) {
@@ -365,9 +441,16 @@ int thread_yield(void) {
         shiftUsages(running->tcb->stop - running->tcb->start, running->tcb);
         setAverage(running->tcb);
         swapcontext(running->tcb->ucontext, scheduler);
+
+        if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == ERROR) {
+            return FAILURE;
+        }
         return SUCCESS;
     }
 
+    if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == ERROR) {
+        return FAILURE;
+    }
     return FAILURE;
 }
 
@@ -1016,28 +1099,22 @@ void sigHandler(int j, siginfo_t *si, void *old_context) {
     swapcontext(running->tcb->ucontext, scheduler); //TODO: bring this back...
 }
 
-//TODO: add masking here! :)
-/*
- * sigset_t mask;
-
-            if (sigemptyset(&mask) == ERROR) {
-                perror("I am sorry, but sigemptyset failed.\n");
-                exit(EXIT_FAILURE);
-            }
-
-            if (sigaddset(&mask, SIGCHLD) == ERROR) {
-                perror("I am sorry, but sigaddset failed.\n");
-                exit(EXIT_FAILURE);
-            }
-            if (sigprocmask(SIG_BLOCK, &mask, NULL) == ERROR) {
-                perror("I am sorry, but sigprocmask failed.\n");
-                exit(EXIT_FAILURE);
-            }
-
-            put_job_in_background(j, ZERO, RUNNING);
-
-            if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == ERROR) {
-                perror("I am sorry, but sigprocmask failed.\n");
-                exit(EXIT_FAILURE);
-            }
- */
+////TODO: add masking to stop race conditions! :)
+//sigset_t mask;
+//
+//if (sigemptyset(&mask) == ERROR) {
+//    return FAILURE;
+//}
+//
+//if (sigaddset(&mask, SIGALRM) == ERROR) {
+//    return FAILURE;
+//}
+//if (sigprocmask(SIG_BLOCK, &mask, NULL) == ERROR) {
+//    return FAILURE;
+//}
+//
+////TODO: add critical section here
+//
+//if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == ERROR) {
+//    return FAILURE;
+//}
