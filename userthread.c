@@ -8,7 +8,7 @@
 #include "userthread.h"
 #include "logger.h"
 
-#define MAINPRIORITY 1
+#define MAINPRIORITY 0
 #define MAINTID -1
 #define FAILURE -1
 #define SUCCESS 0
