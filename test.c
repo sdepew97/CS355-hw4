@@ -10,7 +10,7 @@
 #define SUCCESS 0
 #define FAILURE -1
 #define POLICY 2 //FIFO PRIORITY
-#define PRIORITY 0
+#define PRIORITY 2
 
 void printHello() {
     printf("Hello World\n");
