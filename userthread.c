@@ -164,15 +164,13 @@ int thread_libinit(int policy) {
             return FAILURE;
         }
 
-        printf("priority\n");
-
         struct itimerval realt;
         setrtimer(&realt);
 
         if (setitimer(ITIMER_REAL, &realt, NULL) == FAILURE) {
             return FAILURE;
         }
-        sleep(1);
+        printf("priority\n");
 
         return SUCCESS;
     } else {
