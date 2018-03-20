@@ -173,13 +173,17 @@ int thread_libinit(int policy) {
             return FAILURE;
         }
 
+        signal(SIGALRM, sigHandler);
+
+        while(1) {
+            pause();
+            printf("alarm recieved\n");
+        }
+
 //        //TODO: setup queues here and the signal handler (DONE)
 //        if (setupSignals() == FAILURE) {
 //            return FAILURE;
 //        }
-
-        signal(SIGALRM, sigHandler);
-        pause(); //to test sighandler with working
 
         //create the lists
         lowList = malloc(sizeof(linkedList));
