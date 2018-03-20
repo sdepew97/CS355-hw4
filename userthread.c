@@ -320,7 +320,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
         TCB *newThreadTCB = newTCB(currentTID, 0, 0, 0, (totalRuntime / totalRuns), 0, 0, 0, priority, READY,
                                    NULL); //For preemptive, don't require a join to run the thread, since the scheduler is called with SIGALARM
         newThreadTCB->ucontext = newThread;
-        TID++; //TODO: MASK!!
+        TID++;
 
         if (priority == LOW) {
             if (addNode(newThreadTCB, lowList) == FAILURE) {
@@ -349,13 +349,14 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
         }
         return currentTID;
     }
-
+    if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
+        return FAILURE;
+    }
     return FAILURE;
 }
 
 int thread_yield(void) {
     printf("yield hit\n");
-
     sigset_t mask;
 
     if (sigemptyset(&mask) == FAILURE) {
@@ -387,6 +388,9 @@ int thread_yield(void) {
             //TODO: (Yes, do this) ask Rachel here about shifting and averaging and the whole runtime thing...since this changes the runtime with the zero's going into computing the average (Mark's idea is to use latest if 1 or 2, but then average if three or more)
             shiftUsages(running->tcb->stop - running->tcb->start, running->tcb);
             setAverage(running->tcb);
+            if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
+                return FAILURE;
+            }
             swapcontext(running->tcb->ucontext, scheduler);
             return SUCCESS;
         }
@@ -414,11 +418,10 @@ int thread_yield(void) {
         totalRuns++;
         shiftUsages(running->tcb->stop - running->tcb->start, running->tcb);
         setAverage(running->tcb);
-        swapcontext(running->tcb->ucontext, scheduler);
-
         if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
             return FAILURE;
         }
+        swapcontext(running->tcb->ucontext, scheduler);
         return SUCCESS;
     }
 
@@ -519,10 +522,10 @@ int thread_join(int tid) {
                 shiftUsages(running->tcb->stop - running->tcb->start, running->tcb);
                 setAverage(running->tcb);
                 currentNode->tcb->joined = running->tcb;
-                swapcontext(running->tcb->ucontext, scheduler);
                 if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
                     return FAILURE;
                 }
+                swapcontext(running->tcb->ucontext, scheduler);
             } else {
                 //attempting a circular join, so a failure should occur
                 printf("failed on circular\n");
@@ -543,10 +546,10 @@ int thread_join(int tid) {
             shiftUsages(running->tcb->stop - running->tcb->start, running->tcb);
             setAverage(running->tcb);
             printList();
-            swapcontext(running->tcb->ucontext, scheduler); //TODO: see if this needs to be replaced, here
             if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
                 return FAILURE;
             }
+            swapcontext(running->tcb->ucontext, scheduler); //TODO: see if this needs to be replaced, here
         }
         if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
             return FAILURE;
@@ -651,10 +654,10 @@ void stub(void (*func)(void *), void *arg) {
     }
     //TODO: free node here with freenode function
     running = NULL;
+    sigprocmask(SIG_UNBLOCK, &mask, NULL);
 
     //current thread is done, so we must get a new thread to run
     setcontext(scheduler);
-    sigprocmask(SIG_UNBLOCK, &mask, NULL);
 }
 
  long getTicks() {
@@ -716,6 +719,7 @@ void schedule() {
         printf("running TID %d\n", running->tcb->TID);
         printf("POLICY in schedule two: %d\n", POLICY);
         printList();
+        sigprocmask(SIG_UNBLOCK, &mask, NULL);
         setcontext(((TCB *) running->tcb)->ucontext);
     } else if (POLICY == SJF) {
         node *currentNode = readyList->head;
@@ -758,6 +762,7 @@ void schedule() {
         printf("running TID %d\n", ((TCB *) running->tcb)->TID);
         printf("POLICY in schedule two: %d\n", POLICY);
         printList();
+        sigprocmask(SIG_UNBLOCK, &mask, NULL);
         setcontext(running->tcb->ucontext);
     } else if (POLICY == PRIORITY) {
         //TODO: ensure thread runs for 100 miliseconds, so reset timer here each time I schedule a thread??
@@ -854,6 +859,7 @@ void schedule() {
         running->tcb->state = RUNNING;
         printf("running TID %d\n", running->tcb->TID);
         printList();
+        sigprocmask(SIG_UNBLOCK, &mask, NULL);
         setcontext(running->tcb->ucontext);
     }
 
@@ -920,8 +926,7 @@ void printList() {
 }
 
 ucontext_t *newContext(ucontext_t *uc_link, void (*func)(void *), void* arg) {
-    //TODO: mask access to global variable!
-    ucontext_t *returnValue = malloc(sizeof(ucontext_t)); //TODO: error check malloc
+    ucontext_t *returnValue = malloc(sizeof(ucontext_t));
     if (returnValue == NULL) {
         return NULL;
     }
@@ -935,12 +940,9 @@ ucontext_t *newContext(ucontext_t *uc_link, void (*func)(void *), void* arg) {
         return NULL;
     }
     returnValue->uc_stack.ss_size = STACKSIZE;
-    //TODO: figure out what to do with masking here??
-
     return returnValue;
 }
 
-//TODO: masking and error checking, here
 TCB* newTCB(int TID, int usage1, int usage2, int usage3, int averageOfUsages, int CPUUsage, int start, int stop, int priority, int state, TCB *joined) {
     TCB *returnValue = malloc(sizeof(TCB));
     if (returnValue == NULL) {
@@ -982,9 +984,7 @@ node* newNode(TCB *tcb, node* next, node* prev) {
 }
 
 int addNode(TCB *tcb, linkedList *list) {
-    //TODO: mask this linked list interaction
-
-    //NOTE: this case should not occur, as long as libinit has been called
+    //NOTE: this case should not occur, as long as lib_init has been called
     if (list->size == 0) {
         node *newThreadNode = newNode(tcb, NULL, NULL);
         if (newThreadNode == NULL) {
@@ -1142,7 +1142,7 @@ int setupSignals(void) {
 }
 
 void sigHandler(int j, siginfo_t *si, void *old_context) {
-    printf("got to sigHandler\n");
+    printf("*********************got to sigHandler*********************g\n");
 
     //save thread's state and go to the scheduler
     swapcontext(running->tcb->ucontext, scheduler);
