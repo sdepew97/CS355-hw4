@@ -842,7 +842,7 @@ void schedule() {
             printf("enter loop\n");
             randomEntry = rand_r(&(secs)) % 19; //number between 0 and 18
             priorityToSchedule = scheduling[randomEntry];
-
+            printf("got priority %d\n", priorityToSchedule);
             if (priorityToSchedule == HIGH) {
                 currentNode = highList->head;
                 while (currentNode != NULL && currentNode->tcb->state != READY) {
