@@ -383,6 +383,7 @@ int main(void) {
 
     int tid1 = thread_create(foo, NULL, 100);
     if (tid1 == -1)
+        printf("failure to create\n");
         exit(EXIT_FAILURE);
 
     if (thread_join(tid1) == -1)
