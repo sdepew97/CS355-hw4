@@ -176,9 +176,10 @@ int thread_libinit(int policy) {
         printf("got here\n");
         signal(SIGALRM, sigHandler);
         printf("got here\n");
-        alarm(1);
+//        alarm(1);
 
         while(1) {
+            printf("stuck\n");
             pause();
             printf("alarm recieved\n");
         }
