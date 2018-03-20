@@ -103,7 +103,7 @@ static int moveToEnd(node *nodeToMove, linkedList *list);
 static void shiftUsages(int newUsageValue, TCB *tcb);
 static int computeAverage(TCB *tcb);
 static void freeNode(node *nodeToFree);
-static int removeNode(node *nodeToRemove);
+static int removeNode(node *nodeToRemove, linkedList *list);
 static void setAverage(TCB *tcb);
 void setrtimer(struct itimerval *ivPtr);
 static int setupSignals(void);
@@ -509,19 +509,24 @@ void stub(void (*func)(void *), void *arg) {
         //current node is now the one we're looking for
         if(POLICY == FIFO || POLICY == SJF) {
             moveToEnd(currentNode, readyList);
+            printf("Free node result %d\n", removeNode(running, readyList));
+            printList();
         } else {
             if(currentNode->tcb->priority == HIGH) {
                 moveToEnd(currentNode, highList);
+                printf("Free node result %d\n", removeNode(running, highList));
+                printList();
             } else if(currentNode->tcb->priority == MEDIUM) {
                 moveToEnd(currentNode, mediumList);
+                printf("Free node result %d\n", removeNode(running, mediumList));
+                printList();
             } else if(currentNode->tcb->priority == LOW) {
                 moveToEnd(currentNode, lowList);
+                printf("Free node result %d\n", removeNode(running, lowList));
+                printList();
             }
         }
     }
-
-    printf("Free node result %d\n", removeNode(running));
-    printList();
 
     running = NULL;
 
@@ -817,38 +822,38 @@ void freeNode(node *nodeToFree) {
     //TODO: fill in body here
 }
 
-int removeNode(node *nodeToRemove) {
+int removeNode(node *nodeToRemove, linkedList *list) {
     node *prev = nodeToRemove->prev;
     node *next = nodeToRemove->next;
 
-    if(readyList->head->tcb->TID == readyList->tail->tcb->TID && readyList->head->tcb->TID == nodeToRemove->tcb->TID) {
+    if(list->head->tcb->TID == list->tail->tcb->TID && list->head->tcb->TID == nodeToRemove->tcb->TID) {
         //the node is the only one in the list, so we can simply remove it here
-        readyList->head = NULL;
-        readyList->tail = NULL;
+        list->head = NULL;
+        list->tail = NULL;
         freeNode(nodeToRemove);
-        readyList->size--;
+        list->size--;
     }
     //removing head with more than one node in the list (don't have to reset the tail)
-    else if (readyList->head->tcb->TID == nodeToRemove->tcb->TID) {
-        readyList->head = next;
-        readyList->head->prev = NULL;
+    else if (list->head->tcb->TID == nodeToRemove->tcb->TID) {
+        list->head = next;
+        list->head->prev = NULL;
         //can keep the new head's next pointer
 
         nodeToRemove->next = NULL;
         nodeToRemove->prev = NULL;
         freeNode(nodeToRemove);
-        readyList->size--;
+        list->size--;
 
         return SUCCESS;
-    } else if(readyList->tail->tcb->TID == nodeToRemove->tcb->TID) { //remove node from tail
-        readyList->tail = prev;
-        readyList->tail->next = NULL;
+    } else if(list->tail->tcb->TID == nodeToRemove->tcb->TID) { //remove node from tail
+        list->tail = prev;
+        list->tail->next = NULL;
         //can keep the new tail's prev pointer
 
         nodeToRemove->next = NULL;
         nodeToRemove->prev = NULL;
         freeNode(nodeToRemove);
-        readyList->size--;
+        list->size--;
         return SUCCESS;
     } else {
         //node to move is a middle node, so have to reset pointers accordingly
@@ -858,7 +863,7 @@ int removeNode(node *nodeToRemove) {
         nodeToRemove->next = NULL;
         nodeToRemove->prev = NULL;
         freeNode(nodeToRemove);
-        readyList->size--;
+        list->size--;
         return SUCCESS;
     }
 
