@@ -899,9 +899,9 @@ void setAverage(TCB *tcb) {
   Its interval is 100 milliseconds.  Its initial value is 100 milliseconds.
 */
 void setrtimer(struct itimerval *ivPtr) {
-    ivPtr->it_interval.tv_sec = INTERVAL_SECS;
+    ivPtr->it_interval.tv_sec = 0;
     ivPtr->it_interval.tv_usec = 100000;
-    ivPtr->it_value.tv_sec = VALUE_SECS;
+    ivPtr->it_value.tv_sec = 0;
     ivPtr->it_interval.tv_usec = 100000;
 }
 
