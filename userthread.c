@@ -256,15 +256,18 @@ int thread_libterminate(void) {
     if (POLICY == FIFO || POLICY == SJF) {
         if (readyList == NULL) {
             return FAILURE; //this means that threadlib_init wasn't called beforehand
-        }
-        currentNode = readyList->head;
-        while (currentNode != NULL) {
-            nextNode = currentNode->next;
-            freeNode(currentNode);
-            currentNode = nextNode;
-        }
+        } else {
+            currentNode = readyList->head;
+            while (currentNode != NULL) {
+                nextNode = currentNode->next;
+                freeNode(currentNode);
+                currentNode = nextNode;
+            }
 
-        free(readyList);
+            free(readyList);
+
+            return SUCCESS;
+        }
     } else {
         if (highList == NULL || mediumList == NULL || lowList == NULL) {
             return FAILURE; //this means that init wasn't called
@@ -293,6 +296,8 @@ int thread_libterminate(void) {
             }
             free(lowList);
         }
+
+        return SUCCESS;
     }
 
     if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
