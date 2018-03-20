@@ -9,7 +9,7 @@
 #include "logger.h"
 
 #define MAINPRIORITY 1
-#define MAINTID 1
+#define MAINTID -1
 #define FAILURE -1
 #define SUCCESS 0
 #define TRUE 1
@@ -796,6 +796,7 @@ void sigHandler(int j, siginfo_t *si, void *old_context) {
 //    swapcontext(running->tcb->ucontext, scheduler); //TODO: bring this back...
 }
 
+//TODO: add masking here! :)
 /*
  * sigset_t mask;
 
