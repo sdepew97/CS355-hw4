@@ -1022,7 +1022,7 @@ TCB* newTCB(int TID, int usage1, int usage2, int usage3, int averageOfUsages, in
 }
 
 void freeTCB(TCB *tcb) {
-    freeUcontext(tcb->ucontext);
+//    freeUcontext(tcb->ucontext);
     free(tcb->ucontext);
     tcb->joined = NULL; //make sure not to free the wrong thing here
     free(tcb->joined);
@@ -1043,7 +1043,7 @@ node* newNode(TCB *tcb, node* next, node* prev) {
 
 void freeNode(node *nodeToFree) {
     //TODO: fill in body here
-//    freeTCB(nodeToFree->tcb);
+    freeTCB(nodeToFree->tcb);
     nodeToFree->next = NULL;
     nodeToFree->prev = NULL;
     free(nodeToFree);
@@ -1207,7 +1207,7 @@ void sigHandler(int j, siginfo_t *si, void *old_context) {
     printf("*********************got to sigHandler********************* at %d\n", (int) getTicks() - startTime);
 
     //save thread's state and go to the scheduler
-    if (running == NULL) { //TODO: figure out why this is always NULL, which means only finished threads are hitting it here
+    if (running == NULL) { //TODO: figure out why this is always NULL, which means only finished threads are hitting it here, so have to unblock for threads that are not yet finished...
 //        printf("running is NULL\n");
         setcontext(scheduler);
     } else {
