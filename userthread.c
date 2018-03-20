@@ -173,24 +173,13 @@ int thread_libinit(int policy) {
             return FAILURE;
         }
 
-        printf("got here\n");
-//        signal(SIGALRM, sigHandler);
-
-//        alarm(1);
-
-//        while(1) {
-//            printf("stuck\n");
-//            pause();
-//            printf("alarm recieved\n");
-//        }
-
-//        //TODO: setup queues here and the signal handler (DONE)
+        //TODO: setup queues here and the signal handler (DONE)
         if (setupSignals() == FAILURE) {
             return FAILURE;
         }
 
         printf("got here\n");
-        pause();
+//        pause();
 
         //create the lists
         lowList = malloc(sizeof(linkedList));
@@ -910,10 +899,6 @@ void setAverage(TCB *tcb) {
   Its interval is 100 milliseconds.  Its initial value is 100 milliseconds.
 */
 void setrtimer(struct itimerval *ivPtr) {
-//    ivPtr->it_interval.tv_sec = 1;
-////    ivPtr->it_interval.tv_usec = 100000;
-//    ivPtr->it_value.tv_sec = 1;
-////    ivPtr->it_interval.tv_usec = 100000;
     ivPtr->it_interval.tv_sec = ivPtr->it_value.tv_sec = 0;
     ivPtr->it_interval.tv_usec = ivPtr->it_value.tv_usec = 100000;
 }
