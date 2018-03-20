@@ -874,6 +874,7 @@ int addNode(TCB *tcb, linkedList *list) {
 }
 
 int moveToEnd(node *nodeToMove, linkedList *list) {
+    printf("move to end\n");
     printList();
     node *prev = nodeToMove->prev;
     node *next = nodeToMove->next;
