@@ -173,8 +173,7 @@ int thread_libinit(int policy) {
             return FAILURE;
         }
 
-        //setAlrmMask();
-
+        setAlrmMask();
         //create the lists
         lowList = malloc(sizeof(linkedList));
         if (lowList == NULL) {
@@ -203,7 +202,7 @@ int thread_libinit(int policy) {
 
         //LOG main's creation
         Log((int) getTicks() - startTime, CREATED, MAINTID, MAINPRIORITY);
-        //removeAlrmMask();
+        removeAlrmMask();
         //everything went fine, so return success
         return SUCCESS;
     } else {
@@ -218,7 +217,7 @@ int thread_libterminate(void) {
     node *currentNode = NULL;
     node *nextNode = NULL;
 
-    //setAlrmMask();
+    setAlrmMask();
     //free all queues
 
     //free all thread memory malloced
@@ -229,6 +228,7 @@ int thread_libterminate(void) {
 
     if (POLICY == FIFO || POLICY == SJF) {
         if (readyList == NULL) {
+            removeAlrmMask();
             return FAILURE; //this means that threadlib_init wasn't called beforehand
         } else {
             currentNode = readyList->head;
@@ -239,6 +239,7 @@ int thread_libterminate(void) {
             }
 
             free(readyList);
+            removeAlrmMask();
 
             return SUCCESS;
         }
@@ -270,7 +271,7 @@ int thread_libterminate(void) {
             }
             free(lowList);
         }
-        //removeAlrmMask();
+        removeAlrmMask();
         return SUCCESS;
     }
 
