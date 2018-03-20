@@ -35,7 +35,7 @@ static int startTime;
 static int LogCreated = FALSE; //know if we append or not to the log.txt file
 static int totalRuntime = 0;
 static int totalRuns = 0;
-static int scheduling[] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, -1, -1, -1, -1}; //2.25:1.5:1 ratio here, so randomly picking an entry allows us to know we get proper ratio of priorities
+static int scheduling[] = {HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, MEDIUM, MEDIUM, MEDIUM, MEDIUM, MEDIUM, MEDIUM, LOW, LOW, LOW, LOW}; //2.25:1.5:1 ratio here, so randomly picking an entry allows us to know we get proper ratio of priorities
 
 //structs used in program
 typedef struct TCB {
