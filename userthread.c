@@ -927,6 +927,7 @@ int setupSignals(void) {
 //}
 //
 void sigHandler(int j, siginfo_t *si, void *old_context) {
+    printf("got to handler\n");
     printf("hello world\n");
     Log(getTicks() - startTime, FINISHED, mainTCB->TID, 1);
     exit(EXIT_SUCCESS);
