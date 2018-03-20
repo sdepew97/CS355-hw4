@@ -1140,14 +1140,14 @@ int setupSignals(void) {
 }
 
 void sigHandler(int j, siginfo_t *si, void *old_context) {
-    printf("*********************got to sigHandler********************* at %d\n", (int) getTicks() - startTime);
+//    printf("*********************got to sigHandler********************* at %d\n", (int) getTicks() - startTime);
 
     //save thread's state and go to the scheduler
     if (running == NULL) {
-        printf("running is NULL\n");
+//        printf("running is NULL\n");
         setcontext(scheduler);
     } else {
-        printf("running is not NULL\n");
+//        printf("running is not NULL\n");
         swapcontext(running->tcb->ucontext, scheduler);
     }
 }
