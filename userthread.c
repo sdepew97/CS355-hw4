@@ -106,16 +106,12 @@ static void setAverage(TCB *tcb);
 void setrtimer(struct itimerval *ivPtr);
 static int setupSignals(void);
 static void sigHandler(int j, siginfo_t *si, void *old_context);
-//void sigHandler(int sig);
 
-//TODO: Ask rachel about FIFO scheduling (DONE), ask her about masking for the methods (DONE), ask her about SJF and ask her about testing? (DONE) and all comments in body
-
-//TODO: masking, then done!
-//Wanted to mask entire method, since this is using globals very freely
+/*
+ * Masking the entire method, since it uses globals on almost every line and I didn't want to end up in an inconsistent state
+ */
 int thread_libinit(int policy) {
-    //TODO: add masking to stop race conditions! :)
     sigset_t mask;
-
     if (sigemptyset(&mask) == FAILURE) {
         return FAILURE;
     }
@@ -128,7 +124,7 @@ int thread_libinit(int policy) {
     }
 
     //this is when the program officially started
-    startTime = (int) getTicks(); //TODO: move this for correct timing
+    startTime = (int) getTicks();
 
     //create context for scheduler
     scheduler = newContext(NULL, (void (*)(void *)) scheduler, NULL);
@@ -140,7 +136,7 @@ int thread_libinit(int policy) {
 
     //create main's TCB
     mainTCB = newTCB(MAINTID, 0, 0, 0, QUANTA / 2, 0, (int) getTicks(), 0, MAINPRIORITY, READY, NULL);
-    totalRuntime += QUANTA / 2; //TODO: ask about this here (DONE)
+    totalRuntime += QUANTA / 2;
     totalRuns++;
 
     if (mainTCB == NULL) {
@@ -186,13 +182,9 @@ int thread_libinit(int policy) {
             return FAILURE;
         }
 
-        //TODO: setup queues here and the signal handler (DONE)
         if (setupSignals() == FAILURE) {
             return FAILURE;
         }
-
-        printf("got here\n");
-//        pause();
 
         //create the lists
         lowList = malloc(sizeof(linkedList));
@@ -213,26 +205,10 @@ int thread_libinit(int policy) {
         if (MAINPRIORITY == HIGH) {
             if (addNode(mainTCB, highList) == FAILURE) {
                 return FAILURE;
-            }
-            else {
+            } else {
                 running = highList->head; //have to set running to the proper node, main, here
             }
         }
-//        else if (MAINPRIORITY == MEDIUM) {
-//            if (addNode(mainTCB, mediumList) == FAILURE) {
-//                return FAILURE;
-//            }
-//            else {
-//                running = mediumList->head; //have to set running to the proper node, main, here
-//            }
-//        } else if (MAINPRIORITY == LOW) {
-//            if (addNode(mainTCB, lowList) == FAILURE) {
-//                return FAILURE;
-//            }
-//            else {
-//                running = lowList->head; //have to set running to the proper node, main, here
-//            }
-//        }
 
         mainTCB->state = RUNNING;
 
@@ -284,7 +260,6 @@ int thread_libterminate(void) {
 //TODO: masking, then done!
 int thread_create(void (*func)(void *), void *arg, int priority) {
     printf("creating new thread %d\n", TID);
-
     sigset_t mask;
 
     if (sigemptyset(&mask) == FAILURE) {
@@ -299,32 +274,35 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
     }
 
     //This means that we have not called threadlib_init first, which is required
-    if(running == NULL || func == NULL) {
-        printf("Failure\n");
+    if (running == NULL || func == NULL) {
+        printf("Failure in create due to running or func being null.\n");
+        if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
+            return FAILURE;
+        }
         return FAILURE;
     }
-    printList();
-
-    //TODO: mask access to global variable!? (YES)
-    int currentTID = TID;
 
     if (POLICY == FIFO || POLICY == SJF) {
         ucontext_t *newThread = newContext(NULL, func, arg);
-        if(newThread == NULL) {
+        if (newThread == NULL) {
             return FAILURE;
         }
 
         makecontext(newThread, (void (*)(void)) stub, 2, func, arg);
-        TCB *newThreadTCB = newTCB(currentTID, 0, 0, 0, (totalRuntime/totalRuns), 0, 0, 0, priority, READY, NULL); //TODO: ask Rachel about this tonight (DONE)
-        newThreadTCB->ucontext = newThread;
-        TID++; //TODO: MASK!!
 
-        if(addNode(newThreadTCB, readyList) == FAILURE) {
+        int currentTID = TID;
+        TCB *newThreadTCB = newTCB(currentTID, 0, 0, 0, (totalRuntime / totalRuns), 0, 0, 0, priority, READY,
+                                   NULL);
+        newThreadTCB->ucontext = newThread;
+        TID++;
+
+        if (addNode(newThreadTCB, readyList) == FAILURE) {
             return FAILURE;
         }
         Log((int) getTicks() - startTime, CREATED, currentTID, priority);
-        printList();
 
+        printf("List after creation.\n");
+        printList();
 
         if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
             return FAILURE;
@@ -333,26 +311,27 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
     } else { //we are priority scheduling
         printf("we are creating in priority\n");
         ucontext_t *newThread = newContext(NULL, func, arg);
-        if(newThread == NULL) {
+        if (newThread == NULL) {
             return FAILURE;
         }
 
         makecontext(newThread, (void (*)(void)) stub, 2, func, arg);
 
-        TCB *newThreadTCB = newTCB(currentTID, 0, 0, 0, (totalRuntime/totalRuns), 0, 0, 0, priority, READY, NULL); //For preemptive, don't require a join to run the thread, since the scheduler is called with SIGALARM
+        TCB *newThreadTCB = newTCB(currentTID, 0, 0, 0, (totalRuntime / totalRuns), 0, 0, 0, priority, READY,
+                                   NULL); //For preemptive, don't require a join to run the thread, since the scheduler is called with SIGALARM
         newThreadTCB->ucontext = newThread;
         TID++; //TODO: MASK!!
 
         if (priority == LOW) {
-            if(addNode(newThreadTCB, lowList) == FAILURE) {
+            if (addNode(newThreadTCB, lowList) == FAILURE) {
                 return FAILURE;
             }
         } else if (priority == MEDIUM) {
-            if(addNode(newThreadTCB, mediumList) == FAILURE) {
+            if (addNode(newThreadTCB, mediumList) == FAILURE) {
                 return FAILURE;
             }
         } else if (priority == HIGH) {
-            if(addNode(newThreadTCB, highList) == FAILURE) {
+            if (addNode(newThreadTCB, highList) == FAILURE) {
                 return FAILURE;
             }
         } else {
@@ -361,17 +340,14 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
         }
 
         Log((int) getTicks() - startTime, CREATED, currentTID, priority);
-        printList();
 
+        printf("List after creation.\n");
+        printList();
 
         if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
             return FAILURE;
         }
         return currentTID;
-    }
-
-    if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
-        return FAILURE;
     }
 
     return FAILURE;
@@ -478,7 +454,7 @@ int thread_join(int tid) {
     printList();
 
     if (POLICY == FIFO || POLICY == SJF) {
-        if(moveToEnd(running, readyList) == FAILURE) {
+        if (moveToEnd(running, readyList) == FAILURE) {
             return FAILURE;
         }
         printList();
@@ -511,7 +487,7 @@ int thread_join(int tid) {
         while (currentNode != NULL && currentNode->tcb->TID != tid) {
             currentNode = currentNode->next;
         }
-        if(currentNode==NULL) {
+        if (currentNode == NULL) {
             currentNode = mediumList->head;
             while (currentNode != NULL && currentNode->tcb->TID != tid) {
                 currentNode = currentNode->next;
@@ -616,16 +592,17 @@ void stub(void (*func)(void *), void *arg) {
     Log((int) getTicks() - startTime, FINISHED, running->tcb->TID, running->tcb->priority);
     running->tcb->state = DONE; //mark as done running
 
-    if (running->tcb->joined != NULL) { //running is joined to another thread...so need to set that joined thread to ready
+    if (running->tcb->joined !=
+        NULL) { //running is joined to another thread...so need to set that joined thread to ready
         running->tcb->joined->state = READY;
 
         node *currentNode = NULL;
-        if(POLICY == FIFO || POLICY == SJF) {
+        if (POLICY == FIFO || POLICY == SJF) {
             currentNode = readyList->head;
             while (currentNode != NULL && currentNode->tcb->TID != running->tcb->joined->TID) {
                 currentNode = currentNode->next;
             }
-        } else if(POLICY == PRIORITY) {
+        } else if (POLICY == PRIORITY) {
             currentNode = highList->head;
             while (currentNode != NULL && currentNode->tcb->TID != running->tcb->joined->TID) {
                 currentNode = currentNode->next;
@@ -681,11 +658,11 @@ void stub(void (*func)(void *), void *arg) {
 }
 
  long getTicks() {
-    struct timeval time;
-    gettimeofday(&time, NULL);
-    long time_in_mill = (time.tv_sec) * 1000 + (time.tv_usec) / 1000 ;
-    return time_in_mill;
-}
+     struct timeval time;
+     gettimeofday(&time, NULL);
+     long time_in_mill = (time.tv_sec) * 1000 + (time.tv_usec) / 1000;
+     return time_in_mill;
+ }
 
 void Log (int ticks, int OPERATION, int TID, int PRIORITY) {
     FILE *file;
@@ -857,7 +834,7 @@ void schedule() {
             }
         }
 
-        if(toSchedule == NULL) {
+        if (toSchedule == NULL) {
             printf("loop failed\n");
         }
 
@@ -886,11 +863,13 @@ void schedule() {
 void printList() {
     node *currentNode = NULL;
 
-    if(POLICY == FIFO || POLICY == SJF) {
+    if (POLICY == FIFO || POLICY == SJF) {
         currentNode = readyList->head;
 
         while (currentNode != NULL) {
-            printf("%d, state %d, policy %d, average %d, u1 %d, u2 %d, u3 %d->", currentNode->tcb->TID, currentNode->tcb->state, POLICY, currentNode->tcb->averageOfUsages, currentNode->tcb->usage1, currentNode->tcb->usage2, currentNode->tcb->usage3);
+            printf("%d, state %d, policy %d, average %d, u1 %d, u2 %d, u3 %d->", currentNode->tcb->TID,
+                   currentNode->tcb->state, POLICY, currentNode->tcb->averageOfUsages, currentNode->tcb->usage1,
+                   currentNode->tcb->usage2, currentNode->tcb->usage3);
 
             currentNode = currentNode->next;
         }
@@ -902,7 +881,9 @@ void printList() {
         currentNode = highList->head;
 
         while (currentNode != NULL) {
-            printf("%d, state %d, policy %d, average %d, u1 %d, u2 %d, u3 %d->", currentNode->tcb->TID, currentNode->tcb->state, POLICY, currentNode->tcb->averageOfUsages, currentNode->tcb->usage1, currentNode->tcb->usage2, currentNode->tcb->usage3);
+            printf("%d, state %d, policy %d, average %d, u1 %d, u2 %d, u3 %d->", currentNode->tcb->TID,
+                   currentNode->tcb->state, POLICY, currentNode->tcb->averageOfUsages, currentNode->tcb->usage1,
+                   currentNode->tcb->usage2, currentNode->tcb->usage3);
 
             currentNode = currentNode->next;
         }
@@ -913,7 +894,9 @@ void printList() {
         currentNode = mediumList->head;
 
         while (currentNode != NULL) {
-            printf("%d, state %d, policy %d, average %d, u1 %d, u2 %d, u3 %d->", currentNode->tcb->TID, currentNode->tcb->state, POLICY, currentNode->tcb->averageOfUsages, currentNode->tcb->usage1, currentNode->tcb->usage2, currentNode->tcb->usage3);
+            printf("%d, state %d, policy %d, average %d, u1 %d, u2 %d, u3 %d->", currentNode->tcb->TID,
+                   currentNode->tcb->state, POLICY, currentNode->tcb->averageOfUsages, currentNode->tcb->usage1,
+                   currentNode->tcb->usage2, currentNode->tcb->usage3);
 
             currentNode = currentNode->next;
         }
@@ -924,7 +907,9 @@ void printList() {
         currentNode = lowList->head;
 
         while (currentNode != NULL) {
-            printf("%d, state %d, policy %d, average %d, u1 %d, u2 %d, u3 %d->", currentNode->tcb->TID, currentNode->tcb->state, POLICY, currentNode->tcb->averageOfUsages, currentNode->tcb->usage1, currentNode->tcb->usage2, currentNode->tcb->usage3);
+            printf("%d, state %d, policy %d, average %d, u1 %d, u2 %d, u3 %d->", currentNode->tcb->TID,
+                   currentNode->tcb->state, POLICY, currentNode->tcb->averageOfUsages, currentNode->tcb->usage1,
+                   currentNode->tcb->usage2, currentNode->tcb->usage3);
 
             currentNode = currentNode->next;
         }
@@ -937,16 +922,16 @@ void printList() {
 ucontext_t *newContext(ucontext_t *uc_link, void (*func)(void *), void* arg) {
     //TODO: mask access to global variable!
     ucontext_t *returnValue = malloc(sizeof(ucontext_t)); //TODO: error check malloc
-    if(returnValue == NULL) {
+    if (returnValue == NULL) {
         return NULL;
     }
-    if(getcontext(returnValue) == FAILURE) {
+    if (getcontext(returnValue) == FAILURE) {
         return NULL;
     }
 
     returnValue->uc_link = uc_link;
     returnValue->uc_stack.ss_sp = malloc(STACKSIZE);
-    if(returnValue->uc_stack.ss_sp == NULL) {
+    if (returnValue->uc_stack.ss_sp == NULL) {
         return NULL;
     }
     returnValue->uc_stack.ss_size = STACKSIZE;
@@ -958,11 +943,11 @@ ucontext_t *newContext(ucontext_t *uc_link, void (*func)(void *), void* arg) {
 //TODO: masking and error checking, here
 TCB* newTCB(int TID, int usage1, int usage2, int usage3, int averageOfUsages, int CPUUsage, int start, int stop, int priority, int state, TCB *joined) {
     TCB *returnValue = malloc(sizeof(TCB));
-    if(returnValue == NULL) {
+    if (returnValue == NULL) {
         return NULL;
     }
     returnValue->ucontext = malloc(sizeof(ucontext_t));
-    if(returnValue->ucontext == NULL) {
+    if (returnValue->ucontext == NULL) {
         return NULL;
     }
     returnValue->TID = TID;
@@ -975,8 +960,8 @@ TCB* newTCB(int TID, int usage1, int usage2, int usage3, int averageOfUsages, in
     returnValue->stop = stop;
     returnValue->priority = priority;
     returnValue->joined = malloc(sizeof(TCB));
-    if(returnValue->joined == NULL) {
-        return  NULL;
+    if (returnValue->joined == NULL) {
+        return NULL;
     }
     returnValue->joined = joined;
     returnValue->state = state;
@@ -986,7 +971,7 @@ TCB* newTCB(int TID, int usage1, int usage2, int usage3, int averageOfUsages, in
 
 node* newNode(TCB *tcb, node* next, node* prev) {
     node *returnValue = malloc(sizeof(node));
-    if(returnValue == NULL) {
+    if (returnValue == NULL) {
         return NULL;
     }
     returnValue->tcb = tcb;
@@ -1002,7 +987,7 @@ int addNode(TCB *tcb, linkedList *list) {
     //NOTE: this case should not occur, as long as libinit has been called
     if (list->size == 0) {
         node *newThreadNode = newNode(tcb, NULL, NULL);
-        if(newThreadNode == NULL) {
+        if (newThreadNode == NULL) {
             return FAILURE;
         }
         list->head = newThreadNode;
@@ -1011,7 +996,7 @@ int addNode(TCB *tcb, linkedList *list) {
     } else { //there are other nodes on the list, so this node should be added to the tail, since it arrived last (best for FIFO)
         node *tailNode = list->tail;
         node *newThreadNode = newNode(tcb, NULL, tailNode);
-        if(newThreadNode == NULL) {
+        if (newThreadNode == NULL) {
             return FAILURE;
         }
         tailNode->next = newThreadNode;
@@ -1071,14 +1056,14 @@ int removeNode(node *nodeToRemove, linkedList *list) {
     node *prev = nodeToRemove->prev;
     node *next = nodeToRemove->next;
 
-    if(list->head->tcb->TID == list->tail->tcb->TID && list->head->tcb->TID == nodeToRemove->tcb->TID) {
+    if (list->head->tcb->TID == list->tail->tcb->TID && list->head->tcb->TID == nodeToRemove->tcb->TID) {
         //the node is the only one in the list, so we can simply remove it here
         list->head = NULL;
         list->tail = NULL;
         freeNode(nodeToRemove);
         list->size--;
     }
-    //removing head with more than one node in the list (don't have to reset the tail)
+        //removing head with more than one node in the list (don't have to reset the tail)
     else if (list->head->tcb->TID == nodeToRemove->tcb->TID) {
         list->head = next;
         list->head->prev = NULL;
@@ -1090,7 +1075,7 @@ int removeNode(node *nodeToRemove, linkedList *list) {
         list->size--;
 
         return SUCCESS;
-    } else if(list->tail->tcb->TID == nodeToRemove->tcb->TID) { //remove node from tail
+    } else if (list->tail->tcb->TID == nodeToRemove->tcb->TID) { //remove node from tail
         list->tail = prev;
         list->tail->next = NULL;
         //can keep the new tail's prev pointer
@@ -1122,7 +1107,7 @@ void shiftUsages(int newUsageValue, TCB *tcb) {
 }
 
 int computeAverage(TCB *tcb) {
-    return ((tcb->usage1+tcb->usage2+tcb->usage3)/3);
+    return ((tcb->usage1 + tcb->usage2 + tcb->usage3) / 3);
 }
 
 void setAverage(TCB *tcb) {

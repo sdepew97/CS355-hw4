@@ -7,5 +7,5 @@ Notes:
 * I ran the Ziting tests and took care of the deadlocking cases by returning errors for these cases; I didn't want to deadlock, so I addressed the issues and simply did not permit the joins to occur
 
 Known Bugs:
-* I know that Dylan's test for ___ and kxu's test for ___ don't quite work correctly. My FIFO does ___ and theirs does this___.
+* My yielding is not working 100% correctly for threads; I ended up having to sigprocmask too much of my code to allow successful interleaving to occur
 
