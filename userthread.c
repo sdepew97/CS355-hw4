@@ -173,7 +173,8 @@ int thread_libinit(int policy) {
             return FAILURE;
         }
 
-        setAlrmMask();
+        //setAlrmMask();
+
         //create the lists
         lowList = malloc(sizeof(linkedList));
         if (lowList == NULL) {
@@ -202,7 +203,7 @@ int thread_libinit(int policy) {
 
         //LOG main's creation
         Log((int) getTicks() - startTime, CREATED, MAINTID, MAINPRIORITY);
-        removeAlrmMask();
+        //removeAlrmMask();
         //everything went fine, so return success
         return SUCCESS;
     } else {
@@ -217,7 +218,7 @@ int thread_libterminate(void) {
     node *currentNode = NULL;
     node *nextNode = NULL;
 
-    setAlrmMask();
+    //setAlrmMask();
     //free all queues
 
     //free all thread memory malloced
@@ -269,7 +270,7 @@ int thread_libterminate(void) {
             }
             free(lowList);
         }
-
+        //removeAlrmMask();
         return SUCCESS;
     }
 
@@ -282,7 +283,7 @@ int thread_libterminate(void) {
 
 //TODO: masking, then done!
 int thread_create(void (*func)(void *), void *arg, int priority) {
-    setAlrmMask();
+    //setAlrmMask();
 
     //This means that we have not called threadlib_init first, which is required
     if (running == NULL || func == NULL) {
@@ -359,7 +360,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
 }
 
 int thread_yield(void) {
-    setAlrmMask();
+    //setAlrmMask();
 
     //This means that we have not called threadlib_init first, which is required
     if (running == NULL) {
@@ -422,7 +423,7 @@ int thread_yield(void) {
 
 int thread_join(int tid) {
     //TODO: ignore if joined something that is done/had been scheduled
-    setAlrmMask();
+    //setAlrmMask();
 
     node *currentNode = NULL;
 
@@ -552,7 +553,7 @@ void stub(void (*func)(void *), void *arg) {
     func(arg); // call root function //Allow this function to be interrupted
     //TODO: thread clean up mentioned in assignment guidelines on page 3
 
-    setAlrmMask();
+    //setAlrmMask();
 
     Log((int) getTicks() - startTime, FINISHED, running->tcb->TID, running->tcb->priority);
     running->tcb->state = DONE; //mark as done running
@@ -612,21 +613,25 @@ void stub(void (*func)(void *), void *arg) {
     }
     //TODO: free node here with freenode function
     running = NULL;
-    setAlrmMask();
+    //setAlrmMask();
 
     //current thread is done, so we must get a new thread to run
     setcontext(scheduler);
 }
 
 int setAlrmMask() {
-    sigaddset(&mask, SIGALRM);
-    sigprocmask(SIG_BLOCK, &mask, NULL);
-    return SUCCESS; //TODO: modify return here for correct values
+    if (sigaddset(&mask, SIGALRM) == FAILURE || sigprocmask(SIG_BLOCK, &mask, NULL) == FAILURE) {
+        return FAILURE;
+    }
+    return SUCCESS;
 }
 
 int removeAlrmMask() {
-    sigprocmask(SIG_UNBLOCK, &mask, NULL);
-    return SUCCESS; //TODO: modfiy return here
+    if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
+        return FAILURE;
+    }
+
+    return SUCCESS;
 }
 
 /*
@@ -692,7 +697,7 @@ void Log (int ticks, int OPERATION, int TID, int PRIORITY) {
 
 /* Method with the scheduling algorithms */
 void schedule() {
-    setAlrmMask();
+    //setAlrmMask();
     getcontext(scheduler);
 
     node *currentNode;
@@ -710,7 +715,7 @@ void schedule() {
         //start timing here
         running->tcb->start = (int) getTicks(); //TODO: Ask Rachel: milliseconds of same time?? account for seconds?
         running->tcb->state = RUNNING;
-        setAlrmMask();
+        //setAlrmMask();
         setcontext(running->tcb->ucontext);
     } else if (POLICY == SJF) {
         node *currentNode = readyList->head;
@@ -749,7 +754,7 @@ void schedule() {
         running->tcb->start = (int) getTicks(); //TODO: Ask Rachel: milliseconds of same time?? account for seconds?
         running->tcb->state = RUNNING;
 
-        setAlrmMask();
+        //setAlrmMask();
         setcontext(running->tcb->ucontext);
     } else if (POLICY == PRIORITY) {
         //get random entry into array for the priority to be scheduled
@@ -822,7 +827,7 @@ void schedule() {
         //start timing here
         running->tcb->start = (int) getTicks(); //TODO: Ask Rachel: milliseconds of same time?? account for seconds?
         running->tcb->state = RUNNING;
-        setAlrmMask();
+        //setAlrmMask();
         setcontext(running->tcb->ucontext);
     }
 }
