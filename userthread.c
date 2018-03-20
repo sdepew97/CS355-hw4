@@ -619,7 +619,7 @@ void stub(void (*func)(void *), void *arg) {
     if (running->tcb->joined != NULL) { //running is joined to another thread...so need to set that joined thread to ready
         running->tcb->joined->state = READY;
 
-        node *currentNode;
+        node *currentNode = NULL;
         if(POLICY == FIFO || POLICY == SJF) {
             currentNode = readyList->head;
             while (currentNode != NULL && currentNode->tcb->TID != running->tcb->joined->TID) {
@@ -654,20 +654,24 @@ void stub(void (*func)(void *), void *arg) {
         } else {
             if (currentNode->tcb->priority == HIGH) {
                 moveToEnd(currentNode, highList);
-                printf("Free node result %d\n", removeNode(running, highList));
                 printList();
             } else if (currentNode->tcb->priority == MEDIUM) {
                 moveToEnd(currentNode, mediumList);
-                printf("Free node result %d\n", removeNode(running, mediumList));
                 printList();
             } else if (currentNode->tcb->priority == LOW) {
                 moveToEnd(currentNode, lowList);
-                printf("Free node result %d\n", removeNode(running, lowList));
                 printList();
             }
         }
     }
 
+    if (running->tcb->priority == HIGH) {
+        printf("Free node result %d\n", removeNode(running, highList));
+    } else if (running->tcb->priority == MEDIUM) {
+        printf("Free node result %d\n", removeNode(running, mediumList));
+    } else if (running->tcb->priority == LOW) {
+        printf("Free node result %d\n", removeNode(running, lowList));
+    }
     //TODO: free node here with freenode function
     running = NULL;
 
@@ -1154,26 +1158,6 @@ int setupSignals(void) {
 void sigHandler(int j, siginfo_t *si, void *old_context) {
     printf("got to sigHandler\n");
 
-    //save thread and go to scheduler
-    swapcontext(running->tcb->ucontext, scheduler); //TODO: bring this back...
+    //save thread's state and go to the scheduler
+    swapcontext(running->tcb->ucontext, scheduler);
 }
-
-////TODO: add masking to stop race conditions! :)
-//sigset_t mask;
-//
-//if (sigemptyset(&mask) == FAILURE) {
-//    return FAILURE;
-//}
-//
-//if (sigaddset(&mask, SIGALRM) == FAILURE) {
-//    return FAILURE;
-//}
-//if (sigprocmask(SIG_BLOCK, &mask, NULL) == FAILURE) {
-//    return FAILURE;
-//}
-//
-////TODO: add critical section here
-//
-//if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
-//    return FAILURE;
-//}
