@@ -13,8 +13,8 @@
 #define PRIORITY 0
 
 void printHello() {
-//    printf("Hello World\n");
-    poll(NULL, 0, 100);
+    printf("Hello World\n");
+    poll(NULL, 0, 200);
 }
 
 /*
