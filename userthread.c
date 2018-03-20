@@ -101,7 +101,7 @@ static void freeNode(node *nodeToFree);
 static int removeNode(node *nodeToRemove, linkedList *list);
 static void setAverage(TCB *tcb);
 void setrtimer(struct itimerval *ivPtr);
-void setAlrmMask();
+int setAlrmMask();
 int removeAlrmMask();
 static int setupSignals(void);
 static void sigHandler(int j, siginfo_t *si, void *old_context);
@@ -359,7 +359,6 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
 }
 
 int thread_yield(void) {
-    sigset_t *mask = malloc(sizeof(sigset_t));
     setAlrmMask();
 
     //This means that we have not called threadlib_init first, which is required
@@ -619,14 +618,15 @@ void stub(void (*func)(void *), void *arg) {
     setcontext(scheduler);
 }
 
-void setAlrmMask() {
+int setAlrmMask() {
     sigaddset(&mask, SIGALRM);
     sigprocmask(SIG_BLOCK, &mask, NULL);
+    return SUCCESS; //TODO: modify return here for correct values
 }
 
 int removeAlrmMask() {
     sigprocmask(SIG_UNBLOCK, &mask, NULL);
-    return SUCCESS; //TODO: mofiy return here
+    return SUCCESS; //TODO: modfiy return here
 }
 
 /*
