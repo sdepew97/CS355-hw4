@@ -456,6 +456,19 @@ int thread_yield(void) {
 int thread_join(int tid) {
     printf("join called for %d\n", tid);
     //TODO: ignore if joined something that is done/had been scheduled
+    sigset_t mask;
+
+    if (sigemptyset(&mask) == FAILURE) {
+        return FAILURE;
+    }
+
+    if (sigaddset(&mask, SIGALRM) == FAILURE) {
+        return FAILURE;
+    }
+    if (sigprocmask(SIG_BLOCK, &mask, NULL) == FAILURE) {
+        return FAILURE;
+    }
+
     node *currentNode = NULL;
 
     //This means that we have not called threadlib_init first, which is required or thread is trying to join itself
@@ -512,6 +525,10 @@ int thread_join(int tid) {
             }
         }
     } else {
+        if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
+            return FAILURE;
+        }
+
         return FAILURE;
     }
 
@@ -528,9 +545,16 @@ int thread_join(int tid) {
                 setAverage(running->tcb);
                 currentNode->tcb->joined = running->tcb;
                 swapcontext(running->tcb->ucontext, scheduler);
+                if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
+                    return FAILURE;
+                }
             } else {
                 //attempting a circular join, so a failure should occur
                 printf("failed on circular\n");
+                if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
+                    return FAILURE;
+                }
+
                 return FAILURE;
             }
         } else {
@@ -545,7 +569,14 @@ int thread_join(int tid) {
             setAverage(running->tcb);
             printList();
             swapcontext(running->tcb->ucontext, scheduler); //TODO: see if this needs to be replaced, here
+            if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
+                return FAILURE;
+            }
         }
+        if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
+            return FAILURE;
+        }
+
         return SUCCESS;
     } else {
         printf("in else\n");
@@ -555,8 +586,15 @@ int thread_join(int tid) {
             return SUCCESS;
         } else if (currentNode == NULL) {
             printf("failed on null with node %d\n", tid);
+            if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
+                return FAILURE;
+            }
+
             return FAILURE;
         }
+    }
+    if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
+        return FAILURE;
     }
 
     printf("got to end here\n");
