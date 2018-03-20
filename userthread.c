@@ -168,8 +168,6 @@ int thread_libinit(int policy) {
         setrtimer(&realt);
 
         if (setitimer(ITIMER_REAL, &realt, NULL) == FAILURE) {
-            printf("priority\n");
-            perror("I am sorry, setitimer failed %d\n");
             return FAILURE;
         }
 
