@@ -868,7 +868,7 @@ void freeUcontext(ucontext_t *ucontext) {
     free(ucontext);
 }
 
-TCB* newTCB(int TID, int usage1, int usage2, int usage3, int averageOfUsages, int CPUUsage, int start, int stop, int priority, int state, TCB *joined) {
+TCB* newTCB(int TID, int usage1, int usage2, int usage3, int averageOfUsages, int start, int stop, int priority, int state, TCB *joined) {
     TCB *returnValue = malloc(sizeof(TCB));
     if (returnValue == NULL) {
         return NULL;
@@ -882,7 +882,6 @@ TCB* newTCB(int TID, int usage1, int usage2, int usage3, int averageOfUsages, in
     returnValue->usage2 = usage2;
     returnValue->usage3 = usage3;
     returnValue->averageOfUsages = averageOfUsages;
-    returnValue->CPUusage = CPUUsage;
     returnValue->start = start;
     returnValue->stop = stop;
     returnValue->priority = priority;
