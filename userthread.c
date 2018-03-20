@@ -1076,7 +1076,7 @@ void sigHandler(int j, siginfo_t *si, void *old_context) {
     //save thread's state and go to the scheduler
     if (running ==
         NULL) { //TODO: figure out why this is always NULL, which means only finished threads are hitting it here, so have to unblock for threads that are not yet finished...
-        printf("thread done, TID: %d\n", running->tcb->TID);
+        printf("thread done and running NULL %d\n");
         setcontext(scheduler);
     } else {
         printf("thread not done, TID: %d\n", running->tcb->TID);
