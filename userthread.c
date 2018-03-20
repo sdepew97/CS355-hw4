@@ -1145,5 +1145,9 @@ void sigHandler(int j, siginfo_t *si, void *old_context) {
     printf("*********************got to sigHandler*********************\n");
 
     //save thread's state and go to the scheduler
-    swapcontext(running->tcb->ucontext, scheduler);
+    if(running == NULL) {
+        setcontext(scheduler);
+    } else {
+        swapcontext(running->tcb->ucontext, scheduler);
+    }
 }
