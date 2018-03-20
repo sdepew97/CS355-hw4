@@ -99,7 +99,7 @@ static ucontext_t *newContext(ucontext_t *uc_link, void (*func)(void *), void* a
 static TCB* newTCB(int TID, int usage1, int usage2, int usage3, int averageOfUsages, int CPUUsage, int start, int stop, int priority, int state, TCB *joined);
 static node* newNode(TCB *tcb, node* next, node* prev);
 static int addNode(TCB *tcb, linkedList *list);
-static int moveToEnd(node *nodeToMove);
+static int moveToEnd(node *nodeToMove, linkedList *list);
 static void shiftUsages(int newUsageValue, TCB *tcb);
 static int computeAverage(TCB *tcb);
 static void freeNode(node *nodeToFree);
@@ -111,6 +111,7 @@ static void sigHandler(int j, siginfo_t *si, void *old_context);
 
 //TODO: Ask rachel about FIFO scheduling (DONE), ask her about masking for the methods (DONE), ask her about SJF and ask her about testing? (DONE) and all comments in body
 
+//TODO: masking, then done!
 int thread_libinit(int policy) {
     //this is when the program officially started
     startTime = (int) getTicks(); //TODO: move this for correct timing
@@ -228,6 +229,7 @@ int thread_libinit(int policy) {
     return FAILURE;
 }
 
+//TODO: free all memory here
 int thread_libterminate(void) {
     //free all queues
 
@@ -239,6 +241,7 @@ int thread_libterminate(void) {
     return FAILURE;
 }
 
+//TODO: masking, then done!
 int thread_create(void (*func)(void *), void *arg, int priority) {
     printf("creating new thread %d\n", TID);
 
@@ -270,7 +273,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
         printList();
         return currentTID;
     } else { //we are priority scheduling
-
+        printf("we are creating in priority\n");
         ucontext_t *newThread = newContext(NULL, func, arg);
         if(newThread == NULL) {
             return FAILURE;
@@ -281,8 +284,6 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
         TCB *newThreadTCB = newTCB(currentTID, 0, 0, 0, (totalRuntime/totalRuns), 0, 0, 0, priority, READY, NULL); //For preemptive, don't require a join to run the thread, since the scheduler is called with SIGALARM
         newThreadTCB->ucontext = newThread;
         TID++; //TODO: MASK!!
-
-        printf("we are creating in priority\n");
 
         if (priority == LOW) {
             if(addNode(newThreadTCB, lowList) == FAILURE) {
@@ -327,7 +328,7 @@ int thread_yield(void) {
 
     if (POLICY == FIFO || POLICY == SJF) {
         //running node is in the list, so have to 1) find it (have a pointer to it rn), 2) move it to the tail
-        if (moveToEnd(running) == FAILURE) {
+        if (moveToEnd(running, readyList) == FAILURE) {
             return FAILURE;
         } else {
             running->tcb->state = READY;
@@ -343,7 +344,32 @@ int thread_yield(void) {
         }
     } else {
         //TODO: fill in code here for priority
+        if (running->tcb->priority == HIGH) {
+            if (moveToEnd(running, highList) == FAILURE) {
+                return FAILURE;
+            }
+        } else if (running->tcb->priority == MEDIUM) {
+            if (moveToEnd(running, mediumList) == FAILURE) {
+                return FAILURE;
+            }
+        } else if (running->tcb->priority == LOW) {
+            if (moveToEnd(running, lowList) == FAILURE) {
+                return FAILURE;
+            }
+        } else {
+            return FAILURE;
+        }
 
+        running->tcb->state = READY;
+        Log((int) getTicks() - startTime, STOPPED, running->tcb->TID, -1);
+        running->tcb->stop = (int) getTicks();
+        totalRuntime += running->tcb->stop - running->tcb->start;
+        totalRuns++;
+        //TODO: (Yes, do this) ask Rachel here about shifting and averaging and the whole runtime thing...since this changes the runtime with the zero's going into computing the average (Mark's idea is to use latest if 1 or 2, but then average if three or more)
+        shiftUsages(running->tcb->stop - running->tcb->start, running->tcb);
+        setAverage(running->tcb);
+        swapcontext(running->tcb->ucontext, scheduler);
+        return SUCCESS;
     }
 
     return FAILURE;
@@ -352,79 +378,115 @@ int thread_yield(void) {
 int thread_join(int tid) {
     printf("join called for %d\n", tid);
     //TODO: ignore if joined something that is done/had been scheduled
+    node *currentNode = NULL;
 
     //This means that we have not called threadlib_init first, which is required or thread is trying to join itself
-    if(running == NULL || running->tcb->TID == tid) {
+    if (running == NULL || running->tcb->TID == tid) {
         return FAILURE;
     }
     printf("currently running %d\n", running->tcb->TID);
     printList();
 
     if (POLICY == FIFO || POLICY == SJF) {
-        moveToEnd(running);
+        if(moveToEnd(running, readyList) == FAILURE) {
+            return FAILURE;
+        }
         printList();
 
         printf("got into FIFO or SJF\n");
-        node *currentNode = readyList->head;
+        currentNode = readyList->head;
 
         //find the node to join
-        while(currentNode!=NULL && currentNode->tcb->TID != tid) {
+        while (currentNode != NULL && currentNode->tcb->TID != tid) {
             currentNode = currentNode->next;
         }
-
-        if(currentNode != NULL && currentNode->tcb->state != DONE) {
-            // case TID does exist and running thread is waiting already, which would mean you'd get stuck forever, perhaps?
-            if (running->tcb->joined != NULL && running->tcb->joined->state == WAITING) {
-                if (running->tcb->joined->TID != currentNode->tcb->TID) {
-                    running->tcb->state = WAITING;
-                    Log((int) getTicks() - startTime, STOPPED, running->tcb->TID, -1);
-                    running->tcb->stop = (int) getTicks();
-                    totalRuntime += running->tcb->stop-running->tcb->start;
-                    totalRuns++;
-                    shiftUsages(running->tcb->stop-running->tcb->start, running->tcb);
-                    setAverage(running->tcb);
-                    currentNode->tcb->joined = running->tcb;
-                    swapcontext(running->tcb->ucontext, scheduler);
-                } else {
-                    //attempting a circular join, so a failure should occur
-                    printf("failed on circular\n");
-                    return FAILURE;
-                }
-            }
-            else {
-                //case 3: TID does exist and thread is ready to go! (set calling thread to waiting by this thread and set joined pointer)
-                running->tcb->state = WAITING;
-                currentNode->tcb->joined = running->tcb;
-                Log((int) getTicks() - startTime, STOPPED, running->tcb->TID, -1);
-                running->tcb->stop = (int) getTicks();
-                totalRuntime += running->tcb->stop-running->tcb->start;
-                totalRuns++;
-                shiftUsages(running->tcb->stop-running->tcb->start, running->tcb);
-                setAverage(running->tcb);
-                printList();
-                swapcontext(running->tcb->ucontext, scheduler);
-            }
-
-            return SUCCESS;
-        }
-        else {
-            printf("in else\n");
-            //case TID doesn't exist/thread with that TID wasn't created
-            if(currentNode == NULL && tid <= TID) { //TODO: bring back after doing swap function finish
-//            if(currentNode != NULL && currentNode->tcb->state == DONE) {
-                //shouldn't raise an error if trying to join a prior created thread that's already finished
-                return SUCCESS;
-            }
-            else if (currentNode == NULL) {
-                printf("failed on null with node %d\n", tid);
+    } else if (POLICY == PRIORITY) {
+        if (running->tcb->priority == HIGH) {
+            if (moveToEnd(running, highList) == FAILURE) {
                 return FAILURE;
             }
+        } else if (running->tcb->priority == MEDIUM) {
+            if (moveToEnd(running, mediumList) == FAILURE) {
+                return FAILURE;
+            }
+        } else if (running->tcb->priority == LOW) {
+            if (moveToEnd(running, lowList) == FAILURE) {
+                return FAILURE;
+            }
+        } else {
+            return FAILURE;
+        }
+
+        currentNode = highList->head;
+        while (currentNode != NULL && currentNode->tcb->TID != tid) {
+            currentNode = currentNode->next;
+        }
+        if(currentNode==NULL) {
+            currentNode = mediumList->head;
+            while (currentNode != NULL && currentNode->tcb->TID != tid) {
+                currentNode = currentNode->next;
+            }
+            if (currentNode == NULL) {
+                currentNode = lowList->head;
+                while (currentNode != NULL && currentNode->tcb->TID != tid) {
+                    currentNode = currentNode->next;
+                }
+            }
+        }
+    } else {
+        return FAILURE;
+    }
+
+    if (currentNode != NULL && currentNode->tcb->state != DONE) {
+        // case where TID does exist and running thread is waiting already, which would mean you'd get stuck forever, perhaps?
+        if (running->tcb->joined != NULL && running->tcb->joined->state == WAITING) {
+            if (running->tcb->joined->TID != currentNode->tcb->TID) {
+                running->tcb->state = WAITING;
+                Log((int) getTicks() - startTime, STOPPED, running->tcb->TID, -1);
+                running->tcb->stop = (int) getTicks();
+                totalRuntime += running->tcb->stop - running->tcb->start;
+                totalRuns++;
+                shiftUsages(running->tcb->stop - running->tcb->start, running->tcb);
+                setAverage(running->tcb);
+                currentNode->tcb->joined = running->tcb;
+                swapcontext(running->tcb->ucontext, scheduler);
+            } else {
+                //attempting a circular join, so a failure should occur
+                printf("failed on circular\n");
+                return FAILURE;
+            }
+        } else {
+            //case where TID does exist and thread is ready to go! (set calling thread to waiting by this thread and set joined pointer)
+            running->tcb->state = WAITING;
+            currentNode->tcb->joined = running->tcb;
+            Log((int) getTicks() - startTime, STOPPED, running->tcb->TID, -1);
+            running->tcb->stop = (int) getTicks();
+            totalRuntime += running->tcb->stop - running->tcb->start;
+            totalRuns++;
+            shiftUsages(running->tcb->stop - running->tcb->start, running->tcb);
+            setAverage(running->tcb);
+            printList();
+            swapcontext(running->tcb->ucontext, scheduler);
+        }
+        return SUCCESS;
+    } else {
+        printf("in else\n");
+        //case where TID doesn't exist/thread with that TID wasn't created
+        if (currentNode == NULL && tid <= TID) { //TODO: bring back after doing swap function finish
+//            if(currentNode != NULL && currentNode->tcb->state == DONE) {
+            //shouldn't raise an error if trying to join a prior created thread that's already finished
+            return SUCCESS;
+        } else if (currentNode == NULL) {
+            printf("failed on null with node %d\n", tid);
+            return FAILURE;
         }
     }
+
     printf("got to end here\n");
     return FAILURE;
 }
 
+//TODO: clean up here
 void stub(void (*func)(void *), void *arg) {
     printf("entered stub\n");
     // thread starts here
@@ -445,7 +507,17 @@ void stub(void (*func)(void *), void *arg) {
         printf("Current node TID %d, running node joined TID %d\n", currentNode->tcb->TID, running->tcb->joined->TID);
 
         //current node is now the one we're looking for
-        moveToEnd(currentNode);
+        if(POLICY == FIFO || POLICY == SJF) {
+            moveToEnd(currentNode, readyList);
+        } else {
+            if(currentNode->tcb->priority == HIGH) {
+                moveToEnd(currentNode, highList);
+            } else if(currentNode->tcb->priority == MEDIUM) {
+                moveToEnd(currentNode, mediumList);
+            } else if(currentNode->tcb->priority == LOW) {
+                moveToEnd(currentNode, lowList);
+            }
+        }
     }
 
     printf("Free node result %d\n", removeNode(running));
@@ -700,29 +772,29 @@ int addNode(TCB *tcb, linkedList *list) {
     return SUCCESS;
 }
 
-int moveToEnd(node *nodeToMove) {
+int moveToEnd(node *nodeToMove, linkedList *list) {
     printList();
     node *prev = nodeToMove->prev;
     node *next = nodeToMove->next;
-    node *currentTail = readyList->tail;
+    node *currentTail = list->tail;
 
-    if (readyList->head->tcb->TID == readyList->tail->tcb->TID && readyList->head->tcb->TID == nodeToMove->tcb->TID) {
+    if (list->head->tcb->TID == list->tail->tcb->TID && list->head->tcb->TID == nodeToMove->tcb->TID) {
         //node is the only one in the list, so do nothing
         return SUCCESS;
-    } else if (readyList->tail->tcb->TID == nodeToMove->tcb->TID) {
+    } else if (list->tail->tcb->TID == nodeToMove->tcb->TID) {
         //do nothing, since node to move is already the tail
         return SUCCESS;
     }
         //moving head to tail
-    else if (readyList->head->tcb->TID == nodeToMove->tcb->TID) {
-        readyList->head = next;
-        readyList->head->prev = NULL;
+    else if (list->head->tcb->TID == nodeToMove->tcb->TID) {
+        list->head = next;
+        list->head->prev = NULL;
         //can keep the new head's next pointer
 
         nodeToMove->next = NULL;
         currentTail->next = nodeToMove;
         nodeToMove->prev = currentTail;
-        readyList->tail = nodeToMove;
+        list->tail = nodeToMove;
 
         return SUCCESS;
     } else {
@@ -732,7 +804,7 @@ int moveToEnd(node *nodeToMove) {
         currentTail->next = nodeToMove;
         prev->next = next;
         next->prev = prev;
-        readyList->tail = nodeToMove;
+        list->tail = nodeToMove;
         return SUCCESS;
     }
 
