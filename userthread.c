@@ -261,6 +261,7 @@ int thread_libterminate(void) {
         while (currentNode != NULL) {
             nextNode = currentNode->next;
             freeNode(currentNode);
+            currentNode = nextNode;
         }
 
         free(readyList);
@@ -272,6 +273,7 @@ int thread_libterminate(void) {
             while (currentNode != NULL) {
                 nextNode = currentNode->next;
                 freeNode(currentNode);
+                currentNode = nextNode;
             }
             free(highList);
 
@@ -279,6 +281,7 @@ int thread_libterminate(void) {
             while (currentNode != NULL) {
                 nextNode = currentNode->next;
                 freeNode(currentNode);
+                currentNode = nextNode;
             }
             free(mediumList);
 
@@ -286,6 +289,7 @@ int thread_libterminate(void) {
             while (currentNode != NULL) {
                 nextNode = currentNode->next;
                 freeNode(currentNode);
+                currentNode = nextNode;
             }
             free(lowList);
         }
