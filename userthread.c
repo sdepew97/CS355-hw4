@@ -8,6 +8,8 @@
 #include "userthread.h"
 #include "logger.h"
 
+#define MAINPRIORITY 1
+#define MAINTID 1
 #define FAILURE -1
 #define SUCCESS 0
 #define TRUE 1
@@ -18,6 +20,9 @@
 #define INTERVAL_MICROSECS 	100000
 #define VALUE_SECS 		0
 #define VALUE_MICROSECS 100000
+#define LOW -1
+#define MEDIUM 0
+#define HIGH 1
 
 //globals for logging
 enum {CREATED, SCHEDULED, STOPPED, FINISHED};
@@ -112,22 +117,22 @@ int thread_libinit(int policy) {
 
     //create context for scheduler
     scheduler = newContext(NULL, (void (*)(void *)) scheduler, NULL);
-    if(scheduler == NULL) {
+    if (scheduler == NULL) {
         return FAILURE;
     }
 
     makecontext(scheduler, (void (*)(void)) schedule, 0);
 
     //create main's TCB
-    mainTCB = newTCB(-1, 0, 0, 0, QUANTA/2, 0, (int) getTicks(), 0, 1, READY, NULL);
-    totalRuntime += QUANTA/2; //TODO: ask about this here (DONE)
+    mainTCB = newTCB(MAINTID, 0, 0, 0, QUANTA / 2, 0, (int) getTicks(), 0, MAINPRIORITY, READY, NULL);
+    totalRuntime += QUANTA / 2; //TODO: ask about this here (DONE)
     totalRuns++;
 
-    if(mainTCB == NULL) {
+    if (mainTCB == NULL) {
         return FAILURE;
     }
 
-    if(getcontext(mainTCB->ucontext) == FAILURE) {
+    if (getcontext(mainTCB->ucontext) == FAILURE) {
         return FAILURE;
     }
 
@@ -147,30 +152,66 @@ int thread_libinit(int policy) {
         }
 
         //set ready list's value to running and update the size as necessary
-        if(addNode(mainTCB, readyList) == FAILURE) {
+        if (addNode(mainTCB, readyList) == FAILURE) {
             return FAILURE;
         }
         running = readyList->head; //have to set running to the proper node, main, here
         mainTCB->state = RUNNING;
 
         //LOG main's creation
-        Log((int) getTicks() - startTime, CREATED, -1, -1);
+        Log((int) getTicks() - startTime, CREATED, MAINTID, MAINPRIORITY);
 
         //everything went fine, so return success
         return SUCCESS;
     } else if (policy == PRIORITY) {
         //TODO: setup queues here and the signal handler
 
-        if(setupSignals() == FAILURE) {
+        if (setupSignals() == FAILURE) {
             return FAILURE;
         }
 
         setrtimer(&realt);
-
         if (setitimer(ITIMER_REAL, &realt, NULL) == FAILURE) {
             return FAILURE;
         }
 
+        //create the lists
+        lowList = malloc(sizeof(linkedList));
+        if (lowList == NULL) {
+            return FAILURE;
+        }
+
+        mediumList = malloc(sizeof(linkedList));
+        if (mediumList == NULL) {
+            return FAILURE;
+        }
+
+        highList = malloc(sizeof(linkedList));
+        if (highList == NULL) {
+            return FAILURE;
+        }
+
+        if (MAINTID == HIGH) {
+            if (addNode(mainTCB, highList) == FAILURE) {
+                return FAILURE;
+            }
+        } else if (MAINTID == MEDIUM) {
+            if (addNode(mainTCB, mediumList) == FAILURE) {
+                return FAILURE;
+            }
+        } else if (MAINTID == LOW) {
+            if (addNode(mainTCB, lowList) == FAILURE) {
+                return FAILURE;
+            }
+        }
+
+        running = readyList->head; //have to set running to the proper node, main, here
+        mainTCB->state = RUNNING;
+
+        //LOG main's creation
+        Log((int) getTicks() - startTime, CREATED, MAINTID, MAINPRIORITY);
+
+        //everything went fine, so return success
         return SUCCESS;
     } else {
         return FAILURE;
