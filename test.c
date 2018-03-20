@@ -441,8 +441,8 @@ int main(void) {
         if (thread_join(tids[i]) == FAIL)
             exit(EXIT_FAILURE);
     }
-    if (thread_libterminate() == FAIL)
-        exit(EXIT_FAILURE);
+//    if (thread_libterminate() == FAIL)
+//        exit(EXIT_FAILURE);
 
     exit(EXIT_SUCCESS);
 }
