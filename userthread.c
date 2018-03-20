@@ -556,8 +556,10 @@ void schedule() {
 }
 
 void printList() {
+    node *currentNode = NULL;
+
     if(PRIORITY == FIFO || PRIORITY == SJF) {
-        node *currentNode = readyList->head;
+        currentNode = readyList->head;
 
         while (currentNode != NULL) {
             printf("%d, state %d, policy %d, average %d, u1 %d, u2 %d, u3 %d->", currentNode->tcb->TID, currentNode->tcb->state, POLICY, currentNode->tcb->averageOfUsages, currentNode->tcb->usage1, currentNode->tcb->usage2, currentNode->tcb->usage3);
@@ -569,7 +571,7 @@ void printList() {
 
         printf("\n");
     } else {
-        node *currentNode = highList->head;
+        currentNode = highList->head;
 
         while (currentNode != NULL) {
             printf("%d, state %d, policy %d, average %d, u1 %d, u2 %d, u3 %d->", currentNode->tcb->TID, currentNode->tcb->state, POLICY, currentNode->tcb->averageOfUsages, currentNode->tcb->usage1, currentNode->tcb->usage2, currentNode->tcb->usage3);
@@ -577,10 +579,10 @@ void printList() {
             currentNode = currentNode->next;
         }
 
-        printf("NULL, high list size %d", higList->size);
+        printf("NULL, high list size %d", highList->size);
         printf("\n");
 
-        node *currentNode = mediumList->head;
+        currentNode = mediumList->head;
 
         while (currentNode != NULL) {
             printf("%d, state %d, policy %d, average %d, u1 %d, u2 %d, u3 %d->", currentNode->tcb->TID, currentNode->tcb->state, POLICY, currentNode->tcb->averageOfUsages, currentNode->tcb->usage1, currentNode->tcb->usage2, currentNode->tcb->usage3);
@@ -591,7 +593,7 @@ void printList() {
         printf("NULL, medium list size %d", mediumList->size);
         printf("\n");
 
-        node *currentNode = lowList->head;
+        currentNode = lowList->head;
 
         while (currentNode != NULL) {
             printf("%d, state %d, policy %d, average %d, u1 %d, u2 %d, u3 %d->", currentNode->tcb->TID, currentNode->tcb->state, POLICY, currentNode->tcb->averageOfUsages, currentNode->tcb->usage1, currentNode->tcb->usage2, currentNode->tcb->usage3);
