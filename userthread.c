@@ -730,10 +730,9 @@ int setupSignals(void) {
 
     act.sa_sigaction = sigHandler;
     sigemptyset(&act.sa_mask);
-    act.sa_flags = SA_SIGINFO; //TODO: see if I also want SIGRESTART or any other flags here (texted Rachel...)
-
-    sigemptyset(&set);
-    sigaddset(&set, SIGALRM);
+    sigaddset(&act.sa_mask, SIGALARM);
+//    act.sa_flags = SA_SIGINFO; //TODO: see if I also want SIGRESTART or any other flags here (texted Rachel...she said yes...)
+    act.sa_flags = SA_RESTART | SA_SIGINFO;
 
     if (sigaction(SIGALRM, &act, NULL) != 0) {
         return FAILURE;
@@ -748,3 +747,28 @@ void sigHandler(int j, siginfo_t *si, void *old_context) {
     //save thread and go to scheduler
 //    swapcontext(running->tcb->ucontext, scheduler); //TODO: bring this back...
 }
+
+/*
+ * sigset_t mask;
+
+            if (sigemptyset(&mask) == ERROR) {
+                perror("I am sorry, but sigemptyset failed.\n");
+                exit(EXIT_FAILURE);
+            }
+
+            if (sigaddset(&mask, SIGCHLD) == ERROR) {
+                perror("I am sorry, but sigaddset failed.\n");
+                exit(EXIT_FAILURE);
+            }
+            if (sigprocmask(SIG_BLOCK, &mask, NULL) == ERROR) {
+                perror("I am sorry, but sigprocmask failed.\n");
+                exit(EXIT_FAILURE);
+            }
+
+            put_job_in_background(j, ZERO, RUNNING);
+
+            if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == ERROR) {
+                perror("I am sorry, but sigprocmask failed.\n");
+                exit(EXIT_FAILURE);
+            }
+ */

@@ -4,14 +4,16 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <poll.h>
 #include "userthread.h"
 
 #define SUCCESS 0
 #define FAILURE -1
-#define POLICY 2
+#define POLICY 0 //FIFO
 
 void printHello() {
-    printf("Hello World\n");
+//    printf("Hello World\n");
+    poll(NULL, 0, 100);
 }
 
 /*
