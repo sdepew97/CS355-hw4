@@ -108,7 +108,8 @@ static int removeNode(node *nodeToRemove, linkedList *list);
 static void setAverage(TCB *tcb);
 void setrtimer(struct itimerval *ivPtr);
 static int setupSignals(void);
-static void sigHandler(int j, siginfo_t *si, void *old_context);
+//static void sigHandler(int j, siginfo_t *si, void *old_context);
+void sigHandler(int sig);
 
 //TODO: Ask rachel about FIFO scheduling (DONE), ask her about masking for the methods (DONE), ask her about SJF and ask her about testing? (DONE) and all comments in body
 
@@ -166,15 +167,18 @@ int thread_libinit(int policy) {
         //everything went fine, so return success
         return SUCCESS;
     } else if (policy == PRIORITY) {
-        //TODO: setup queues here and the signal handler (DONE)
-        if (setupSignals() == FAILURE) {
-            return FAILURE;
-        }
-
         setrtimer(&realt);
         if (setitimer(ITIMER_REAL, &realt, NULL) == FAILURE) {
             return FAILURE;
         }
+
+//        //TODO: setup queues here and the signal handler (DONE)
+//        if (setupSignals() == FAILURE) {
+//            return FAILURE;
+//        }
+
+        signal(SIGALRM, sigHandler);
+        pause(); //to test sighandler with working
 
         //create the lists
         lowList = malloc(sizeof(linkedList));
@@ -219,7 +223,6 @@ int thread_libinit(int policy) {
 
         //LOG main's creation
         Log((int) getTicks() - startTime, CREATED, MAINTID, MAINPRIORITY);
-        pause(); //to test sighandler with working
 
         //everything went fine, so return success
         return SUCCESS;
@@ -918,6 +921,10 @@ int setupSignals(void) {
     }
 
     return SUCCESS;
+}
+
+void sigHandler(int sig) {
+    printf("handler hit\n");
 }
 
 void sigHandler(int j, siginfo_t *si, void *old_context) {
