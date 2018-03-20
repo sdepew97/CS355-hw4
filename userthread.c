@@ -225,8 +225,8 @@ int thread_libinit(int policy) {
 //TODO: free all memory here
 int thread_libterminate(void) {
     sigset_t mask;
-    node *currentNode = NULL;
-    node *nextNode = NULL;
+    node *currentNode = malloc(sizeof(node));
+    node *nextNode = malloc(sizeof(node));
 
     if (sigemptyset(&mask) == FAILURE) {
         return FAILURE;
