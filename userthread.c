@@ -686,6 +686,8 @@ void stub(void (*func)(void *), void *arg) {
         }
     }
 
+    printf("got here\n");
+
     if (running->tcb->priority == HIGH) {
         printf("Free node result %d\n", removeNode(running, highList));
     } else if (running->tcb->priority == MEDIUM) {
