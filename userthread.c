@@ -500,27 +500,27 @@ void stub(void (*func)(void *), void *arg) {
         running->tcb->joined->state = READY;
 
         node *currentNode = readyList->head;
-        while(currentNode!=NULL && currentNode->tcb->TID != running->tcb->joined->TID) {
+        while (currentNode != NULL && currentNode->tcb->TID != running->tcb->joined->TID) {
             currentNode = currentNode->next;
         }
 
         printf("Current node TID %d, running node joined TID %d\n", currentNode->tcb->TID, running->tcb->joined->TID);
 
         //current node is now the one we're looking for
-        if(POLICY == FIFO || POLICY == SJF) {
+        if (POLICY == FIFO || POLICY == SJF) {
             moveToEnd(currentNode, readyList);
             printf("Free node result %d\n", removeNode(running, readyList));
             printList();
         } else {
-            if(currentNode->tcb->priority == HIGH) {
+            if (currentNode->tcb->priority == HIGH) {
                 moveToEnd(currentNode, highList);
                 printf("Free node result %d\n", removeNode(running, highList));
                 printList();
-            } else if(currentNode->tcb->priority == MEDIUM) {
+            } else if (currentNode->tcb->priority == MEDIUM) {
                 moveToEnd(currentNode, mediumList);
                 printf("Free node result %d\n", removeNode(running, mediumList));
                 printList();
-            } else if(currentNode->tcb->priority == LOW) {
+            } else if (currentNode->tcb->priority == LOW) {
                 moveToEnd(currentNode, lowList);
                 printf("Free node result %d\n", removeNode(running, lowList));
                 printList();
@@ -635,7 +635,10 @@ void schedule() {
     } else if (POLICY == PRIORITY) {
         //TODO: ensure thread runs for 100 miliseconds, so reset timer here each time I schedule a thread??
         printf("schedule\n");
+        mediumList->head->tcb->state = RUNNING;
         setcontext(mediumList->head->tcb->ucontext); //TODO: add scheduling logic here
+
+        //TODO: think about complex joining logic..if no threads of one type are available in one queue, then do you schedule in a different queue???
     }
 }
 
