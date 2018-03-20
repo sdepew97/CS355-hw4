@@ -36,7 +36,6 @@ static int LogCreated = FALSE; //know if we append or not to the log.txt file
 static int totalRuntime = 0;
 static int totalRuns = 0;
 static sigset_t set;
-static struct itimerval realt;
 static int scheduling[] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, -1, -1, -1, -1}; //2.25:1.5:1 ratio here, so randomly picking an entry allows us to know we get proper ratio of priorities
 
 //structs used in program
@@ -167,6 +166,8 @@ int thread_libinit(int policy) {
         //everything went fine, so return success
         return SUCCESS;
     } else if (policy == PRIORITY) {
+        struct itimerval realt;
+
         setrtimer(&realt);
         if (setitimer(ITIMER_REAL, &realt, NULL) == FAILURE) {
             return FAILURE;
