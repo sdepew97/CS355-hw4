@@ -994,7 +994,7 @@ ucontext_t *newContext(ucontext_t *uc_link, void (*func)(void *), void* arg) {
 }
 
 void freeUcontext(ucontext_t *ucontext) {
-//    free(ucontext->uc_stack.ss_sp);
+    free(ucontext->uc_stack.ss_sp);
     free(ucontext);
 }
 
@@ -1027,7 +1027,7 @@ TCB* newTCB(int TID, int usage1, int usage2, int usage3, int averageOfUsages, in
 }
 
 void freeTCB(TCB *tcb) {
-    freeUcontext(tcb->ucontext); //TODO: see if this is causing errors...
+//    freeUcontext(tcb->ucontext); //TODO: see if this is causing errors...
     free(tcb->ucontext);
     tcb->joined = NULL; //make sure not to free the wrong thing here
     free(tcb->joined);
