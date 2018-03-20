@@ -10,7 +10,7 @@
 #define SUCCESS 0
 #define FAILURE -1
 #define POLICY 2 //FIFO PRIORITY
-#define PRIORITY 2
+#define PRIORITY 0
 
 void printHello() {
     printf("Hello World\n");
@@ -21,7 +21,7 @@ void printHello() {
  * Simple FIFO test with main's functionality as a thread is tested.
  */
 int main(void) {
-    if (thread_libinit(PRIORITY) == FAILURE)
+    if (thread_libinit(POLICY) == FAILURE)
         exit(EXIT_FAILURE);
 
     printf("This is a Priority test where main is tested as a thread.\n");
