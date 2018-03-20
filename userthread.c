@@ -566,14 +566,15 @@ void schedule() {
     printf("schedule called\n");
     printf("POLICY in schedule: %d\n", POLICY);
     printList();
-
-    //TODO: ensure this interaction is masked
-    node *currentNode = readyList->head;
-    while (currentNode != NULL && ((TCB *) currentNode->tcb)->state != READY) {
-        currentNode = currentNode->next;
-    }
+    node *currentNode;
 
     if (POLICY == FIFO) {
+        //TODO: ensure this interaction is masked
+        currentNode = readyList->head;
+        while (currentNode != NULL && ((TCB *) currentNode->tcb)->state != READY) {
+            currentNode = currentNode->next;
+        }
+
         //now current node is ready to run, so have to run it here
         running = currentNode;
         Log((int) getTicks() - startTime, SCHEDULED, currentNode->tcb->TID, -1);
@@ -629,6 +630,7 @@ void schedule() {
     } else if (POLICY == PRIORITY) {
         //TODO: ensure thread runs for 100 miliseconds, so reset timer here each time I schedule a thread??
         printf("schedule\n");
+        setcontext(mediumList->head->tcb->ucontext);
     }
 }
 
