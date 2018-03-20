@@ -885,6 +885,9 @@ void schedule() {
         printList();
         setcontext(running->tcb->ucontext);
     }
+    if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
+        return FAILURE;
+    }
 }
 
 void printList() {
