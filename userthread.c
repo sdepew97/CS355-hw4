@@ -270,6 +270,9 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
         printList();
         return currentTID;
     } else { //we are priority scheduling
+
+        printf("we are creating in priority\n");
+
         ucontext_t *newThread = newContext(NULL, func, arg);
         if(newThread == NULL) {
             return FAILURE;
@@ -281,15 +284,15 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
         newThreadTCB->ucontext = newThread;
         TID++; //TODO: MASK!!
 
-        if (priority == -1) {
+        if (priority == LOW) {
             if(addNode(newThreadTCB, lowList) == FAILURE) {
                 return FAILURE;
             }
-        } else if (priority == 0) {
+        } else if (priority == MEDIUM) {
             if(addNode(newThreadTCB, mediumList) == FAILURE) {
                 return FAILURE;
             }
-        } else if (priority == 1) {
+        } else if (priority == HIGH) {
             if(addNode(newThreadTCB, highList) == FAILURE) {
                 return FAILURE;
             }
@@ -299,6 +302,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
         }
 
         Log((int) getTicks() - startTime, CREATED, currentTID, -1);
+        printList();
         return currentTID;
     }
 
@@ -339,6 +343,7 @@ int thread_yield(void) {
         }
     } else {
         //TODO: fill in code here for priority
+
     }
 
     return FAILURE;
@@ -551,7 +556,7 @@ void schedule() {
         setcontext(running->tcb->ucontext);
     } else if (POLICY == PRIORITY) {
         //TODO: ensure thread runs for 100 miliseconds, so reset timer here each time I schedule a thread??
-
+        printf("schedule\n");
     }
 }
 
