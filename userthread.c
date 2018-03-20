@@ -107,8 +107,8 @@ static int removeNode(node *nodeToRemove, linkedList *list);
 static void setAverage(TCB *tcb);
 void setrtimer(struct itimerval *ivPtr);
 static int setupSignals(void);
-//static void sigHandler(int j, siginfo_t *si, void *old_context);
-void sigHandler(int sig);
+static void sigHandler(int j, siginfo_t *si, void *old_context);
+//void sigHandler(int sig);
 
 //TODO: Ask rachel about FIFO scheduling (DONE), ask her about masking for the methods (DONE), ask her about SJF and ask her about testing? (DONE) and all comments in body
 
@@ -174,20 +174,23 @@ int thread_libinit(int policy) {
         }
 
         printf("got here\n");
-        signal(SIGALRM, sigHandler);
-        printf("got here\n");
+//        signal(SIGALRM, sigHandler);
+
 //        alarm(1);
 
-        while(1) {
-            printf("stuck\n");
-            pause();
-            printf("alarm recieved\n");
-        }
+//        while(1) {
+//            printf("stuck\n");
+//            pause();
+//            printf("alarm recieved\n");
+//        }
 
 //        //TODO: setup queues here and the signal handler (DONE)
-//        if (setupSignals() == FAILURE) {
-//            return FAILURE;
-//        }
+        if (setupSignals() == FAILURE) {
+            return FAILURE;
+        }
+
+        printf("got here\n");
+        pause();
 
         //create the lists
         lowList = malloc(sizeof(linkedList));
@@ -934,17 +937,17 @@ int setupSignals(void) {
     return SUCCESS;
 }
 
-void sigHandler(int sig) {
-    printf("handler hit\n");
-}
-//
-//void sigHandler(int j, siginfo_t *si, void *old_context) {
-//    printf("hello world\n");
-//    Log(getTicks(), FINISHED, mainTCB->TID, 1);
-//    exit(EXIT_SUCCESS);
-//    //save thread and go to scheduler
-////    swapcontext(running->tcb->ucontext, scheduler); //TODO: bring this back...
+//void sigHandler(int sig) {
+//    printf("handler hit\n");
 //}
+//
+void sigHandler(int j, siginfo_t *si, void *old_context) {
+    printf("hello world\n");
+    Log(getTicks(), FINISHED, mainTCB->TID, 1);
+    exit(EXIT_SUCCESS);
+    //save thread and go to scheduler
+//    swapcontext(running->tcb->ucontext, scheduler); //TODO: bring this back...
+}
 
 //TODO: add masking here! :)
 /*
