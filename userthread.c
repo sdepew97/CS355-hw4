@@ -553,8 +553,7 @@ void stub(void (*func)(void *), void *arg) {
     func(arg); // call root function //Allow this function to be interrupted
     //TODO: thread clean up mentioned in assignment guidelines on page 3
 
-    //setAlrmMask();
-
+    setAlrmMask();
     Log((int) getTicks() - startTime, FINISHED, running->tcb->TID, running->tcb->priority);
     running->tcb->state = DONE; //mark as done running
 
@@ -613,7 +612,7 @@ void stub(void (*func)(void *), void *arg) {
     }
     //TODO: free node here with freenode function
     running = NULL;
-    //setAlrmMask();
+    removeAlrmMask();
 
     //current thread is done, so we must get a new thread to run
     setcontext(scheduler);
