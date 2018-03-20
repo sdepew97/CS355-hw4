@@ -635,6 +635,7 @@ void schedule() {
     } else if (POLICY == PRIORITY) {
         //TODO: ensure thread runs for 100 miliseconds, so reset timer here each time I schedule a thread??
         printf("schedule\n");
+        running = mediumList->head->tcb;
         mediumList->head->tcb->state = RUNNING;
         setcontext(mediumList->head->tcb->ucontext); //TODO: add scheduling logic here
 
