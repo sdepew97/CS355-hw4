@@ -655,6 +655,7 @@ int setupSignals(void) {
 
     //set up global mask
     sigemptyset(&mask);
+    sigaddset(&mask, SIGALRM);
 
     return SUCCESS;
 }
@@ -1060,7 +1061,8 @@ void sigHandler(int j, siginfo_t *si, void *old_context) {
     printf("*********************got to sigHandler********************* at %d\n", (int) getTicks() - startTime);
 
     //save thread's state and go to the scheduler
-    if (running == NULL) { //TODO: figure out why this is always NULL, which means only finished threads are hitting it here, so have to unblock for threads that are not yet finished...
+    if (running ==
+        NULL) { //TODO: figure out why this is always NULL, which means only finished threads are hitting it here, so have to unblock for threads that are not yet finished...
         setcontext(scheduler);
     } else {
         swapcontext(running->tcb->ucontext, scheduler);
