@@ -231,6 +231,8 @@ int thread_libinit(int policy) {
 //TODO: free all memory here
 int thread_libterminate(void) {
     sigset_t mask;
+    node *currentNode = NULL;
+    node *nextNode = NULL;
 
     if (sigemptyset(&mask) == FAILURE) {
         return FAILURE;
@@ -250,11 +252,50 @@ int thread_libterminate(void) {
     //free all TCB's etc...
 
     //mark main as finished and free
-    return FAILURE;
+
+    if (POLICY == FIFO || POLICY == SJF) {
+        if (readyList == NULL) {
+            return FAILURE; //this means that threadlib_init wasn't called beforehand
+        }
+        currentNode = readyList->head;
+        while (currentNode != NULL) {
+            nextNode = currentNode->next;
+            freeNode(currentNode);
+        }
+
+        free(readyList);
+    } else {
+        if (highList == NULL || mediumList == NULL || lowList == NULL) {
+            return FAILURE; //this means that init wasn't called
+        } else {
+            currentNode = highList->head;
+            while (currentNode != NULL) {
+                nextNode = currentNode->next;
+                freeNode(currentNode);
+            }
+            free(highList);
+
+            currentNode = mediumList->head;
+            while (currentNode != NULL) {
+                nextNode = currentNode->next;
+                freeNode(currentNode);
+            }
+            free(mediumList);
+
+            currentNode = lowList->head;
+            while (currentNode != NULL) {
+                nextNode = currentNode->next;
+                freeNode(currentNode);
+            }
+            free(lowList);
+        }
+    }
 
     if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
         return FAILURE;
     }
+
+    return FAILURE;
 }
 
 //TODO: masking, then done!
@@ -941,6 +982,11 @@ ucontext_t *newContext(ucontext_t *uc_link, void (*func)(void *), void* arg) {
     return returnValue;
 }
 
+void freeUcontext(ucontext_t *ucontext) {
+    free(ucontext->uc_stack.ss_sp);
+    free(ucontext);
+}
+
 TCB* newTCB(int TID, int usage1, int usage2, int usage3, int averageOfUsages, int CPUUsage, int start, int stop, int priority, int state, TCB *joined) {
     TCB *returnValue = malloc(sizeof(TCB));
     if (returnValue == NULL) {
@@ -969,6 +1015,14 @@ TCB* newTCB(int TID, int usage1, int usage2, int usage3, int averageOfUsages, in
     return returnValue;
 }
 
+void freeTCB(TCB *tcb) {
+    freeUcontext(tcb->ucontext);
+    free(tcb->ucontext);
+    tcb->joined = NULL; //make sure not to free the wrong thing here
+    free(tcb->joined);
+    free(tcb);
+}
+
 node* newNode(TCB *tcb, node* next, node* prev) {
     node *returnValue = malloc(sizeof(node));
     if (returnValue == NULL) {
@@ -979,6 +1033,14 @@ node* newNode(TCB *tcb, node* next, node* prev) {
     returnValue->prev = prev;
 
     return returnValue;
+}
+
+void freeNode(node *nodeToFree) {
+    //TODO: fill in body here
+    freeTCB(nodeToFree->tcb);
+    nodeToFree->next = NULL;
+    nodeToFree->prev = NULL;
+    free(nodeToFree);
 }
 
 int addNode(TCB *tcb, linkedList *list) {
@@ -1044,10 +1106,6 @@ int moveToEnd(node *nodeToMove, linkedList *list) {
     }
 
     return FAILURE;
-}
-
-void freeNode(node *nodeToFree) {
-    //TODO: fill in body here
 }
 
 int removeNode(node *nodeToRemove, linkedList *list) {
@@ -1140,10 +1198,10 @@ int setupSignals(void) {
 }
 
 void sigHandler(int j, siginfo_t *si, void *old_context) {
-//    printf("*********************got to sigHandler********************* at %d\n", (int) getTicks() - startTime);
+    printf("*********************got to sigHandler********************* at %d\n", (int) getTicks() - startTime);
 
     //save thread's state and go to the scheduler
-    if (running == NULL) {
+    if (running == NULL) { //TODO: figure out why this is always NULL, which means only finished threads are hitting it here
 //        printf("running is NULL\n");
         setcontext(scheduler);
     } else {
