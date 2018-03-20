@@ -610,17 +610,9 @@ void stub(void (*func)(void *), void *arg) {
     printf("thread done\n");
 
     sigset_t mask;
-
-    if (sigemptyset(&mask) == FAILURE) {
-        return FAILURE;
-    }
-
-    if (sigaddset(&mask, SIGALRM) == FAILURE) {
-        return FAILURE;
-    }
-    if (sigprocmask(SIG_BLOCK, &mask, NULL) == FAILURE) {
-        return FAILURE;
-    }
+    sigemptyset(&mask);
+    sigaddset(&mask, SIGALRM);
+    sigprocmask(SIG_BLOCK, &mask, NULL);
 
     Log((int) getTicks() - startTime, FINISHED, running->tcb->TID, running->tcb->priority);
     running->tcb->state = DONE; //mark as done running
@@ -682,9 +674,7 @@ void stub(void (*func)(void *), void *arg) {
 
     //current thread is done, so we must get a new thread to run
     setcontext(scheduler);
-    if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
-        return FAILURE;
-    }
+    sigprocmask(SIG_UNBLOCK, &mask, NULL);
 }
 
  long getTicks() {
@@ -720,17 +710,9 @@ void Log (int ticks, int OPERATION, int TID, int PRIORITY) {
 /* Method with the scheduling algorithms */
 void schedule() {
     sigset_t mask;
-
-    if (sigemptyset(&mask) == FAILURE) {
-        return FAILURE;
-    }
-
-    if (sigaddset(&mask, SIGALRM) == FAILURE) {
-        return FAILURE;
-    }
-    if (sigprocmask(SIG_BLOCK, &mask, NULL) == FAILURE) {
-        return FAILURE;
-    }
+    sigemptyset(&mask);
+    sigaddset(&mask, SIGALRM);
+    sigprocmask(SIG_BLOCK, &mask, NULL) == FAILURE;
 
     getcontext(scheduler);
     printf("schedule called\n");
@@ -893,9 +875,8 @@ void schedule() {
         printList();
         setcontext(running->tcb->ucontext);
     }
-    if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
-        return FAILURE;
-    }
+
+    sigprocmask(SIG_UNBLOCK, &mask, NULL);
 }
 
 void printList() {
