@@ -21,7 +21,7 @@ void printHello() {
  * Simple FIFO test with main's functionality as a thread is tested.
  */
 int main(void) {
-    if (thread_libinit(SJF) == FAILURE)
+    if (thread_libinit(FIFO) == FAILURE)
         exit(EXIT_FAILURE);
 
     printf("This is a Priority test where main is tested as a thread.\n");
