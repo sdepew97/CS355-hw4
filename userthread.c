@@ -786,7 +786,8 @@ void schedule() {
         node *currentNode = NULL;
 
         //now priorityToSchedule holds the list from which to schedule round robin
-        if (running == NULL){} //the prior running thread finished and was removed, so it does not need to be placed back on the queue for round robin
+        if (running ==
+            NULL) {} //the prior running thread finished and was removed, so it does not need to be placed back on the queue for round robin
         else { //current thread needs to be put at the end of it's queue, since round robin and be set to ready to run again, since it shouldn't be running right now
             if (running->tcb->state != WAITING) {
                 running->tcb->state = READY;
@@ -1094,7 +1095,7 @@ int setupSignals(void) {
 
     act.sa_sigaction = sigHandler;
     sigemptyset(&act.sa_mask);
-    sigaddset(&act.sa_mask, SIGALRM);
+//    sigaddset(&act.sa_mask, SIGALRM);
     act.sa_flags = SA_RESTART | SA_SIGINFO;
 
     if (sigaction(SIGALRM, &act, NULL) != 0) {
