@@ -713,6 +713,7 @@ void schedule() {
             }
         }
 
+        printf("to schedule %d\n", toSchedule->tcb->TID);
         //TODO: reset timer here to ensure full 100 milliseconds are given
         struct itimerval realt;
 
