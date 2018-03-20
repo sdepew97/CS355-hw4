@@ -31,6 +31,7 @@ static int LogCreated = FALSE; //know if we append or not to the log.txt file
 static int totalRuntime = 0;
 static int totalRuns = 0;
 static sigset_t set;
+static struct itimerval realt;
 
 //structs used in program
 typedef struct TCB {
@@ -164,11 +165,11 @@ int thread_libinit(int policy) {
             return FAILURE;
         }
 
-        struct itimerval realt;
         setrtimer(&realt);
 
         if (setitimer(ITIMER_REAL, &realt, NULL) == FAILURE) {
             printf("priority\n");
+            perror("I am sorry, setitimer failed %d\n");
             return FAILURE;
         }
 
