@@ -847,9 +847,35 @@ void schedule() {
     }
 }
 
-ucontext_t *newContext(ucontext_t *uc_link, void (*func)(void *), void* arg, int *ret) {
-    void *stack;
+//ucontext_t *newContext(ucontext_t *uc_link, void (*func)(void *), void* arg, int *ret) {
+//    void *stack;
+//
+//    ucontext_t *returnValue = malloc(sizeof(ucontext_t));
+//    if (returnValue == NULL) {
+//        return NULL;
+//    }
+//    if (getcontext(returnValue) == FAILURE) {
+//        return NULL;
+//    }
+//
+//    *ret = VALGRIND_STACK_REGISTER(stack, stack + STACKSIZE);
+//
+//    returnValue->uc_link = uc_link;
+//    returnValue->uc_stack.ss_sp = stack;
+//    if (returnValue->uc_stack.ss_sp == NULL) {
+//        return NULL;
+//    }
+//    returnValue->uc_stack.ss_size = STACKSIZE;
+//    return returnValue;
+//}
+//
+//void freeUcontext(ucontext_t *ucontext) {
+//    free(ucontext->uc_stack.ss_sp);
+//    free(ucontext);
+//}
 
+
+ucontext_t *newContext(ucontext_t *uc_link, void (*func)(void *), void* arg) {
     ucontext_t *returnValue = malloc(sizeof(ucontext_t));
     if (returnValue == NULL) {
         return NULL;
@@ -858,10 +884,8 @@ ucontext_t *newContext(ucontext_t *uc_link, void (*func)(void *), void* arg, int
         return NULL;
     }
 
-    *ret = VALGRIND_STACK_REGISTER(stack, stack + STACKSIZE);
-
     returnValue->uc_link = uc_link;
-    returnValue->uc_stack.ss_sp = stack;
+    returnValue->uc_stack.ss_sp = malloc(STACKSIZE);
     if (returnValue->uc_stack.ss_sp == NULL) {
         return NULL;
     }
