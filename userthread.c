@@ -1027,7 +1027,7 @@ TCB* newTCB(int TID, int usage1, int usage2, int usage3, int averageOfUsages, in
 }
 
 void freeTCB(TCB *tcb) {
-//    freeUcontext(tcb->ucontext);
+    freeUcontext(tcb->ucontext); //TODO: see if this is causing errors...
     free(tcb->ucontext);
     tcb->joined = NULL; //make sure not to free the wrong thing here
     free(tcb->joined);
@@ -1047,7 +1047,6 @@ node* newNode(TCB *tcb, node* next, node* prev) {
 }
 
 void freeNode(node *nodeToFree) {
-    //TODO: fill in body here
     freeTCB(nodeToFree->tcb);
     nodeToFree->next = NULL;
     nodeToFree->prev = NULL;
