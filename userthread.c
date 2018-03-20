@@ -1142,7 +1142,7 @@ int setupSignals(void) {
 }
 
 void sigHandler(int j, siginfo_t *si, void *old_context) {
-    printf("*********************got to sigHandler*********************g\n");
+    printf("*********************got to sigHandler*********************\n");
 
     //save thread's state and go to the scheduler
     swapcontext(running->tcb->ucontext, scheduler);
