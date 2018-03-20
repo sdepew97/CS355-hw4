@@ -5,6 +5,7 @@
 #include <stdarg.h>
 #include <signal.h>
 #include <unistd.h>
+#include "valgrind.h"
 #include "userthread.h"
 #include "logger.h"
 
@@ -225,8 +226,8 @@ int thread_libinit(int policy) {
 //TODO: free all memory here
 int thread_libterminate(void) {
     sigset_t mask;
-    node *currentNode = malloc(sizeof(node));
-    node *nextNode = malloc(sizeof(node));
+    node *currentNode = NULL;
+    node *nextNode = NULL;
 
     if (sigemptyset(&mask) == FAILURE) {
         return FAILURE;
@@ -845,7 +846,9 @@ void schedule() {
     }
 }
 
-ucontext_t *newContext(ucontext_t *uc_link, void (*func)(void *), void* arg) {
+ucontext_t *newContext(ucontext_t *uc_link, void (*func)(void *), void* arg, int *ret) {
+    void *stack;
+
     ucontext_t *returnValue = malloc(sizeof(ucontext_t));
     if (returnValue == NULL) {
         return NULL;
@@ -854,8 +857,10 @@ ucontext_t *newContext(ucontext_t *uc_link, void (*func)(void *), void* arg) {
         return NULL;
     }
 
+    *ret = VALGRIND_STACK_REGISTER(stack, stack + STACKSIZE);
+
     returnValue->uc_link = uc_link;
-    returnValue->uc_stack.ss_sp = malloc(STACKSIZE);
+    returnValue->uc_stack.ss_sp = stack;
     if (returnValue->uc_stack.ss_sp == NULL) {
         return NULL;
     }
