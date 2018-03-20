@@ -8,7 +8,7 @@
 #include "userthread.h"
 #include "logger.h"
 
-#define MAINPRIORITY -1
+#define MAINPRIORITY 1
 #define MAINTID -1
 #define FAILURE -1
 #define SUCCESS 0
@@ -164,8 +164,7 @@ int thread_libinit(int policy) {
         //everything went fine, so return success
         return SUCCESS;
     } else if (policy == PRIORITY) {
-        //TODO: setup queues here and the signal handler
-
+        //TODO: setup queues here and the signal handler (DONE)
         if (setupSignals() == FAILURE) {
             return FAILURE;
         }
@@ -191,21 +190,21 @@ int thread_libinit(int policy) {
             return FAILURE;
         }
 
-        if (MAINTID == HIGH) {
+        if (MAINPRIORITY == HIGH) {
             if (addNode(mainTCB, highList) == FAILURE) {
                 return FAILURE;
             }
             else {
                 running = highList->head; //have to set running to the proper node, main, here
             }
-        } else if (MAINTID == MEDIUM) {
+        } else if (MAINPRIORITY == MEDIUM) {
             if (addNode(mainTCB, mediumList) == FAILURE) {
                 return FAILURE;
             }
             else {
                 running = mediumList->head; //have to set running to the proper node, main, here
             }
-        } else if (MAINTID == LOW) {
+        } else if (MAINPRIORITY == LOW) {
             if (addNode(mainTCB, lowList) == FAILURE) {
                 return FAILURE;
             }
@@ -222,6 +221,7 @@ int thread_libinit(int policy) {
         //everything went fine, so return success
         return SUCCESS;
     } else {
+        //passed in an invalid scheduling policy, which was stated to not occur, but could occur
         return FAILURE;
     }
 
@@ -550,19 +550,58 @@ void schedule() {
         printList();
         setcontext(running->tcb->ucontext);
     } else if (POLICY == PRIORITY) {
+        //TODO: ensure thread runs for 100 miliseconds, so reset timer here each time I schedule a thread??
 
     }
 }
 
 void printList() {
-    node *currentNode = readyList->head;
-    while (currentNode != NULL) {
-        printf("%d, state %d, policy %d, average %d, u1 %d, u2 %d, u3 %d->", currentNode->tcb->TID, currentNode->tcb->state, POLICY, currentNode->tcb->averageOfUsages, currentNode->tcb->usage1, currentNode->tcb->usage2, currentNode->tcb->usage3);
+    if(PRIORITY == FIFO || PRIORITY == SJF) {
+        node *currentNode = readyList->head;
 
-        currentNode = currentNode->next;
+        while (currentNode != NULL) {
+            printf("%d, state %d, policy %d, average %d, u1 %d, u2 %d, u3 %d->", currentNode->tcb->TID, currentNode->tcb->state, POLICY, currentNode->tcb->averageOfUsages, currentNode->tcb->usage1, currentNode->tcb->usage2, currentNode->tcb->usage3);
+
+            currentNode = currentNode->next;
+        }
+
+        printf("NULL, list size %d", readyList->size);
+
+        printf("\n");
+    } else {
+        node *currentNode = highList->head;
+
+        while (currentNode != NULL) {
+            printf("%d, state %d, policy %d, average %d, u1 %d, u2 %d, u3 %d->", currentNode->tcb->TID, currentNode->tcb->state, POLICY, currentNode->tcb->averageOfUsages, currentNode->tcb->usage1, currentNode->tcb->usage2, currentNode->tcb->usage3);
+
+            currentNode = currentNode->next;
+        }
+
+        printf("NULL, high list size %d", higList->size);
+        printf("\n");
+
+        node *currentNode = mediumList->head;
+
+        while (currentNode != NULL) {
+            printf("%d, state %d, policy %d, average %d, u1 %d, u2 %d, u3 %d->", currentNode->tcb->TID, currentNode->tcb->state, POLICY, currentNode->tcb->averageOfUsages, currentNode->tcb->usage1, currentNode->tcb->usage2, currentNode->tcb->usage3);
+
+            currentNode = currentNode->next;
+        }
+
+        printf("NULL, medium list size %d", mediumList->size);
+        printf("\n");
+
+        node *currentNode = lowList->head;
+
+        while (currentNode != NULL) {
+            printf("%d, state %d, policy %d, average %d, u1 %d, u2 %d, u3 %d->", currentNode->tcb->TID, currentNode->tcb->state, POLICY, currentNode->tcb->averageOfUsages, currentNode->tcb->usage1, currentNode->tcb->usage2, currentNode->tcb->usage3);
+
+            currentNode = currentNode->next;
+        }
+
+        printf("NULL, low list size %d", lowList->size);
+        printf("\n");
     }
-    printf("NULL, list size %d", readyList->size);
-    printf("\n");
 }
 
 ucontext_t *newContext(ucontext_t *uc_link, void (*func)(void *), void* arg) {
