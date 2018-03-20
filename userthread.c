@@ -639,7 +639,7 @@ void schedule() {
         mediumList->head->tcb->state = RUNNING;
         setcontext(mediumList->head->tcb->ucontext); //TODO: add scheduling logic here
 
-        //TODO: think about complex joining logic..if no threads of one type are available in one queue, then do you schedule in a different queue???
+        //TODO: think about complex joining logic..if no threads of one type are available in one queue, then do you schedule in a different queue??? Also think about joining across..wait for Rachel answer
     }
 }
 
