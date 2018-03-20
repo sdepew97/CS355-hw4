@@ -14,15 +14,11 @@
 #define SUCCESS 0
 #define TRUE 1
 #define FALSE 0
-#define LOGFILE	"log.txt\0"     // all Log(); messages will be appended to this file
 #define QUANTA 100
-#define INTERVAL_SECS 		0
-#define INTERVAL_MICROSECS 	100000
-#define VALUE_SECS 		0
-#define VALUE_MICROSECS 100000
 #define LOW 1
 #define MEDIUM 0
 #define HIGH -1
+#define LOGFILE	"log.txt\0"     // all Log(); messages will be appended to this file
 
 //globals for logging
 enum {CREATED, SCHEDULED, STOPPED, FINISHED};
@@ -45,7 +41,6 @@ typedef struct TCB {
     unsigned int usage2;
     unsigned int usage3;
     unsigned int averageOfUsages; //sum of last, secondToLast, and thirdToLast over three
-    unsigned int CPUusage; //TODO: remove this
     unsigned int start;
     unsigned int stop;
     unsigned int priority;
@@ -92,9 +87,8 @@ static void stub(void (*func)(void *), void *arg);
 static long getTicks();
 static void Log (int ticks, int OPERATION, int TID, int PRIORITY);    // logs a message to LOGFILE
 static void schedule();
-static void printList(); //TODO: remove, since for debugging
 static ucontext_t *newContext(ucontext_t *uc_link, void (*func)(void *), void* arg);
-static TCB* newTCB(int TID, int usage1, int usage2, int usage3, int averageOfUsages, int CPUUsage, int start, int stop, int priority, int state, TCB *joined);
+static TCB* newTCB(int TID, int usage1, int usage2, int usage3, int averageOfUsages, int start, int stop, int priority, int state, TCB *joined);
 static node* newNode(TCB *tcb, node* next, node* prev);
 static int addNode(TCB *tcb, linkedList *list);
 static int moveToEnd(node *nodeToMove, linkedList *list);
@@ -135,7 +129,7 @@ int thread_libinit(int policy) {
     makecontext(scheduler, (void (*)(void)) schedule, 0);
 
     //create main's TCB
-    mainTCB = newTCB(MAINTID, 0, 0, 0, QUANTA / 2, 0, (int) getTicks(), 0, MAINPRIORITY, READY, NULL);
+    mainTCB = newTCB(MAINTID, 0, 0, 0, QUANTA / 2, (int) getTicks(), 0, MAINPRIORITY, READY, NULL);
     totalRuntime += QUANTA / 2;
     totalRuns++;
 
@@ -309,7 +303,6 @@ int thread_libterminate(void) {
 
 //TODO: masking, then done!
 int thread_create(void (*func)(void *), void *arg, int priority) {
-    printf("creating new thread %d\n", TID);
     sigset_t mask;
 
     if (sigemptyset(&mask) == FAILURE) {
@@ -325,7 +318,6 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
 
     //This means that we have not called threadlib_init first, which is required
     if (running == NULL || func == NULL) {
-        printf("Failure in create due to running or func being null.\n");
         if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
             return FAILURE;
         }
@@ -341,8 +333,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
         makecontext(newThread, (void (*)(void)) stub, 2, func, arg);
 
         int currentTID = TID;
-        TCB *newThreadTCB = newTCB(currentTID, 0, 0, 0, (totalRuntime / totalRuns), 0, 0, 0, priority, READY,
-                                   NULL);
+        TCB *newThreadTCB = newTCB(currentTID, 0, 0, 0, (totalRuntime / totalRuns), 0, 0, priority, READY, NULL);
         newThreadTCB->ucontext = newThread;
         TID++;
 
@@ -351,15 +342,13 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
         }
         Log((int) getTicks() - startTime, CREATED, currentTID, priority);
 
-        printf("List after creation.\n");
-        printList();
+
 
         if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
             return FAILURE;
         }
         return currentTID;
     } else { //we are priority scheduling
-        printf("we are creating in priority\n");
         ucontext_t *newThread = newContext(NULL, func, arg);
         if (newThread == NULL) {
             return FAILURE;
@@ -367,8 +356,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
 
         makecontext(newThread, (void (*)(void)) stub, 2, func, arg);
         int currentTID = TID;
-        TCB *newThreadTCB = newTCB(currentTID, 0, 0, 0, (totalRuntime / totalRuns), 0, 0, 0, priority, READY,
-                                   NULL); //For preemptive, don't require a join to run the thread, since the scheduler is called with SIGALARM
+        TCB *newThreadTCB = newTCB(currentTID, 0, 0, 0, (totalRuntime / totalRuns), 0, 0, priority, READY, NULL);
         newThreadTCB->ucontext = newThread;
         TID++;
 
@@ -391,9 +379,6 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
 
         Log((int) getTicks() - startTime, CREATED, currentTID, priority);
 
-        printf("List after creation.\n");
-        printList();
-
         if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
             return FAILURE;
         }
@@ -406,7 +391,6 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
 }
 
 int thread_yield(void) {
-    printf("yield hit\n");
     sigset_t mask;
 
     if (sigemptyset(&mask) == FAILURE) {
@@ -435,7 +419,6 @@ int thread_yield(void) {
             running->tcb->stop = (int) getTicks();
             totalRuntime += running->tcb->stop - running->tcb->start;
             totalRuns++;
-            //TODO: (Yes, do this) ask Rachel here about shifting and averaging and the whole runtime thing...since this changes the runtime with the zero's going into computing the average (Mark's idea is to use latest if 1 or 2, but then average if three or more)
             shiftUsages(running->tcb->stop - running->tcb->start, running->tcb);
             setAverage(running->tcb);
             if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
@@ -460,7 +443,6 @@ int thread_yield(void) {
         } else {
             return FAILURE;
         }
-
         running->tcb->state = READY;
         Log((int) getTicks() - startTime, STOPPED, running->tcb->TID, running->tcb->priority);
         running->tcb->stop = (int) getTicks();
@@ -482,7 +464,6 @@ int thread_yield(void) {
 }
 
 int thread_join(int tid) {
-    printf("join called for %d\n", tid);
     //TODO: ignore if joined something that is done/had been scheduled
     sigset_t mask;
 
@@ -503,16 +484,11 @@ int thread_join(int tid) {
     if (running == NULL || running->tcb->TID == tid) {
         return FAILURE;
     }
-    printf("currently running %d\n", running->tcb->TID);
-    printList();
 
     if (POLICY == FIFO || POLICY == SJF) {
         if (moveToEnd(running, readyList) == FAILURE) {
             return FAILURE;
         }
-        printList();
-
-        printf("got into FIFO or SJF\n");
         currentNode = readyList->head;
 
         //find the node to join
@@ -578,7 +554,6 @@ int thread_join(int tid) {
                 swapcontext(running->tcb->ucontext, scheduler);
             } else {
                 //attempting a circular join, so a failure should occur
-                printf("failed on circular\n");
                 if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
                     return FAILURE;
                 }
@@ -595,7 +570,7 @@ int thread_join(int tid) {
             totalRuns++;
             shiftUsages(running->tcb->stop - running->tcb->start, running->tcb);
             setAverage(running->tcb);
-            printList();
+
             if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
                 return FAILURE;
             }
@@ -607,13 +582,11 @@ int thread_join(int tid) {
 
         return SUCCESS;
     } else {
-        printf("in else\n");
         //case where TID doesn't exist/thread with that TID wasn't created
         if (currentNode == NULL && tid <= TID) { //TODO: bring back after doing swap function finish
             //shouldn't raise an error if trying to join a prior created thread that's already finished
             return SUCCESS;
         } else if (currentNode == NULL) {
-            printf("failed on null with node %d\n", tid);
             if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == FAILURE) {
                 return FAILURE;
             }
@@ -625,17 +598,13 @@ int thread_join(int tid) {
         return FAILURE;
     }
 
-    printf("got to end here\n");
     return FAILURE;
 }
 
-//TODO: clean up here and modify for sigalarm and for priority!
 void stub(void (*func)(void *), void *arg) {
-    printf("entered stub\n");
     // thread starts here
     func(arg); // call root function //Allow this function to be interrupted
     //TODO: thread clean up mentioned in assignment guidelines on page 3
-    printf("thread done\n");
 
     sigset_t mask;
     sigemptyset(&mask);
@@ -674,35 +643,29 @@ void stub(void (*func)(void *), void *arg) {
             }
         }
 
-        printf("Current node TID %d, running node joined TID %d\n", currentNode->tcb->TID, running->tcb->joined->TID);
-
         //current node is now the one we're looking for to move to the end of the list
         if (POLICY == FIFO || POLICY == SJF) {
             moveToEnd(currentNode, readyList);
-            printf("Free node result %d\n", removeNode(running, readyList));
-            printList();
         } else {
             if (currentNode->tcb->priority == HIGH) {
                 moveToEnd(currentNode, highList);
-                printList();
+
             } else if (currentNode->tcb->priority == MEDIUM) {
                 moveToEnd(currentNode, mediumList);
-                printList();
+
             } else if (currentNode->tcb->priority == LOW) {
                 moveToEnd(currentNode, lowList);
-                printList();
+
             }
         }
     }
 
-    printf("got here\n");
-
     if (running->tcb->priority == HIGH) {
-        printf("Free node result %d\n", removeNode(running, highList));
+        removeNode(running, highList);
     } else if (running->tcb->priority == MEDIUM) {
-        printf("Free node result %d\n", removeNode(running, mediumList));
+        removeNode(running, mediumList);
     } else if (running->tcb->priority == LOW) {
-        printf("Free node result %d\n", removeNode(running, lowList));
+        removeNode(running, lowList);
     }
     //TODO: free node here with freenode function
     running = NULL;
@@ -750,9 +713,7 @@ void schedule() {
     sigprocmask(SIG_BLOCK, &mask, NULL);
 
     getcontext(scheduler);
-    printf("schedule called\n");
-    printf("POLICY in schedule: %d\n", POLICY);
-    printList();
+
     node *currentNode;
 
     if (POLICY == FIFO) {
@@ -768,9 +729,6 @@ void schedule() {
         //start timing here
         running->tcb->start = (int) getTicks(); //TODO: Ask Rachel: milliseconds of same time?? account for seconds?
         running->tcb->state = RUNNING;
-        printf("running TID %d\n", running->tcb->TID);
-        printf("POLICY in schedule two: %d\n", POLICY);
-        printList();
         sigprocmask(SIG_UNBLOCK, &mask, NULL);
         setcontext(running->tcb->ucontext);
     } else if (POLICY == SJF) {
@@ -781,7 +739,6 @@ void schedule() {
         //use a loop to find a ready candidate here in the list of nodes to use as a initial value
         while (currentNode != NULL &&
                currentNode->tcb->state != READY) { //TODO: ask rachel if thread here can be scheduled as running in SJF?
-            printf("Current node %d and state %d\n", currentNode->tcb->TID, currentNode->tcb->state);
             currentNode = currentNode->next;
         }
         //current node is now in a ready state, since at least one node must be ready to run in the list
@@ -790,7 +747,6 @@ void schedule() {
 
         currentNode = readyList->head;
         while (currentNode != NULL) {
-            printf("Current node tid %d\n", currentNode->tcb->TID);
             if (currentNode->tcb->state != READY) {
                 currentNode = currentNode->next;
             } else {
@@ -811,16 +767,10 @@ void schedule() {
         //start timing here
         running->tcb->start = (int) getTicks(); //TODO: Ask Rachel: milliseconds of same time?? account for seconds?
         running->tcb->state = RUNNING;
-        printf("running TID %d\n", ((TCB *) running->tcb)->TID);
-        printf("POLICY in schedule two: %d\n", POLICY);
-        printList();
+
         sigprocmask(SIG_UNBLOCK, &mask, NULL);
         setcontext(running->tcb->ucontext);
     } else if (POLICY == PRIORITY) {
-        //TODO: ensure thread runs for 100 miliseconds, so reset timer here each time I schedule a thread??
-        printf("schedule priority\n");
-        //TODO: think about complex joining logic..if no threads of one type are available in one queue, then do you schedule in a different queue??? Also think about joining across..wait for Rachel answer
-
         //get random entry into array for the priority to be scheduled
         struct timeval now;
         unsigned int secs;
@@ -834,34 +784,24 @@ void schedule() {
         node *currentNode = NULL;
 
         //now priorityToSchedule holds the list from which to schedule round robin
-        if (running ==
-            NULL) { //the prior running thread finished and was removed, so it does not need to be placed back on the queue for round robin
-
-        } else { //current thread needs to be put at the end of it's queue, since round robin and be set to ready to run again, since it shouldn't be running right now
+        if (running == NULL){} //the prior running thread finished and was removed, so it does not need to be placed back on the queue for round robin
+        else { //current thread needs to be put at the end of it's queue, since round robin and be set to ready to run again, since it shouldn't be running right now
             if (running->tcb->state != WAITING) {
                 running->tcb->state = READY;
             }
             if (running->tcb->priority == HIGH) {
                 moveToEnd(running, highList);
-                printf("moved to end\n");
-                printList();
             } else if (running->tcb->priority == MEDIUM) {
                 moveToEnd(running, mediumList);
-                printf("moved to end\n");
-                printList();
             } else if (running->tcb->priority == LOW) {
                 moveToEnd(running, lowList);
-                printf("moved to end\n");
-                printList();
             }
         }
 
         //Do the scheduling and looping here based of it we have found a valid, ready thread to schedule!
         while (toSchedule == NULL) {
-            printf("enter loop\n");
             randomEntry = rand_r(&(secs)) % 19; //number between 0 and 18
             priorityToSchedule = scheduling[randomEntry];
-            printf("got priority %d\n", priorityToSchedule);
             if (priorityToSchedule == HIGH) {
                 currentNode = highList->head;
                 while (currentNode != NULL && currentNode->tcb->state != READY) {
@@ -886,17 +826,8 @@ void schedule() {
                 toSchedule = currentNode;
                 continue; //node is what we want or it is NULL;
             }
-            if (toSchedule != NULL) {
-                printf("To Schedule %d\n", toSchedule->tcb->TID);
-            }
         }
 
-        if (toSchedule == NULL) {
-            printf("loop failed\n");
-        }
-
-        printf("to schedule %d\n", toSchedule->tcb->TID);
-        //TODO: reset timer here to ensure full 100 milliseconds are given??
         struct itimerval realt;
 
         setrtimer(&realt);
@@ -909,69 +840,8 @@ void schedule() {
         //start timing here
         running->tcb->start = (int) getTicks(); //TODO: Ask Rachel: milliseconds of same time?? account for seconds?
         running->tcb->state = RUNNING;
-        printf("running TID %d\n", running->tcb->TID);
-        printList();
         sigprocmask(SIG_UNBLOCK, &mask, NULL);
         setcontext(running->tcb->ucontext);
-    }
-}
-
-void printList() {
-    node *currentNode = NULL;
-
-    if (POLICY == FIFO || POLICY == SJF) {
-        currentNode = readyList->head;
-
-        while (currentNode != NULL) {
-            printf("%d, state %d, policy %d, average %d, u1 %d, u2 %d, u3 %d->", currentNode->tcb->TID,
-                   currentNode->tcb->state, POLICY, currentNode->tcb->averageOfUsages, currentNode->tcb->usage1,
-                   currentNode->tcb->usage2, currentNode->tcb->usage3);
-
-            currentNode = currentNode->next;
-        }
-
-        printf("NULL, list size %d", readyList->size);
-
-        printf("\n");
-    } else {
-        currentNode = highList->head;
-
-        while (currentNode != NULL) {
-            printf("%d, state %d, policy %d, average %d, u1 %d, u2 %d, u3 %d->", currentNode->tcb->TID,
-                   currentNode->tcb->state, POLICY, currentNode->tcb->averageOfUsages, currentNode->tcb->usage1,
-                   currentNode->tcb->usage2, currentNode->tcb->usage3);
-
-            currentNode = currentNode->next;
-        }
-
-        printf("NULL, high list size %d", highList->size);
-        printf("\n");
-
-        currentNode = mediumList->head;
-
-        while (currentNode != NULL) {
-            printf("%d, state %d, policy %d, average %d, u1 %d, u2 %d, u3 %d->", currentNode->tcb->TID,
-                   currentNode->tcb->state, POLICY, currentNode->tcb->averageOfUsages, currentNode->tcb->usage1,
-                   currentNode->tcb->usage2, currentNode->tcb->usage3);
-
-            currentNode = currentNode->next;
-        }
-
-        printf("NULL, medium list size %d", mediumList->size);
-        printf("\n");
-
-        currentNode = lowList->head;
-
-        while (currentNode != NULL) {
-            printf("%d, state %d, policy %d, average %d, u1 %d, u2 %d, u3 %d->", currentNode->tcb->TID,
-                   currentNode->tcb->state, POLICY, currentNode->tcb->averageOfUsages, currentNode->tcb->usage1,
-                   currentNode->tcb->usage2, currentNode->tcb->usage3);
-
-            currentNode = currentNode->next;
-        }
-
-        printf("NULL, low list size %d", lowList->size);
-        printf("\n");
     }
 }
 
@@ -1079,8 +949,6 @@ int addNode(TCB *tcb, linkedList *list) {
 }
 
 int moveToEnd(node *nodeToMove, linkedList *list) {
-    printf("move to end\n");
-    printList();
     node *prev = nodeToMove->prev;
     node *next = nodeToMove->next;
     node *currentTail = list->tail;
@@ -1212,10 +1080,8 @@ void sigHandler(int j, siginfo_t *si, void *old_context) {
 
     //save thread's state and go to the scheduler
     if (running == NULL) { //TODO: figure out why this is always NULL, which means only finished threads are hitting it here, so have to unblock for threads that are not yet finished...
-//        printf("running is NULL\n");
         setcontext(scheduler);
     } else {
-//        printf("running is not NULL\n");
         swapcontext(running->tcb->ucontext, scheduler);
     }
 }
