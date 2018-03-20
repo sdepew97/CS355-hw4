@@ -27,7 +27,7 @@ enum {CREATED, SCHEDULED, STOPPED, FINISHED};
 char* states[] = {"CREATED\0", "SCHEDULED\0", "STOPPED\0", "FINISHED\0"};
 
 //global variable to store the scheduling policy
-static int sigset_t mask;
+static sigset_t mask;
 static int POLICY; //policy for scheduling that the user passed
 static int TID = 1; //start TID at 1 and get new TID's after that
 static int startTime;
@@ -273,7 +273,7 @@ int thread_libterminate(void) {
         return SUCCESS;
     }
 
-    if (removeMask(mask) == FAILURE) {
+    if (removeAlrmMask() == FAILURE) {
         return FAILURE;
     }
 
@@ -286,7 +286,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
 
     //This means that we have not called threadlib_init first, which is required
     if (running == NULL || func == NULL) {
-        if (removeMask(mask) == FAILURE) {
+        if (removeAlrmMask() == FAILURE) {
             return FAILURE;
         }
         return FAILURE;
@@ -312,7 +312,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
 
 
 
-        if (removeMask(mask) == FAILURE) {
+        if (removeAlrmMask() == FAILURE) {
             return FAILURE;
         }
         return currentTID;
@@ -347,12 +347,12 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
 
         Log((int) getTicks() - startTime, CREATED, currentTID, priority);
 
-        if (removeMask(mask) == FAILURE) {
+        if (removeAlrmMask() == FAILURE) {
             return FAILURE;
         }
         return currentTID;
     }
-    if (removeMask(mask) == FAILURE) {
+    if (removeAlrmMask() == FAILURE) {
         return FAILURE;
     }
     return FAILURE;
@@ -379,7 +379,7 @@ int thread_yield(void) {
             totalRuns++;
             shiftUsages(running->tcb->stop - running->tcb->start, running->tcb);
             setAverage(running->tcb);
-            if (removeMask(mask) == FAILURE) {
+            if (removeAlrmMask() == FAILURE) {
                 return FAILURE;
             }
             swapcontext(running->tcb->ucontext, scheduler);
@@ -408,14 +408,14 @@ int thread_yield(void) {
         totalRuns++;
         shiftUsages(running->tcb->stop - running->tcb->start, running->tcb);
         setAverage(running->tcb);
-        if (removeMask(mask) == FAILURE) {
+        if (removeAlrmMask() == FAILURE) {
             return FAILURE;
         }
         swapcontext(running->tcb->ucontext, scheduler);
         return SUCCESS;
     }
 
-    if (removeMask(mask) == FAILURE) {
+    if (removeAlrmMask() == FAILURE) {
         return FAILURE;
     }
     return FAILURE;
