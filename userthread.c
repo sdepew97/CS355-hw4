@@ -994,7 +994,7 @@ ucontext_t *newContext(ucontext_t *uc_link, void (*func)(void *), void* arg) {
 }
 
 void freeUcontext(ucontext_t *ucontext) {
-    free(ucontext->uc_stack.ss_sp);
+//    free(ucontext->uc_stack.ss_sp);
     free(ucontext);
 }
 
