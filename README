@@ -8,4 +8,6 @@ Notes:
 
 Known Bugs:
 * My yielding is not working 100% correctly for threads; I ended up having to sigprocmask too much of my code to allow successful interleaving to occur
+* I have a ton of valgrind errors
+* I am unable to free the context memory
 

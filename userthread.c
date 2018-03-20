@@ -5,7 +5,8 @@
 #include <stdarg.h>
 #include <signal.h>
 #include <unistd.h>
-#include "valgrind.h"
+//#include "valgrind.h"
+#include "/usr/include/valgrind/valgrind.h"
 #include "userthread.h"
 #include "logger.h"
 
