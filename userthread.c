@@ -284,7 +284,7 @@ int thread_libterminate(void) {
 
 //TODO: masking, then done!
 int thread_create(void (*func)(void *), void *arg, int priority) {
-    //setAlrmMask();
+    setAlrmMask();
 
     //This means that we have not called threadlib_init first, which is required
     if (running == NULL || func == NULL) {
@@ -293,6 +293,8 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
         }
         return FAILURE;
     }
+
+    removeAlrmMask();
 
     if (POLICY == FIFO || POLICY == SJF) {
         ucontext_t *newThread = newContext(NULL, func, arg);
@@ -319,6 +321,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
         }
         return currentTID;
     } else { //we are priority scheduling
+        setAlrmMask();
         ucontext_t *newThread = newContext(NULL, func, arg);
         if (newThread == NULL) {
             return FAILURE;
@@ -332,18 +335,22 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
 
         if (priority == LOW) {
             if (addNode(newThreadTCB, lowList) == FAILURE) {
+                removeAlrmMask();
                 return FAILURE;
             }
         } else if (priority == MEDIUM) {
             if (addNode(newThreadTCB, mediumList) == FAILURE) {
+                removeAlrmMask();
                 return FAILURE;
             }
         } else if (priority == HIGH) {
             if (addNode(newThreadTCB, highList) == FAILURE) {
+                removeAlrmMask();
                 return FAILURE;
             }
         } else {
             //priority is invalid
+            removeAlrmMask();
             return FAILURE;
         }
 
@@ -357,6 +364,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
     if (removeAlrmMask() == FAILURE) {
         return FAILURE;
     }
+
     return FAILURE;
 }
 
