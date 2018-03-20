@@ -720,7 +720,7 @@ void schedule() {
         printf("POLICY in schedule two: %d\n", POLICY);
         printList();
         sigprocmask(SIG_UNBLOCK, &mask, NULL);
-        setcontext(((TCB *) running->tcb)->ucontext);
+        setcontext(running->tcb->ucontext);
     } else if (POLICY == SJF) {
         node *currentNode = readyList->head;
         int minRuntime = 0;
@@ -1146,8 +1146,10 @@ void sigHandler(int j, siginfo_t *si, void *old_context) {
 
     //save thread's state and go to the scheduler
     if (running == NULL) {
+        printf("running is NULL\n");
         setcontext(scheduler);
     } else {
+        printf("running is not NULL\n");
         swapcontext(running->tcb->ucontext, scheduler);
     }
 }
