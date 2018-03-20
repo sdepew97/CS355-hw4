@@ -717,9 +717,7 @@ void schedule() {
         struct itimerval realt;
 
         setrtimer(&realt);
-        if (setitimer(ITIMER_REAL, &realt, NULL) == FAILURE) {
-            return FAILURE;
-        }
+        setitimer(ITIMER_REAL, &realt, NULL);
 
         //toSchedule is the node we want at this point
         currentNode = toSchedule;
