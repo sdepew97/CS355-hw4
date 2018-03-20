@@ -635,8 +635,9 @@ void setMask(sigset_t *mask) {
 }
 
 int removeMask(sigset_t *mask) {
-    sigprocmask(SIG_UNBLOCK, &mask, NULL);
+    sigprocmask(SIG_UNBLOCK, mask, NULL);
     free(mask);
+    return SUCCESS; //TODO: mofiy return here
 }
 
  long getTicks() {
