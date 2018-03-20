@@ -605,7 +605,7 @@ int thread_join(int tid) {
 void stub(void (*func)(void *), void *arg) {
     printf("entered stub\n");
     // thread starts here
-    func(arg); // call root function
+    func(arg); // call root function //Allow this function to be interrupted
     //TODO: thread clean up mentioned in assignment guidelines on page 3
     printf("thread done\n");
 
