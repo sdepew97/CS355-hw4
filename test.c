@@ -1,47 +1,47 @@
+////
+//// Created by Sarah Depew on 3/19/18.
+////
 //
-// Created by Sarah Depew on 3/19/18.
+//#include <stdio.h>
+//#include <stdlib.h>
+//#include <poll.h>
+//#include "userthread.h"
 //
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <poll.h>
-#include "userthread.h"
-
-#define SUCCESS 0
-#define FAILURE -1
-#define POLICY 2 //FIFO PRIORITY
-#define PRIORITY 0
-
-void printHello() {
-    printf("Hello World\n");
-    poll(NULL, 0, 200);
-}
-
-/*
- * Simple FIFO test with main's functionality as a thread is tested.
- */
-int main(void) {
-    if (thread_libinit(POLICY) == FAILURE)
-        exit(EXIT_FAILURE);
-
-    printf("This is a Priority test where main is tested as a thread.\n");
-
-    int tid1 = thread_create(printHello, NULL, PRIORITY);
-
-    if (tid1 == FAILURE)
-        exit(EXIT_FAILURE);
-
-    if (thread_join(tid1) == FAILURE)
-        exit(EXIT_FAILURE);
-
-    printf("Back in Main\n");
-    printf("Should run main->%d and print Hello World and Back in Main if successful.\n", tid1);
-
-    if (thread_libterminate() == FAILURE)
-        exit(EXIT_FAILURE);
-
-    exit(EXIT_SUCCESS);
-}
+//#define SUCCESS 0
+//#define FAILURE -1
+//#define POLICY 2 //FIFO PRIORITY
+//#define PRIORITY 0
+//
+//void printHello() {
+//    printf("Hello World\n");
+//    poll(NULL, 0, 200);
+//}
+//
+///*
+// * Simple FIFO test with main's functionality as a thread is tested.
+// */
+//int main(void) {
+//    if (thread_libinit(POLICY) == FAILURE)
+//        exit(EXIT_FAILURE);
+//
+//    printf("This is a Priority test where main is tested as a thread.\n");
+//
+//    int tid1 = thread_create(printHello, NULL, PRIORITY);
+//
+//    if (tid1 == FAILURE)
+//        exit(EXIT_FAILURE);
+//
+//    if (thread_join(tid1) == FAILURE)
+//        exit(EXIT_FAILURE);
+//
+//    printf("Back in Main\n");
+//    printf("Should run main->%d and print Hello World and Back in Main if successful.\n", tid1);
+//
+//    if (thread_libterminate() == FAILURE)
+//        exit(EXIT_FAILURE);
+//
+//    exit(EXIT_SUCCESS);
+//}
 
 
 
@@ -355,3 +355,41 @@ int main(void) {
 //
 //    exit(EXIT_SUCCESS);
 //}
+
+#include <stdio.h>
+#include <stdlib.h>
+#include "userthread.h"
+
+#define FAILURE -1
+
+void foo() {
+    printf("Woo!\n");
+}
+
+int main(void) {
+    printf("Testing some misuses of threads\n");
+    printf("This assumes that the priority queue range is from -1 to 1\n");
+    printf("because it tests adding a thread with priority 100\n");
+    printf("On success, it prints 'Woo!', does not crash, and does not cause any memory leaks\n");
+
+    int tidx = thread_create(foo, NULL, 0);
+    if (tidx != -1)
+        exit(EXIT_FAILURE);
+
+    thread_libterminate();
+
+    if (thread_libinit(PRIORITY) == FAILURE)
+        exit(EXIT_FAILURE);
+
+    int tid1 = thread_create(foo, NULL, 100);
+    if (tid1 == -1)
+        exit(EXIT_FAILURE);
+
+    if (thread_join(tid1) == -1)
+        exit(EXIT_FAILURE);
+
+    if (thread_libterminate() == FAILURE)
+        exit(EXIT_FAILURE);
+
+    exit(EXIT_SUCCESS);
+}
