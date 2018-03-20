@@ -109,7 +109,7 @@ static void sigHandler(int j, siginfo_t *si, void *old_context);
  * Masking the entire method, since it uses globals on almost every line and I didn't want to end up in an inconsistent state
  */
 int thread_libinit(int policy) {
-    sigset_t *mask = malloc ;
+    sigset_t *mask = malloc(sizeof(sigset_t));
     setMask(mask);
 
     //this is when the program officially started
@@ -125,8 +125,7 @@ int thread_libinit(int policy) {
 
     //create main's TCB
     mainTCB = newTCB(MAINTID, 0, 0, 0, QUANTA / 2, (int) getTicks(), 0, MAINPRIORITY, READY, NULL);
-    totalRuntime += QUA
-    NTA / 2;
+    totalRuntime += QUANTA / 2;
     totalRuns++;
 
     if (mainTCB == NULL) {
@@ -562,7 +561,8 @@ void stub(void (*func)(void *), void *arg) {
     func(arg); // call root function //Allow this function to be interrupted
     //TODO: thread clean up mentioned in assignment guidelines on page 3
 
-
+    sigset_t *mask = malloc(sizeof(sigset_t));
+    setMask(mask);
 
     Log((int) getTicks() - startTime, FINISHED, running->tcb->TID, running->tcb->priority);
     running->tcb->state = DONE; //mark as done running
