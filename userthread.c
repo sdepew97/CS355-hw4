@@ -1039,7 +1039,7 @@ node* newNode(TCB *tcb, node* next, node* prev) {
 
 void freeNode(node *nodeToFree) {
     //TODO: fill in body here
-    freeTCB(nodeToFree->tcb);
+//    freeTCB(nodeToFree->tcb);
     nodeToFree->next = NULL;
     nodeToFree->prev = NULL;
     free(nodeToFree);
