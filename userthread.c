@@ -35,7 +35,6 @@ static int startTime;
 static int LogCreated = FALSE; //know if we append or not to the log.txt file
 static int totalRuntime = 0;
 static int totalRuns = 0;
-static sigset_t set;
 static int scheduling[] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, -1, -1, -1, -1}; //2.25:1.5:1 ratio here, so randomly picking an entry allows us to know we get proper ratio of priorities
 
 //structs used in program
@@ -712,7 +711,7 @@ void schedule() {
     sigset_t mask;
     sigemptyset(&mask);
     sigaddset(&mask, SIGALRM);
-    sigprocmask(SIG_BLOCK, &mask, NULL) == FAILURE;
+    sigprocmask(SIG_BLOCK, &mask, NULL);
 
     getcontext(scheduler);
     printf("schedule called\n");
