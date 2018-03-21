@@ -369,16 +369,18 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
 }
 
 int thread_yield(void) {
-    //setAlrmMask();
+    setAlrmMask();
 
     //This means that we have not called threadlib_init first, which is required
     if (running == NULL) {
+        removeAlrmMask();
         return FAILURE;
     }
 
     if (POLICY == FIFO || POLICY == SJF) {
         //running node is in the list, so have to 1) find it (have a pointer to it rn), 2) move it to the tail
         if (moveToEnd(running, readyList) == FAILURE) {
+            removeAlrmMask();
             return FAILURE;
         } else {
             running->tcb->state = READY;
@@ -388,26 +390,30 @@ int thread_yield(void) {
             totalRuns++;
             shiftUsages(running->tcb->stop - running->tcb->start, running->tcb);
             setAverage(running->tcb);
-//            if (removeAlrmMask() == FAILURE) {
-//                return FAILURE;
-//            }
+            if (removeAlrmMask() == FAILURE) {
+                return FAILURE;
+            }
             swapcontext(running->tcb->ucontext, scheduler);
             return SUCCESS;
         }
     } else {
         if (running->tcb->priority == HIGH) {
             if (moveToEnd(running, highList) == FAILURE) {
+                removeAlrmMask();
                 return FAILURE;
             }
         } else if (running->tcb->priority == MEDIUM) {
             if (moveToEnd(running, mediumList) == FAILURE) {
+                removeAlrmMask();
                 return FAILURE;
             }
         } else if (running->tcb->priority == LOW) {
             if (moveToEnd(running, lowList) == FAILURE) {
+                removeAlrmMask();
                 return FAILURE;
             }
         } else {
+            removeAlrmMask();
             return FAILURE;
         }
         running->tcb->state = READY;
@@ -417,16 +423,16 @@ int thread_yield(void) {
         totalRuns++;
         shiftUsages(running->tcb->stop - running->tcb->start, running->tcb);
         setAverage(running->tcb);
-//        if (removeAlrmMask() == FAILURE) {
-//            return FAILURE;
-//        }
+        if (removeAlrmMask() == FAILURE) {
+            return FAILURE;
+        }
         swapcontext(running->tcb->ucontext, scheduler);
         return SUCCESS;
     }
 
-//    if (removeAlrmMask() == FAILURE) {
-//        return FAILURE;
-//    }
+    if (removeAlrmMask() == FAILURE) {
+        return FAILURE;
+    }
     return FAILURE;
 }
 
