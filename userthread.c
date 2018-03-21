@@ -945,6 +945,7 @@ node* newNode(TCB *tcb, node* next, node* prev) {
 }
 
 void freeNode(node *nodeToFree) {
+    printf("free node\n");
     freeTCB(nodeToFree->tcb);
     nodeToFree->next = NULL;
     nodeToFree->prev = NULL;
