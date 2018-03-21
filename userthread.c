@@ -111,6 +111,10 @@ static void sigHandler(int signo, siginfo_t *si, void *old_context);
  * Masking the entire method, since it uses globals on almost every line and I didn't want to end up in an inconsistent state
  */
 int thread_libinit(int policy) {
+    if(policy > PRIORITY || policy < FIFO) {
+        return FAILURE;
+    }
+
     //this is when the program officially started
     startTime = (int) getTicks();
     sigemptyset(&mask); //Initialize the mask global value if it is needed later on
