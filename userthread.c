@@ -133,7 +133,7 @@ int thread_libinit(int policy) {
         return FAILURE;
     }
 
-    int ret = newContext(newMainContext, NULL, func, arg);
+    int ret = newContext(newMainContext, NULL, NULL, NULL);
 
     //create main's TCB
     mainTCB = newTCB(MAINTID, newMainContext, 0, 0, 0, QUANTA / 2, (int) getTicks(), 0, MAINPRIORITY, READY, NULL);
