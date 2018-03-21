@@ -11,15 +11,15 @@
 
 #define N 128
 
-void foo(void *) {
+void foo(void) {
     poll(NULL, 0, 1);
 }
 
 int main(void) {
     printf(" * Running 129 threads! \n");
-    printf(" * We want to see 129 threads execute with no memory leaks or failures. \n");
+    printf(" * We want to have this behave like a simple Round Robin scheduling algorithm. No memory leaks!\n");
 
-    if (thread_libinit(SJF) == -1)
+    if (thread_libinit(PRIORITY) == -1)
         exit(EXIT_FAILURE);
 
     int tids[N];
