@@ -27,10 +27,10 @@ enum {CREATED, SCHEDULED, STOPPED, FINISHED};
 char* states[] = {"CREATED\0", "SCHEDULED\0", "STOPPED\0", "FINISHED\0"};
 
 //global variable to store the scheduling policy
-static sigset_t mask;
-static int POLICY; //policy for scheduling that the user passed
+static sigset_t mask = NULL;
+static int POLICY = FIFO; //policy for scheduling that the user passed
 static int TID = 1; //start TID at 1 and get new TID's after that
-static int startTime;
+static int startTime = 0;
 static int LogCreated = FALSE; //know if we append or not to the log.txt file
 static int totalRuntime = 0;
 static int totalRuns = 0;
