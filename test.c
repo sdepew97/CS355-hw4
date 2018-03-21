@@ -1,46 +1,55 @@
+//
+// Created by Sarah Depew on 3/19/18.
+//
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "userthread.h"
+#include "logger.h"
 
 #define SUCCESS 0
 #define FAILURE -1
 #define PRIORITY 1
 
-void printHello() {
-    printf("Hello World\n");
+void printHello () {
+    printf("Hello world\n");
 }
 
-/*
- * Simple FIFO test with main's functionality as a thread is tested.
- */
-int main(void) {
-    if (thread_libinit(FIFO) == FAILURE)
+void tryYield() {
+    printf("start yield\n");
+    thread_yield();
+    printf("end yield\n");
+    printHello();
+}
+
+int main() {
+    if (thread_libinit(SJF) == FAILURE)
         exit(EXIT_FAILURE);
 
-    printf("This is a FIFO test where main is tested as a thread.\n");
+    int tid1 = thread_create(printHello, NULL, -1);
 
-    int tid1 = thread_create(printHello, NULL, PRIORITY);
-
-    if(tid1 == FAILURE)
+    if (tid1 == FAILURE)
         exit(EXIT_FAILURE);
+
+    int tid2 = thread_create(tryYield, NULL, -1);
+
+    if (tid2 == FAILURE)
+        exit(EXIT_FAILURE);
+
+    printf("joining 2\n");
+    if (thread_join(tid2) == FAILURE)
+        exit(EXIT_FAILURE);
+
+    printf("joining 1\n");
 
     if (thread_join(tid1) == FAILURE)
         exit(EXIT_FAILURE);
 
-    printf("Back in Main\n");
-
-    int tid2 = thread_create(printHello, NULL, PRIORITY);
-
-    if(tid2 == FAILURE)
-        exit(EXIT_FAILURE);
-
-    if (thread_join(tid2) == FAILURE)
-        exit(EXIT_FAILURE);
-
-    printf("Should run main->%d->%d and print Hello World, Back in Main, and Hello World if successful.\n", tid1, tid2);
+    printf("Back to main\n");
 
     if (thread_libterminate() == FAILURE)
         exit(EXIT_FAILURE);
 
+    printf("Congratulations, your test was successful!\n");
     exit(EXIT_SUCCESS);
 }
