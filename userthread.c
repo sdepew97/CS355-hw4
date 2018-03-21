@@ -573,6 +573,7 @@ int thread_join(int tid) {
 
         return SUCCESS;
     } else {
+        printf("got into else\n");
         //case where TID doesn't exist/thread with that TID wasn't created
         if (currentNode != NULL && currentNode->tcb->joined != NULL) {
             if (removeAlrmMask() == FAILURE) {
@@ -581,6 +582,9 @@ int thread_join(int tid) {
             return FAILURE;
         } else if (currentNode == NULL && tid <= TID) {
             //shouldn't raise an error if trying to join a prior created thread that's already finished
+            if (removeAlrmMask() == FAILURE) {
+                return FAILURE;
+            }
             return SUCCESS;
         } else if (currentNode == NULL) {
             if (removeAlrmMask() == FAILURE) {
