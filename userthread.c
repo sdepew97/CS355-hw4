@@ -275,7 +275,6 @@ int thread_libterminate(void) {
             }
 
             free(readyList);
-            freeUcontext(scheduler); //TODO: remove at end, since only needed for debugging purposes!
 
             removeAlrmMask();
 
