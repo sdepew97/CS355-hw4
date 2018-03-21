@@ -574,6 +574,7 @@ int thread_join(int tid) {
         return SUCCESS;
     } else {
         printf("got into else\n");
+        printf("%d\n", currentNode->tcb->TID);
         //case where TID doesn't exist/thread with that TID wasn't created
         if (currentNode != NULL && currentNode->tcb->joined != NULL) {
             printf("joined already\n");
