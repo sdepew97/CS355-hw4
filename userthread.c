@@ -321,7 +321,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
         }
         return currentTID;
     } else { //we are priority scheduling
-//        setAlrmMask();
+        setAlrmMask();
         ucontext_t *newThread = newContext(NULL, func, arg);
         if (newThread == NULL) {
             removeAlrmMask();
