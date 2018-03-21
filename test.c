@@ -48,9 +48,9 @@ int main(void) {
 
     for (int i = 0; i < n; i++) {
         if (tids[i] == -1)
-            printf("error\n");
             exit(EXIT_FAILURE);
     }
+    printf("error\n");
 
     for (int i = 0; i < n; i++) {
         if (thread_join(tids[i]) == -1) {
