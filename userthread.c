@@ -5,8 +5,6 @@
 #include <stdarg.h>
 #include <signal.h>
 #include <unistd.h>
-//#include "valgrind.h"
-#include "/usr/include/valgrind/valgrind.h"
 #include "userthread.h"
 #include "logger.h"
 
@@ -87,8 +85,7 @@ static void stub(void (*func)(void *), void *arg);
 static long getTicks();
 static void Log (int ticks, int OPERATION, int TID, int PRIORITY);    // logs a message to LOGFILE
 static void schedule();
-//static ucontext_t *newContext(ucontext_t *uc_link, void (*func)(void *), void* arg);
-static int newContext(ucontext_t *ucontext, ucontext_t *uc_link, void (*func)(void *), void* arg);
+static ucontext_t *newContext(ucontext_t *uc_link, void (*func)(void *), void* arg);
 static TCB* newTCB(int TID, ucontext_t *ucontext, int usage1, int usage2, int usage3, int averageOfUsages, int start, int stop, int priority, int state, TCB *joined);
 static node* newNode(TCB *tcb, node* next, node* prev);
 static int addNode(TCB *tcb, linkedList *list);
@@ -119,8 +116,7 @@ int thread_libinit(int policy) {
     static TCB *mainTCB = NULL;
 
     //create context for scheduler
-    scheduler = malloc(sizeof(ucontext_t));
-    int ret = newContext(scheduler, NULL, (void (*)(void *)) scheduler, NULL);
+    scheduler = newContext(NULL, (void (*)(void *)) scheduler, NULL);
     if (scheduler == NULL) {
         return FAILURE;
     }
@@ -128,12 +124,10 @@ int thread_libinit(int policy) {
     makecontext(scheduler, (void (*)(void)) schedule, 0);
 
     //context for main
-    ucontext_t *newMainContext = malloc(sizeof(ucontext_t));
+    ucontext_t *newMainContext = newContext(NULL, NULL, NULL);
     if (newMainContext == NULL) {
         return FAILURE;
     }
-
-    ret = newContext(newMainContext, NULL, NULL, NULL);
 
     //create main's TCB
     mainTCB = newTCB(MAINTID, newMainContext, 0, 0, 0, QUANTA / 2, (int) getTicks(), 0, MAINPRIORITY, READY, NULL);
@@ -314,8 +308,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
     removeAlrmMask();
 
     if (POLICY == FIFO || POLICY == SJF) {
-        ucontext_t *newThread = malloc(sizeof(ucontext_t));
-        int ret = newContext(newThread, NULL, func, arg);
+        ucontext_t *newThread = newContext(newThread, NULL, func, arg);
         if (newThread == NULL) {
             return FAILURE;
         }
@@ -336,8 +329,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
         }
         return currentTID;
     } else { //we are priority scheduling
-        ucontext_t *newThread = malloc(sizeof(ucontext_t));
-        int ret = newContext(newThread, NULL, func, arg);
+        ucontext_t *newThread = newContext(newThread, NULL, func, arg);
 
         if (newThread == NULL) {
             return FAILURE;
@@ -879,47 +871,28 @@ void schedule() {
     }
 }
 
-int newContext(ucontext_t *ucontext, ucontext_t *uc_link, void (*func)(void *), void* arg) {
-    void *stack = malloc(STACKSIZE);
+ucontext_t *newContext(ucontext_t *uc_link, void (*func)(void *), void* arg) {
+    ucontext_t *returnValue = malloc(sizeof(ucontext_t));
+    if (returnValue == NULL) {
+        return NULL;
+    }
+    if (getcontext(returnValue) == FAILURE) {
+        return NULL;
+    }
 
-    getcontext(ucontext);
-
-    int ret = VALGRIND_STACK_REGISTER(stack, stack + STACKSIZE);
-
-    ucontext->uc_link = uc_link;
-    ucontext->uc_stack.ss_sp = stack;
-    ucontext->uc_stack.ss_size = STACKSIZE;
-
-    return ret;
+    returnValue->uc_link = uc_link;
+    returnValue->uc_stack.ss_sp = malloc(STACKSIZE);
+    if (returnValue->uc_stack.ss_sp == NULL) {
+        return NULL;
+    }
+    returnValue->uc_stack.ss_size = STACKSIZE;
+    return returnValue;
 }
 
 void freeUcontext(ucontext_t *ucontext) {
     free(ucontext->uc_stack.ss_sp);
     free(ucontext);
 }
-
-//ucontext_t *newContext(ucontext_t *uc_link, void (*func)(void *), void* arg) {
-//    ucontext_t *returnValue = malloc(sizeof(ucontext_t));
-//    if (returnValue == NULL) {
-//        return NULL;
-//    }
-//    if (getcontext(returnValue) == FAILURE) {
-//        return NULL;
-//    }
-//
-//    returnValue->uc_link = uc_link;
-//    returnValue->uc_stack.ss_sp = malloc(STACKSIZE);
-//    if (returnValue->uc_stack.ss_sp == NULL) {
-//        return NULL;
-//    }
-//    returnValue->uc_stack.ss_size = STACKSIZE;
-//    return returnValue;
-//}
-
-//void freeUcontext(ucontext_t *ucontext) {
-//    free(ucontext->uc_stack.ss_sp);
-//    free(ucontext);
-//}
 
 TCB* newTCB(int TID, ucontext_t *ucontext, int usage1, int usage2, int usage3, int averageOfUsages, int start, int stop, int priority, int state, TCB *joined) {
     TCB *returnValue = malloc(sizeof(TCB));
