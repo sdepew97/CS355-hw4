@@ -43,7 +43,7 @@ int main(void) {
 
 
     // more misuses...
-//    thread_libterminate();
+    thread_libterminate();
     thread_join(123132);
 
 
