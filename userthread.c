@@ -95,6 +95,9 @@ static int moveToEnd(node *nodeToMove, linkedList *list);
 static void shiftUsages(int newUsageValue, TCB *tcb);
 static int computeAverage(TCB *tcb);
 static void freeNode(node *nodeToFree);
+static void freeTCB(TCB *tcb);
+static void freeUcontext(ucontext_t *ucontext);
+
 static int removeNode(node *nodeToRemove, linkedList *list);
 static void setAverage(TCB *tcb);
 void setrtimer(struct itimerval *ivPtr);
@@ -916,10 +919,6 @@ TCB* newTCB(int TID, int usage1, int usage2, int usage3, int averageOfUsages, in
     returnValue->start = start;
     returnValue->stop = stop;
     returnValue->priority = priority;
-//    returnValue->joined = malloc(sizeof(TCB));
-//    if (returnValue->joined == NULL) {
-//        return NULL;
-//    }
     returnValue->joined = joined;
     returnValue->state = state;
 
@@ -929,8 +928,6 @@ TCB* newTCB(int TID, int usage1, int usage2, int usage3, int averageOfUsages, in
 void freeTCB(TCB *tcb) {
 //    freeUcontext(tcb->ucontext); //TODO: see if this is causing errors...
     free(tcb->ucontext);
-    tcb->joined = NULL; //make sure not to free the wrong thing here
-    free(tcb->joined);
     free(tcb);
 }
 
