@@ -1,6 +1,4 @@
 Assumptions when Coding:
-* In the non-preemptive scheduling algorithms, FIFO and SJF, when a new thread is created, it is blocked. If we do not join the thread,
-then it remains blocked and will never run. Only upon a thread_join is the thread able to run and the scheduler called.
 
 Notes:
 * My log is found in log.txt
@@ -14,7 +12,7 @@ Known Bugs/Notes:
 * There was one time I ran valgrind and got a segfault. I tried to recreate the error to no avail. I am wondering if there is a minor race condition that occured. I
 knew about this and attempted to fix it, but was unable to recreate the issue. So, I am recording it here. This was running in Priority scheduling mode.
 * Small memory leaks with TCB and UContexts
-* Weird bug about printing and swapping for Prority on one test (Rachel was sent a screen shot)
+* Weird bug about printing and swapping for Priority on one test (Rachel was sent a screen shot)
 * I was unable to figure out how to break my code in userthread.c into multiple .h files. If I could have done so, I would have done ___, ___, and ____.
 * I am not 100% certain the ratio on my scheduler is correct. I followed your advice, but after running
 Eileen's test I am not sure I have the proper ratio. I think I do, but I wanted to document the
@@ -23,4 +21,5 @@ possibility it was not 100% correct.
 * I decided on different behavior than jiaping for wjp_test_invalid_join where an attempted join was valid on a thread that had already
 terminated that was attempting to be joined
 * When a failure occurs during a test, such as in wjp_test_invalid_join2 and wjp_test_invalid_priority, the exit happens immediately, so there is a guaranteed, and occurring memory leak as threadlib_term was not called
+* wjp_test_misuse1.c also showed invalid reads, writes, and jumps; I was able to fix the segfault
 *

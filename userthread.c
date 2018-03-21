@@ -909,8 +909,12 @@ int newContext(ucontext_t *ucontext, ucontext_t *uc_link, void (*func)(void *), 
 }
 
 void freeUcontext(ucontext_t *ucontext) {
-    free(ucontext->uc_stack.ss_sp);
-    free(ucontext);
+    if(ucontext != NULL) {
+        if (ucontext->uc_stack.ss_sp != NULL) {
+            free(ucontext->uc_stack.ss_sp);
+        }
+        free(ucontext);
+    }
 }
 
 //ucontext_t *newContext(ucontext_t *uc_link, void (*func)(void *), void* arg) {
@@ -929,11 +933,6 @@ void freeUcontext(ucontext_t *ucontext) {
 //    }
 //    returnValue->uc_stack.ss_size = STACKSIZE;
 //    return returnValue;
-//}
-
-//void freeUcontext(ucontext_t *ucontext) {
-//    free(ucontext->uc_stack.ss_sp);
-//    free(ucontext);
 //}
 
 TCB* newTCB(int TID, ucontext_t *ucontext, int usage1, int usage2, int usage3, int averageOfUsages, int start, int stop, int priority, int state, TCB *joined) {
@@ -957,8 +956,12 @@ TCB* newTCB(int TID, ucontext_t *ucontext, int usage1, int usage2, int usage3, i
 }
 
 void freeTCB(TCB *tcb) {
-    freeUcontext(tcb->ucontext);
-    free(tcb);
+    if(tcb != NULL) {
+        if(tcb->ucontext != NULL) {
+            freeUcontext(tcb->ucontext);
+        }
+        free(tcb);
+    }
 }
 
 node* newNode(TCB *tcb, node* next, node* prev) {
@@ -974,11 +977,15 @@ node* newNode(TCB *tcb, node* next, node* prev) {
 }
 
 void freeNode(node *nodeToFree) {
-    TCB *tcb = nodeToFree->tcb;
-    freeTCB(tcb);
-    nodeToFree->next = NULL;
-    nodeToFree->prev = NULL;
-    free(nodeToFree);
+    if(nodeToFree != NULL) {
+        TCB *tcb = nodeToFree->tcb;
+        if(tcb != NULL) {
+            freeTCB(tcb);
+        }
+        nodeToFree->next = NULL;
+        nodeToFree->prev = NULL;
+        free(nodeToFree);
+    }
 }
 
 int addNode(TCB *tcb, linkedList *list) {
