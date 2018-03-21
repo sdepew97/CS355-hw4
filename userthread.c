@@ -646,7 +646,7 @@ void stub(void (*func)(void *), void *arg) {
     }
 
     //TODO: free node here with freenode function
-    freeNode(running); //TODO: see if this causes an error...
+//    freeNode(running); //TODO: see if this causes an error...
 
     running = NULL;
     removeAlrmMask();
