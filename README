@@ -19,4 +19,5 @@ knew about this and attempted to fix it, but was unable to recreate the issue. S
 * I am not 100% certain the ratio on my scheduler is correct. I followed your advice, but after running
 Eileen's test I am not sure I have the proper ratio. I think I do, but I wanted to document the
 possibility it was not 100% correct.
+* I kept getting a persistent error with jiaping's wjp_priority_yield_same test where I had a Conditional jump or move depending upon an uninitialized value error
 *
