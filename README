@@ -24,4 +24,5 @@ terminated that was attempting to be joined
 * wjp_test_misuse1.c also showed invalid reads, writes, and jumps; I was able to fix the segfault
 * There is a free():invalid pointer and Aborted (core dumped) error on wjp_test_misuse1
 * Not sure if this is pertinent, but I changed the type of the foo functions in kyu's tests to get the files to compile.
+* I have an error on the kyu misuse test
 *
