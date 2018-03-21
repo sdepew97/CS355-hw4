@@ -1,54 +1,67 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <poll.h>
 #include "userthread.h"
 
-void foo(void) {}
-void bar(void) {}
+void foo1(void* args) {
+    for (int i = 0; i < 4; i++) {
+        poll(NULL, 0, 1);
+        thread_yield();
+    }
+    printf("I should end first\n");
+}
 
+void foo200(void* args) {
+    for (int i = 0; i < 4; i++) {
+        poll(NULL, 0, 200);
+        thread_yield();
+    }
+    printf("I should end second\n");
+}
+
+void foo500(void* args) {
+    for (int i = 0; i < 4; i++) {
+        poll(NULL, 0, 500);
+        thread_yield();
+    }
+    printf("I should end third\n");
+}
+
+/**
+ * A simple test for SJF
+ */
 int main(void) {
-    printf(" * Testing a basic FIFO with some misuse of the userthread library\n");
-    printf(" * Shouldn't cause any crash or memory leak! \n");
-    // the following three should return -1
-    if (thread_create(foo, NULL, 0) != -1)
-        exit(EXIT_FAILURE);
-    if (thread_create(bar, NULL, 0) != -1)
-        exit(EXIT_FAILURE);
-    if (thread_join(1) != -1)
+    if (thread_libinit(SJF) == -1)
         exit(EXIT_FAILURE);
 
-    // calling |thread_libterminate| before calling |thread_libinit|
-    // can either return 0 or -1... but shouldn't cause any thing weird.
-    thread_libterminate();
-    thread_libterminate();
-    if (thread_libinit(FIFO) == -1)
-        exit(EXIT_FAILURE);
+    int tid1 = thread_create(foo1, NULL, 1);
+    int tid2 = thread_create(foo200, NULL, 1);
+    int tid3 = thread_create(foo500, NULL, 1);
+    int tid4 = thread_create(foo1, NULL, 1);
+    int tid5 = thread_create(foo200, NULL, 1);
+    int tid6 = thread_create(foo500, NULL, 1);
 
-    int tid1 = thread_create(foo, NULL, 0);
-    int tid2 = thread_create(foo, NULL, 0);
-    int tid3 = thread_create(foo, NULL, 0);
-    int tid4 = thread_create(foo, NULL, 0);
-    int tid5 = thread_create(foo, NULL, 0);
-    int tid6 = thread_create(foo, NULL, 0);
+    printf("%s\n");
 
-    int n  = 6;
-    int tids[] = { tid1, tid2, tid3, tid4, tid5, tid6 };
+    int n = 6;
+    int tids[] = {tid1, tid2, tid3, tid4, tid5, tid6};
 
-    for (int i = 0; i < n; i++)  {
+    for (int i = 0; i < n; i++) {
         if (tids[i] == -1)
             exit(EXIT_FAILURE);
     }
 
-    if (thread_join(tid6) == -1)
+    for (int i = 0; i < n; i++) {
+        if (thread_join(tids[i]) == -1) {
+            printf("You died from line 56 ");
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    if (thread_libterminate() == -1) {
+        printf("You died from line 62 ");
         exit(EXIT_FAILURE);
+    }
 
-    if (thread_libterminate() == -1)
-        exit(EXIT_FAILURE);
-
-    printf(" * Threads should in this order: %d -> %d -> %d -> %d -> %d -> %d\n",
-           tid1, tid2 ,tid3, tid4, tid5, tid6);
-
-    // more misuses...
-    thread_libterminate();
-    thread_join(123132);
     exit(EXIT_SUCCESS);
 }
