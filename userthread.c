@@ -432,7 +432,7 @@ int thread_yield(void) {
 
 int thread_join(int tid) {
     //TODO: ignore if joined something that is done/had been scheduled
-    //setAlrmMask();
+    setAlrmMask();
 
     node *currentNode = NULL;
 
@@ -504,13 +504,13 @@ int thread_join(int tid) {
                 shiftUsages(running->tcb->stop - running->tcb->start, running->tcb);
                 setAverage(running->tcb);
                 currentNode->tcb->joined = running->tcb;
-                if (setAlrmMask()  == FAILURE) {
+                if (removeAlrmMask()  == FAILURE) {
                     return FAILURE;
                 }
                 swapcontext(running->tcb->ucontext, scheduler);
             } else {
                 //attempting a circular join, so a failure should occur
-                if (setAlrmMask() == FAILURE) {
+                if (removeAlrmMask() == FAILURE) {
                     return FAILURE;
                 }
 
@@ -527,12 +527,12 @@ int thread_join(int tid) {
             shiftUsages(running->tcb->stop - running->tcb->start, running->tcb);
             setAverage(running->tcb);
 
-            if (setAlrmMask() == FAILURE) {
+            if (removeAlrmMask() == FAILURE) {
                 return FAILURE;
             }
             swapcontext(running->tcb->ucontext, scheduler); //TODO: see if this needs to be replaced, here
         }
-        if (setAlrmMask() == FAILURE) {
+        if (removeAlrmMask() == FAILURE) {
             return FAILURE;
         }
 
@@ -543,14 +543,14 @@ int thread_join(int tid) {
             //shouldn't raise an error if trying to join a prior created thread that's already finished
             return SUCCESS;
         } else if (currentNode == NULL) {
-            if (setAlrmMask() == FAILURE) {
+            if (removeAlrmMask() == FAILURE) {
                 return FAILURE;
             }
 
             return FAILURE;
         }
     }
-    if (setAlrmMask() == FAILURE) {
+    if (removeAlrmMask() == FAILURE) {
         return FAILURE;
     }
 
