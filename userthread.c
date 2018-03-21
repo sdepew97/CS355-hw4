@@ -319,7 +319,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
         TCB *newThreadTCB = newTCB(currentTID, 0, 0, 0, (totalRuntime / totalRuns), 0, 0, priority, READY, NULL);
 //        newThreadTCB->ucontext = newThread;
         newContext(newThreadTCB->ucontext, NULL, func, arg);
-        makecontext(newThread, (void (*)(void)) stub, 2, func, arg);
+        makecontext(newThreadTCB->ucontext, (void (*)(void)) stub, 2, func, arg);
         TID++;
 
         if (addNode(newThreadTCB, readyList) == FAILURE) {
