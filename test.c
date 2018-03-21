@@ -20,8 +20,8 @@ int main(void) {
 
     // thread lib terminate could return success or failure,
     // just make sure no memory leaks or crashes occur
-    thread_libterminate();
-    thread_libterminate();
+//    thread_libterminate();
+//    thread_libterminate();
 
     if (thread_libinit(FIFO) == FAILURE) {
         exit(EXIT_FAILURE);
