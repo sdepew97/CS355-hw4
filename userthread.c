@@ -941,10 +941,7 @@ TCB* newTCB(int TID, int usage1, int usage2, int usage3, int averageOfUsages, in
 
 void freeTCB(TCB *tcb) {
     freeUcontext(tcb->ucontext); //TODO: see if this is causing errors..., yes double freeing and...
-    printf("%d\n", tcb->TID);
-    printf("%d\n", sizeof(TCB));
     free(tcb);
-    printf("%d\n", tcb->TID);
 }
 
 node* newNode(TCB *tcb, node* next, node* prev) {
