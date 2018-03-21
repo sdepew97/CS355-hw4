@@ -307,17 +307,19 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
     removeAlrmMask();
 
     if (POLICY == FIFO || POLICY == SJF) {
-        ucontext_t *newThread = malloc(sizeof(ucontext_t));
-        int ret = newContext(newThread, NULL, func, arg);
-        if (newThread == NULL) {
-            return FAILURE;
-        }
+//        ucontext_t *newThread = malloc(sizeof(ucontext_t));
+//        int ret = newContext(newThread, NULL, func, arg);
+//        if (newThread == NULL) {
+//            return FAILURE;
+//        }
 
-        makecontext(newThread, (void (*)(void)) stub, 2, func, arg);
+//        makecontext(newThread, (void (*)(void)) stub, 2, func, arg);
 
         int currentTID = TID;
         TCB *newThreadTCB = newTCB(currentTID, 0, 0, 0, (totalRuntime / totalRuns), 0, 0, priority, READY, NULL);
-        newThreadTCB->ucontext = newThread;
+//        newThreadTCB->ucontext = newThread;
+        newContext(newThreadTCB->ucontext, NULL, func, arg);
+        makecontext(newThread, (void (*)(void)) stub, 2, func, arg);
         TID++;
 
         if (addNode(newThreadTCB, readyList) == FAILURE) {
