@@ -151,6 +151,8 @@ int thread_libinit(int policy) {
         //if malloc failed, return FAILURE
         if (readyList == NULL) {
             return FAILURE;
+        } else {
+            readyList->size = 0;
         }
 
         //set ready list's value to running and update the size as necessary
@@ -182,16 +184,22 @@ int thread_libinit(int policy) {
         lowList = malloc(sizeof(linkedList));
         if (lowList == NULL) {
             return FAILURE;
+        } else {
+            lowList->size = 0;
         }
 
         mediumList = malloc(sizeof(linkedList));
         if (mediumList == NULL) {
             return FAILURE;
+        } else {
+            mediumList->size = 0;
         }
 
         highList = malloc(sizeof(linkedList));
         if (highList == NULL) {
             return FAILURE;
+        } else {
+            highList->size = 0;
         }
 
         if (MAINPRIORITY == HIGH) {
