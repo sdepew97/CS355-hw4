@@ -237,6 +237,11 @@ int thread_libterminate(void) {
     node *currentNode = NULL;
     node *nextNode = NULL;
 
+    if(running == NULL) {
+        //This means that init was not called
+        return FAILURE;
+    }
+
     setAlrmMask();
     Log((int) getTicks() - startTime, FINISHED, MAINTID, MAINPRIORITY);
 
