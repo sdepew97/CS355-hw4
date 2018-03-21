@@ -32,7 +32,6 @@ void foo500(void* args) {
  */
 int main(void) {
     if (thread_libinit(SJF) == -1)
-        printf("error\n");
         exit(EXIT_FAILURE);
 
     int tid1 = thread_create(foo1, NULL, 1);
@@ -49,6 +48,7 @@ int main(void) {
 
     for (int i = 0; i < n; i++) {
         if (tids[i] == -1)
+            printf("error\n");
             exit(EXIT_FAILURE);
     }
 
