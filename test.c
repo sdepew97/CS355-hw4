@@ -4,7 +4,7 @@
 
 #define FAILURE -1
 
-void foo() {
+void fifo_misue_foo() {
     printf("Woo!\n");
 }
 
