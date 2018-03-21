@@ -313,8 +313,6 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
         }
         Log((int) getTicks() - startTime, CREATED, currentTID, priority);
 
-
-
         if (removeAlrmMask() == FAILURE) {
             return FAILURE;
         }
@@ -332,7 +330,6 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
         TCB *newThreadTCB = newTCB(currentTID, 0, 0, 0, (totalRuntime / totalRuns), 0, 0, priority, READY, NULL);
         newThreadTCB->ucontext = newThread;
         TID++;
-        removeAlrmMask();
 
         if (priority == LOW) {
             if (addNode(newThreadTCB, lowList) == FAILURE) {
@@ -360,6 +357,8 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
         if (removeAlrmMask() == FAILURE) {
             return FAILURE;
         }
+
+        removeAlrmMask();
         return currentTID;
     }
     if (removeAlrmMask() == FAILURE) {
