@@ -2,42 +2,36 @@
 #include <stdlib.h>
 #include "userthread.h"
 
-void foo1(void *arg) {
-    printf("I am the first thread!\n", arg);
+void foo(void *arg) {
+    printf("Hello world!\n");
 }
 
-void foo2(void *arg) {
-    printf("I am the second thread!\n", arg);
-}
-
-void foo3(void *arg) {
-    printf("I am the third thread!\n", arg);
-}
-
+/**
+ * Simple FIFO test
+ */
 int main(void) {
-    if (thread_libinit(FIFO) == -1) exit(EXIT_FAILURE);
-    printf(" * A simple test for FIFO scheduling\n");
-    printf(" * Threads should in this order: 1 -> 2 -> 3\n");
+    if (thread_libinit(FIFO) == -1)
+        exit(EXIT_FAILURE);
 
-    int tid_1 = thread_create(foo1, NULL, 0);
-    int tid_2 = thread_create(foo2, NULL, 0);
-    int tid_3 = thread_create(foo3, NULL, 0);
-    int tids[] = { tid_1, tid_2, tid_3 };
 
-    for (int i = 0; i < 3; i++)  {
-        if (tids[i] == -1)
-            exit(EXIT_FAILURE);
-    }
+    int tid1 = thread_create(foo, NULL, 1);
+    int tid2 = thread_create(foo, NULL, 1);
+    int tid3 = thread_create(foo, NULL, 1);
 
-    for (int i = 0; i < 3; i++)  {
-        if (thread_join(tids[i]) == -1)
-            exit(EXIT_FAILURE);
-    }
+    printf("Tesing invalid join with bad ID\n");
+    printf("Should print exactly one 'Hello world' on success\n");
+
+    if (thread_join(tid1) < 0)
+        exit(EXIT_FAILURE);
+
+    if (thread_join(tid1) < 0)
+        exit(EXIT_FAILURE);
+
+    if (thread_join(tid2) < 0)
+        exit(EXIT_FAILURE);
 
     if (thread_libterminate() == -1)
         exit(EXIT_FAILURE);
-
-    if (thread_libterminate() == -1) exit(EXIT_FAILURE);
 
     exit(EXIT_SUCCESS);
 }
