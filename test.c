@@ -2,10 +2,6 @@
 // Created by Sarah Depew on 3/21/18.
 //
 
-//
-// Created by Sarah Depew on 3/19/18.
-//
-
 #include <stdio.h>
 #include <stdlib.h>
 #include "userthread.h"
@@ -20,9 +16,12 @@ void printHello () {
 }
 
 int main() {
-    printf(" * Test where you try to call methods without having called thread_libinit correctly. No memory leaks or crashes should occur.\n");
+    printf(" * Test where you try to call creates without correct priorities. No memory leaks or crashes should occur.\n");
 
-    int tid1 = thread_create(printHello, NULL, -1);
+    if (thread_libinit(PRIORITY) == FAILURE)
+        exit(EXIT_FAILURE);
+
+    int tid1 = thread_create(printHello, NULL, 1000);
 
     if (tid1 != FAILURE)
         exit(EXIT_FAILURE);
@@ -31,7 +30,7 @@ int main() {
     if (thread_join(tid1) != FAILURE)
         exit(EXIT_FAILURE);
 
-    int tid2 = thread_create(printHello, NULL, -1);
+    int tid2 = thread_create(printHello, NULL, -1000);
 
     if (tid2 != FAILURE)
         exit(EXIT_FAILURE);
