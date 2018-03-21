@@ -911,7 +911,7 @@ void freeUcontext(ucontext_t *ucontext) {
 //}
 
 TCB* newTCB(int TID, int usage1, int usage2, int usage3, int averageOfUsages, int start, int stop, int priority, int state, TCB *joined) {
-    printf("created TCB\n");
+    printf("created TCB TID: %d\n", TID);
     TCB *returnValue = malloc(sizeof(TCB));
     if (returnValue == NULL) {
         return NULL;
@@ -937,8 +937,9 @@ TCB* newTCB(int TID, int usage1, int usage2, int usage3, int averageOfUsages, in
 void freeTCB(TCB *tcb) {
 //    freeUcontext(tcb->ucontext); //TODO: see if this is causing errors...
     free(tcb->ucontext);
+    printf("%d\n", tcb->TID);
     free(tcb);
-    printf("%d", tcb);
+    printf("%d\n", tcb->TID);
 }
 
 node* newNode(TCB *tcb, node* next, node* prev) {
