@@ -27,7 +27,7 @@ enum {CREATED, SCHEDULED, STOPPED, FINISHED};
 char* states[] = {"CREATED\0", "SCHEDULED\0", "STOPPED\0", "FINISHED\0"};
 
 //global variable to store the scheduling policy
-static sigset_t mask = NULL;
+static sigset_t mask;
 static int POLICY = FIFO; //policy for scheduling that the user passed
 static int TID = 1; //start TID at 1 and get new TID's after that
 static int startTime = 0;
@@ -109,6 +109,7 @@ static void sigHandler(int signo, siginfo_t *si, void *old_context);
 int thread_libinit(int policy) {
     //this is when the program officially started
     startTime = (int) getTicks();
+    sigemptyset(&mask); //Initialize the mask global value if it is needed later on
 
     //the TCB for the main thread
     static TCB *mainTCB = NULL;
@@ -139,8 +140,6 @@ int thread_libinit(int policy) {
 
     //if we are scheduling in a non-preemptive fashion
     if (policy == FIFO || policy == SJF) {
-        //TODO: free memory malloced here at the end!
-
         //create the ready list
         readyList = malloc(sizeof(linkedList));
 
@@ -162,9 +161,9 @@ int thread_libinit(int policy) {
         //everything went fine, so return success
         return SUCCESS;
     } else if (policy == PRIORITY) {
-        struct itimerval realt;
-
+        struct itimerval realt; //TODO: potentially uninitialized
         setrtimer(&realt);
+
         if (setitimer(ITIMER_REAL, &realt, NULL) == FAILURE) {
             return FAILURE;
         }
