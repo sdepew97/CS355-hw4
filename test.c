@@ -1,47 +1,58 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include "userthread.h"
+/*
+More robust test of thread_yield with 6 threads
+using FIFO priority
 
-void foo_yield(void* args) {
-    for (int i = 0; i < 100; i ++)
+Each thread is called with f() that prints its thread number
+f() calls thread_yield
+
+Expected output: (prints 1, 2, 3, 4, 5, 6, 1, 2, 3... 6 times)
+1
+2
+3
+4
+5
+6
+.
+.
+terminated
+*/
+
+#include <ucontext.h>
+#include <sys/types.h>
+#include <signal.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
+
+#include "userthread.h"
+// #include "scheduler.h"
+
+void f(void *message) {
+    for (int i = 0; i < 5; i++) {
+        printf("%s\n", message);
+        sleep(3);
         thread_yield();
+    }
 }
 
-/**
- * A simple test for PRIORITY
- * Expected Log: thread 1 to thread 3 end in order.
- */
-int main(void) {
-    if (thread_libinit(PRIORITY) == -1)
-        exit(EXIT_FAILURE);
 
-    int tid1 = thread_create(foo_yield, NULL, -1);
-    int tid2 = thread_create(foo_yield, NULL, 0);
-    int tid3 = thread_create(foo_yield, NULL, 0);
-    int tid4 = thread_create(foo_yield, NULL, -1);
-    int tid5 = thread_create(foo_yield, NULL, 0);
-    int tid6 = thread_create(foo_yield, NULL, 0);
+int main() {
+    int tid, tid2, tid3, tid4, tid5, tid6;
 
-    printf("Testing PRIORITY with multiple yield\n");
-    printf("On success, thread 1 and thread 4 should end ahead of all other threads\n");
+    thread_libinit(FIFO);
 
-    int n  = 6;
-    int tids[] = { tid1, tid2, tid3 , tid4, tid5, tid6};
+    // create threads with functions f1, f2
+    tid = thread_create(&f, "1", 0);
+    tid2 = thread_create(&f, "2", 0);
+    tid3 = thread_create(&f, "3", 0);
+    tid4 = thread_create(&f, "4", 0);
+    tid5 = thread_create(&f, "5", 0);
+    tid6 = thread_create(&f, "6", 0);
 
-    for (int i = 0; i < n; i++)  {
-        if (tids[i] == -1)
-            exit(EXIT_FAILURE);
-    }
+    thread_join(tid);
+    // thread_join(tid2);
 
-    for (int i = 0; i < n; i++)  {
-        if (thread_join(tids[i]) == -1) {
-            exit(EXIT_FAILURE);
-        }
-    }
-
-    if (thread_libterminate() == -1)
-        exit(EXIT_FAILURE);
-
-    printf(" Exit success\n");
-    exit(EXIT_SUCCESS);
+    thread_libterminate();
+    printf("terminated\n");
+    return 0;
 }
