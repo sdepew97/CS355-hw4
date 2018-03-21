@@ -89,7 +89,7 @@ static void Log (int ticks, int OPERATION, int TID, int PRIORITY);    // logs a 
 static void schedule();
 //static ucontext_t *newContext(ucontext_t *uc_link, void (*func)(void *), void* arg);
 static int newContext(ucontext_t *ucontext, ucontext_t *uc_link, void (*func)(void *), void* arg);
-static TCB* newTCB(int TID, int usage1, int usage2, int usage3, int averageOfUsages, int start, int stop, int priority, int state, TCB *joined);
+static TCB* newTCB(int TID, ucontext_t *ucontext, int usage1, int usage2, int usage3, int averageOfUsages, int start, int stop, int priority, int state, TCB *joined);
 static node* newNode(TCB *tcb, node* next, node* prev);
 static int addNode(TCB *tcb, linkedList *list);
 static int moveToEnd(node *nodeToMove, linkedList *list);
@@ -307,19 +307,16 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
     removeAlrmMask();
 
     if (POLICY == FIFO || POLICY == SJF) {
-//        ucontext_t *newThread = malloc(sizeof(ucontext_t));
-//        int ret = newContext(newThread, NULL, func, arg);
-//        if (newThread == NULL) {
-//            return FAILURE;
-//        }
+        ucontext_t *newThread = malloc(sizeof(ucontext_t));
+        int ret = newContext(newThread, NULL, func, arg);
+        if (newThread == NULL) {
+            return FAILURE;
+        }
 
-//        makecontext(newThread, (void (*)(void)) stub, 2, func, arg);
+        makecontext(newThread, (void (*)(void)) stub, 2, func, arg); //TODO: reminder I messed with this code to try and figure out malloc error...
 
         int currentTID = TID;
         TCB *newThreadTCB = newTCB(currentTID, 0, 0, 0, (totalRuntime / totalRuns), 0, 0, priority, READY, NULL);
-//        newThreadTCB->ucontext = newThread;
-//        newContext(newThreadTCB->ucontext, NULL, func, arg);
-        makecontext(newThreadTCB->ucontext, (void (*)(void)) stub, 2, func, arg);
         TID++;
 
         if (addNode(newThreadTCB, readyList) == FAILURE) {
@@ -332,20 +329,18 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
         }
         return currentTID;
     } else { //we are priority scheduling
-//        ucontext_t *newThread = malloc(sizeof(ucontext_t));
-//        int ret = newContext(newThread, NULL, func, arg);
-//
-//        if (newThread == NULL) {
-//            return FAILURE;
-//        }
+        ucontext_t *newThread = malloc(sizeof(ucontext_t));
+        int ret = newContext(newThread, NULL, func, arg);
 
-//        makecontext(newThread, (void (*)(void)) stub, 2, func, arg);
+        if (newThread == NULL) {
+            return FAILURE;
+        }
+
+        makecontext(newThread, (void (*)(void)) stub, 2, func, arg);
         setAlrmMask();
 
         int currentTID = TID;
         TCB *newThreadTCB = newTCB(currentTID, 0, 0, 0, (totalRuntime / totalRuns), 0, 0, priority, READY, NULL);
-//        newThreadTCB->ucontext = newThread;
-        makecontext(newThreadTCB->ucontext, (void (*)(void)) stub, 2, func, arg);
         TID++;
 
         if (priority == LOW) {
@@ -919,15 +914,12 @@ void freeUcontext(ucontext_t *ucontext) {
 //    free(ucontext);
 //}
 
-TCB* newTCB(int TID, int usage1, int usage2, int usage3, int averageOfUsages, int start, int stop, int priority, int state, TCB *joined) {
+TCB* newTCB(int TID, ucontext_t *ucontext, int usage1, int usage2, int usage3, int averageOfUsages, int start, int stop, int priority, int state, TCB *joined) {
     TCB *returnValue = malloc(sizeof(TCB));
     if (returnValue == NULL) {
         return NULL;
     }
-    returnValue->ucontext = malloc(sizeof(ucontext_t));
-    if (returnValue->ucontext == NULL) {
-        return NULL;
-    }
+    returnValue->ucontext = ucontext;
     returnValue->TID = TID;
     returnValue->usage1 = usage1;
     returnValue->usage2 = usage2;
