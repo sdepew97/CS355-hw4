@@ -111,7 +111,7 @@ static void sigHandler(int signo, siginfo_t *si, void *old_context);
  * Masking the entire method, since it uses globals on almost every line and I didn't want to end up in an inconsistent state
  */
 int thread_libinit(int policy) {
-    if(policy > PRIORITY || policy < FIFO) {
+    if(policy > PRIORITY || policy < FIFO || running == NULL) {
         return FAILURE;
     }
 
@@ -180,6 +180,7 @@ int thread_libinit(int policy) {
         Log((int) getTicks() - startTime, CREATED, MAINTID, MAINPRIORITY);
 
         //everything went fine, so return success
+        running = NULL;
         return SUCCESS;
     } else if (policy == PRIORITY) {
         struct itimerval realt;
@@ -236,6 +237,7 @@ int thread_libinit(int policy) {
         Log((int) getTicks() - startTime, CREATED, MAINTID, MAINPRIORITY);
         removeAlrmMask();
         //everything went fine, so return success
+        running = NULL;
         return SUCCESS;
     } else {
         //passed in an invalid scheduling policy, which was stated to not occur, but could occur
