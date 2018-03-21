@@ -176,7 +176,7 @@ int thread_libinit(int policy) {
         Log((int) getTicks() - startTime, CREATED, MAINTID, MAINPRIORITY);
 
         //everything went fine, so return success
-        if(running > MAINTID) { //need to set to NULL here
+        if(running->tcb->TID > MAINTID) { //need to set to NULL here
             running = NULL;
         }
         return SUCCESS;
@@ -235,7 +235,7 @@ int thread_libinit(int policy) {
         Log((int) getTicks() - startTime, CREATED, MAINTID, MAINPRIORITY);
         removeAlrmMask();
         //everything went fine, so return success
-        if(running > MAINTID) { //need to set to NULL here
+        if(running->tcb->TID > MAINTID) { //need to set to NULL here
             running = NULL;
         }
         return SUCCESS;
@@ -332,8 +332,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
     removeAlrmMask();
 
     if (POLICY == FIFO || POLICY == SJF) {
-        ucontext_t *newThread = malloc(sizeof(ucontext_t));
-        int ret = newContext(newThread, NULL, func, arg);
+        ucontext_t *newThread = newContext(NULL, func, arg);
         if (newThread == NULL) {
             return FAILURE;
         }

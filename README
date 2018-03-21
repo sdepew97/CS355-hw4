@@ -1,8 +1,13 @@
-Assumptions when Coding:
+Name:
+* Sarah Depew
 
 Notes:
 * My log is found in log.txt
 * I ran the Ziting tests and took care of the deadlocking cases by returning errors for these cases; I didn't want to deadlock, so I addressed the issues and simply did not permit the joins to occur
+
+How to Run:
+* Put whatever code you want to run in test.c
+* Run 'make'
 
 Known Bugs/Notes:
 * My yielding is not working 100% correctly for threads; I ended up having to sigprocmask too much of my code to allow successful interleaving to occur
@@ -26,4 +31,4 @@ terminated that was attempting to be joined
 * Not sure if this is pertinent, but I changed the type of the foo functions in kyu's tests to get the files to compile.
 * I have an error on the kyu misuse test
 * I removed the valgrind information from my code, since it made it messier.
-
+* I think there is at least one segfault that I missed...
