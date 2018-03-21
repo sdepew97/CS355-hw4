@@ -22,7 +22,7 @@ int main(void) {
     int tid_1 = thread_create(foo1, NULL, 0);
     int tid_2 = thread_create(foo2, NULL, 0);
     int tid_3 = thread_create(foo3, NULL, 0);
-    int tids[] = { tid1, tid2, tid3 };
+    int tids[] = { tid_1, tid_2, tid_3 };
 
     for (int i = 0; i < 3; i++)  {
         if (tids[i] == -1)
