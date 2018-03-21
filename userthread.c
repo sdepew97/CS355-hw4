@@ -180,7 +180,9 @@ int thread_libinit(int policy) {
         Log((int) getTicks() - startTime, CREATED, MAINTID, MAINPRIORITY);
 
         //everything went fine, so return success
-        running = NULL;
+        if(running > MAINTID) { //need to set to NULL here
+            running = NULL;
+        }
         return SUCCESS;
     } else if (policy == PRIORITY) {
         struct itimerval realt;
@@ -237,7 +239,9 @@ int thread_libinit(int policy) {
         Log((int) getTicks() - startTime, CREATED, MAINTID, MAINPRIORITY);
         removeAlrmMask();
         //everything went fine, so return success
-        running = NULL;
+        if(running > MAINTID) { //need to set to NULL here
+            running = NULL;
+        }
         return SUCCESS;
     } else {
         //passed in an invalid scheduling policy, which was stated to not occur, but could occur
