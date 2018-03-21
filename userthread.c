@@ -198,7 +198,7 @@ int thread_libinit(int policy) {
             return FAILURE;
         } else {
             lowList->size = 0;
-            lowList->head = NULL:
+            lowList->head = NULL;
             lowList->tail = NULL;
         }
 
