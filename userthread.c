@@ -859,18 +859,15 @@ void schedule() {
 int newContext(ucontext_t *ucontext, ucontext_t *uc_link, void (*func)(void *), void* arg) {
     void *stack = malloc(STACKSIZE);
 
-    if (getcontext(ucontext) == FAILURE) {
-        return NULL;
-    }
+    getcontext(ucontext);
 
     int ret = VALGRIND_STACK_REGISTER(stack, stack + STACKSIZE);
 
     ucontext->uc_link = uc_link;
     ucontext->uc_stack.ss_sp = stack;
-    if (ucontext->uc_stack.ss_sp == NULL) {
-        return NULL;
-    }
+    ucontext->uc_stack.ss_sp;
     ucontext->uc_stack.ss_size = STACKSIZE;
+
     return ret;
 }
 
@@ -898,10 +895,10 @@ void freeUcontext(ucontext_t *ucontext) {
 //    return returnValue;
 //}
 
-void freeUcontext(ucontext_t *ucontext) {
-    free(ucontext->uc_stack.ss_sp);
-    free(ucontext);
-}
+//void freeUcontext(ucontext_t *ucontext) {
+//    free(ucontext->uc_stack.ss_sp);
+//    free(ucontext);
+//}
 
 TCB* newTCB(int TID, int usage1, int usage2, int usage3, int averageOfUsages, int start, int stop, int priority, int state, TCB *joined) {
     printf("created TCB\n");
