@@ -17,9 +17,9 @@ void foo(void *) {
 
 int main(void) {
     printf(" * Running 129 threads! \n");
-    printf(" * We want to see 129 threads execute with no memory leaks or failures. \n");
+    printf(" * We want to have this behave like a simple Round Robin scheduling algorithm.\n");
 
-    if (thread_libinit(SJF) == -1)
+    if (thread_libinit(PRIORITY) == -1)
         exit(EXIT_FAILURE);
 
     int tids[N];
