@@ -3,7 +3,8 @@ Name:
 
 Notes:
 * My log is found in log.txt
-* I ran the Ziting tests and took care of the deadlocking cases by returning errors for these cases; I didn't want to deadlock, so I addressed the issues and simply did not permit the joins to occur
+* I ran the Ziting tests and took care of the deadlocking cases by returning errors for these cases;
+I didn't want to deadlock, so I addressed the issues and simply did not permit the joins to occur
 
 How to Run:
 * Put whatever code you want to run in test.c
