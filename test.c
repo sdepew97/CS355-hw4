@@ -32,6 +32,8 @@ int main(void) {
         exit(EXIT_FAILURE);
     }
 
+    printf("didn't get here\n");
+
     tid1 = thread_create(fifo_misuse_foo, NULL, -1);
     if (tid1 == FAILURE) {
         exit(EXIT_FAILURE);
