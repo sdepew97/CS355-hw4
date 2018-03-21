@@ -35,4 +35,4 @@ terminated that was attempting to be joined
 Please note that some of the information may be outdated, but it is comprehensive to tracking the progression of the project.
 * fifo_null_func.c has a memory leak, but that's because we exit on a failure and never call the terminate function for the library
 * wjp_test_invalid_join.c prints Hello World! three times, since I return a different thing/have different behavior for that type of failure
-* I wasn't able to add as many tests as I had hoped
+* I wasn't able to add as many tests as I had hoped, but I did get some simple tests to ensure memory leaks didn't occur upon creation, joining, and yielding
