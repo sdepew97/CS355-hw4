@@ -278,6 +278,7 @@ int thread_libterminate(void) {
 
             removeAlrmMask();
 
+            running = NULL; //we are done here
             return SUCCESS;
         }
     } else {
@@ -308,9 +309,9 @@ int thread_libterminate(void) {
             }
             free(lowList);
         }
-        freeUcontext(scheduler); //TODO: remove at end!!
 
         removeAlrmMask();
+        running = NULL;
         return SUCCESS;
     }
 
