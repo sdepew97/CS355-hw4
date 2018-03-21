@@ -329,8 +329,6 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
         if (removeAlrmMask() == FAILURE) {
             return FAILURE;
         }
-        printf("%d", running->tcb->TID);
-        printf("failed second\n");
         return FAILURE;
     }
 
@@ -594,7 +592,6 @@ int thread_join(int tid) {
     } else {
         //case where TID doesn't exist/thread with that TID wasn't created
         if (currentNode != NULL && currentNode->tcb->joined != NULL) {
-            printf("joined already\n");
             if (removeAlrmMask() == FAILURE) {
                 return FAILURE;
             }
