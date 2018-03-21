@@ -309,7 +309,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
     setAlrmMask();
 
     //This means that we have not called threadlib_init first, which is required
-    if (running == NULL || func == NULL) {
+    if (running == NULL || func == NULL || priority > HIGH || priority < LOW) {
         if (removeAlrmMask() == FAILURE) {
             return FAILURE;
         }

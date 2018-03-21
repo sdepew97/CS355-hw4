@@ -28,10 +28,10 @@ int main(void) {
     }
     int tid1;
 
-//    int tid1 = thread_create(fifo_misuse_foo, NULL, 100);
-//    if (tid1 != FAILURE) {
-//        exit(EXIT_FAILURE);
-//    }
+    int tid1 = thread_create(fifo_misuse_foo, NULL, 100);
+    if (tid1 != FAILURE) {
+        exit(EXIT_FAILURE);
+    }
 
     printf("didn't get here\n");
 
