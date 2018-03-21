@@ -612,13 +612,16 @@ void stub(void (*func)(void *), void *arg) {
         }
     }
 
-    if (running->tcb->priority == HIGH) {
-        removeNode(running, highList);
-    } else if (running->tcb->priority == MEDIUM) {
-        removeNode(running, mediumList);
-    } else if (running->tcb->priority == LOW) {
-        removeNode(running, lowList);
+    if(POLICY == PRIORITY) {
+        if (running->tcb->priority == HIGH) {
+            removeNode(running, highList);
+        } else if (running->tcb->priority == MEDIUM) {
+            removeNode(running, mediumList);
+        } else if (running->tcb->priority == LOW) {
+            removeNode(running, lowList);
+        }
     }
+
     //TODO: free node here with freenode function
     running = NULL;
     removeAlrmMask();
