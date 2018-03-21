@@ -129,6 +129,8 @@ int thread_libinit(int policy) {
 
     //create main's TCB
     mainTCB = newTCB(MAINTID, 0, 0, 0, QUANTA / 2, (int) getTicks(), 0, MAINPRIORITY, READY, NULL);
+    ucontext_t *mainContext = malloc(sizeof(ucontext_t));
+    mainTCB->ucontext = newContext(mainContext, NULL, NULL, NULL);
     getcontext(mainTCB->ucontext); //TODO: see if this fixes the issue?
     totalRuntime += QUANTA / 2;
     totalRuns++;
