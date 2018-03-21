@@ -76,9 +76,6 @@ static linkedList *lowList = NULL;
 static linkedList *mediumList = NULL;
 static linkedList *highList = NULL;
 
-//the TCB for the main thread
-static TCB *mainTCB = NULL;
-
 //the current running thread's node
 static node *running = NULL;
 
@@ -112,6 +109,9 @@ static void sigHandler(int signo, siginfo_t *si, void *old_context);
 int thread_libinit(int policy) {
     //this is when the program officially started
     startTime = (int) getTicks();
+
+    //the TCB for the main thread
+    static TCB *mainTCB = NULL;
 
     //create context for scheduler
     scheduler = newContext(NULL, (void (*)(void *)) scheduler, NULL);
@@ -218,13 +218,7 @@ int thread_libterminate(void) {
     node *nextNode = NULL;
 
     setAlrmMask();
-    //free all queues
-
-    //free all thread memory malloced
-
-    //free all TCB's etc...
-
-    //mark main as finished and free
+    Log((int) getTicks() - startTime, FINISHED, MAINTID, MAINPRIORITY);
 
     if (POLICY == FIFO || POLICY == SJF) {
         if (readyList == NULL) {
@@ -271,6 +265,7 @@ int thread_libterminate(void) {
             }
             free(lowList);
         }
+
         removeAlrmMask();
         return SUCCESS;
     }
