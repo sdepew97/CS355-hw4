@@ -938,6 +938,7 @@ void freeTCB(TCB *tcb) {
 //    freeUcontext(tcb->ucontext); //TODO: see if this is causing errors...
     free(tcb->ucontext);
     free(tcb);
+    printf("%d", tcb);
 }
 
 node* newNode(TCB *tcb, node* next, node* prev) {
