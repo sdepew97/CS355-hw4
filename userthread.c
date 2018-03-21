@@ -324,8 +324,10 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
     //This means that we have not called threadlib_init first, which is required
     if (running == NULL || func == NULL || priority > LOW || priority < HIGH) {
         if (removeAlrmMask() == FAILURE) {
+            printf("failed first\n");
             return FAILURE;
         }
+        printf("failed second\n");
         return FAILURE;
     }
 
