@@ -294,7 +294,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
         return FAILURE;
     }
 
-//    removeAlrmMask();
+    removeAlrmMask();
 
     if (POLICY == FIFO || POLICY == SJF) {
         ucontext_t *newThread = newContext(NULL, func, arg);
