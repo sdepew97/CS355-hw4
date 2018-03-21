@@ -1086,14 +1086,11 @@ void setAverage(TCB *tcb) {
 }
 
 void sigHandler(int signo, siginfo_t *si, void *old_context) {
-    printf("*********************got to sigHandler********************* at %d\n", (int) getTicks() - startTime);
-
     //save thread's state and go to the scheduler
     if (running ==
         NULL) {
         setcontext(scheduler);
     } else {
-        printf("thread not done, TID: %d\n", running->tcb->TID);
         running->tcb->state = READY;
         Log((int) getTicks() - startTime, STOPPED, running->tcb->TID, running->tcb->priority);
         running->tcb->stop = (int) getTicks();
