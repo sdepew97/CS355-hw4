@@ -463,7 +463,7 @@ void big(void *arg)
 }
 
 int main(void) {
-    if (thread_libinit(SJF) == FAIL)
+    if (thread_libinit(FIFO) == FAIL)
         exit(EXIT_FAILURE);
     int tid1 = thread_create(big, NULL, -1);
     int tid2 = thread_create(big, NULL, 0);
