@@ -2,10 +2,6 @@
 // Created by Sarah Depew on 3/21/18.
 //
 
-//
-// Created by Sarah Depew on 3/19/18.
-//
-
 #include <stdio.h>
 #include <stdlib.h>
 #include "userthread.h"
@@ -31,7 +27,7 @@ int main() {
     if (thread_join(tid1) != FAILURE)
         exit(EXIT_FAILURE);
 
-    int tid2 = thread_create(tryYield, NULL, -1);
+    int tid2 = thread_create(printHello, NULL, -1);
 
     if (tid2 != FAILURE)
         exit(EXIT_FAILURE);
