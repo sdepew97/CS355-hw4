@@ -935,8 +935,8 @@ TCB* newTCB(int TID, int usage1, int usage2, int usage3, int averageOfUsages, in
 }
 
 void freeTCB(TCB *tcb) {
-//    freeUcontext(tcb->ucontext); //TODO: see if this is causing errors...
-//    free(tcb->ucontext);
+    freeUcontext(tcb->ucontext); //TODO: see if this is causing errors...
+    free(tcb->ucontext);
     printf("%d\n", tcb->TID);
     free(tcb);
     printf("%d\n", tcb->TID);
