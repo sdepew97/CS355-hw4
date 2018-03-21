@@ -350,20 +350,20 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
             }
         } else {
             //priority is invalid
-//            removeAlrmMask();
+            removeAlrmMask();
             return FAILURE;
         }
 
         Log((int) getTicks() - startTime, CREATED, currentTID, priority);
 
-//        if (removeAlrmMask() == FAILURE) {
-//            return FAILURE;
-//        }
+        if (removeAlrmMask() == FAILURE) {
+            return FAILURE;
+        }
         return currentTID;
     }
-//    if (removeAlrmMask() == FAILURE) {
-//        return FAILURE;
-//    }
+    if (removeAlrmMask() == FAILURE) {
+        return FAILURE;
+    }
 
     return FAILURE;
 }
@@ -543,7 +543,7 @@ int thread_join(int tid) {
             if (removeAlrmMask() == FAILURE) {
                 return FAILURE;
             }
-            swapcontext(running->tcb->ucontext, scheduler); //TODO: see if this needs to be replaced, here
+            swapcontext(running->tcb->ucontext, scheduler);
         }
         if (removeAlrmMask() == FAILURE) {
             return FAILURE;
@@ -552,7 +552,7 @@ int thread_join(int tid) {
         return SUCCESS;
     } else {
         //case where TID doesn't exist/thread with that TID wasn't created
-        if (currentNode == NULL && tid <= TID) { //TODO: bring back after doing swap function finish
+        if (currentNode == NULL && tid <= TID) {
             //shouldn't raise an error if trying to join a prior created thread that's already finished
             return SUCCESS;
         } else if (currentNode == NULL) {
@@ -625,7 +625,7 @@ void stub(void (*func)(void *), void *arg) {
         }
     }
 
-    if(POLICY == PRIORITY) {
+    if (POLICY == PRIORITY) {
         if (running->tcb->priority == HIGH) {
             removeNode(running, highList);
         } else if (running->tcb->priority == MEDIUM) {
@@ -726,7 +726,6 @@ void schedule() {
     node *currentNode = NULL;
 
     if (POLICY == FIFO) {
-        //TODO: ensure this interaction is masked
         currentNode = readyList->head;
         while (currentNode != NULL && ((TCB *) currentNode->tcb)->state != READY) {
             currentNode = currentNode->next;
@@ -736,7 +735,7 @@ void schedule() {
         running = currentNode;
         Log((int) getTicks() - startTime, SCHEDULED, currentNode->tcb->TID, currentNode->tcb->priority);
         //start timing here
-        running->tcb->start = (int) getTicks(); //TODO: Ask Rachel: milliseconds of same time?? account for seconds?
+        running->tcb->start = (int) getTicks();
         running->tcb->state = RUNNING;
         removeAlrmMask();
         setcontext(running->tcb->ucontext);
@@ -774,7 +773,7 @@ void schedule() {
         running = currentNode;
         Log((int) getTicks() - startTime, SCHEDULED, currentNode->tcb->TID, currentNode->tcb->priority);
         //start timing here
-        running->tcb->start = (int) getTicks(); //TODO: Ask Rachel: milliseconds of same time?? account for seconds?
+        running->tcb->start = (int) getTicks();
         running->tcb->state = RUNNING;
 
         removeAlrmMask();
@@ -848,7 +847,7 @@ void schedule() {
         running = currentNode;
         Log((int) getTicks() - startTime, SCHEDULED, currentNode->tcb->TID, currentNode->tcb->priority);
         //start timing here
-        running->tcb->start = (int) getTicks(); //TODO: Ask Rachel: milliseconds of same time?? account for seconds?
+        running->tcb->start = (int) getTicks();
         running->tcb->state = RUNNING;
         removeAlrmMask();
         setcontext(running->tcb->ucontext);
@@ -1090,12 +1089,10 @@ void sigHandler(int signo, siginfo_t *si, void *old_context) {
 
     //save thread's state and go to the scheduler
     if (running ==
-        NULL) { //TODO: figure out why this is always NULL, which means only finished threads are hitting it here, so have to unblock for threads that are not yet finished...
-        printf("thread done and running NULL\n");
+        NULL) {
         setcontext(scheduler);
     } else {
         printf("thread not done, TID: %d\n", running->tcb->TID);
-        //TODO: log a stop here
         running->tcb->state = READY;
         Log((int) getTicks() - startTime, STOPPED, running->tcb->TID, running->tcb->priority);
         running->tcb->stop = (int) getTicks();
