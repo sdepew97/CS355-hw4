@@ -21,6 +21,7 @@ int main(void) {
     }
 
     if (thread_join(tid_1) < 0) exit(EXIT_FAILURE);
+    printf("error\n");
 
     if (thread_libterminate() == -1) exit(EXIT_FAILURE);
 
