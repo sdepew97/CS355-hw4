@@ -903,6 +903,7 @@ void freeUcontext(ucontext_t *ucontext) {
 }
 
 TCB* newTCB(int TID, int usage1, int usage2, int usage3, int averageOfUsages, int start, int stop, int priority, int state, TCB *joined) {
+    printf("created TCB\n");
     TCB *returnValue = malloc(sizeof(TCB));
     if (returnValue == NULL) {
         return NULL;
