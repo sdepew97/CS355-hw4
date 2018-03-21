@@ -7,7 +7,7 @@
 
 void big(void *arg)
 {
-    poll(NULL, 0, 200);
+    poll(NULL, 0, 300);
 }
 
 int main(void)
