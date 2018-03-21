@@ -459,6 +459,7 @@
 void big(void *arg)
 {
     poll(NULL, 0, 300);
+    printf("done with poll\n");
 }
 
 int main(void) {
