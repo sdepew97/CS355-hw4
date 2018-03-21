@@ -11,14 +11,12 @@ How to Run:
 
 Known Bugs/Notes:
 * My yielding is not working 100% correctly for threads; I ended up having to sigprocmask too much of my code to allow successful interleaving to occur
-* I have a ton of valgrind errors
-* I am unable to free the context memory
-* Odd error relating to priority scheduling where I run for shorter time than expected, but thread function adequately runs and reaches the end of the run
-* There was one time I ran valgrind and got a segfault. I tried to recreate the error to no avail. I am wondering if there is a minor race condition that occured. I
+* I have a ton of valgrind errors (these were fixed by the valgrind inclusion with the stack for ucontext_t)
+* Odd error relating to priority scheduling where I run for shorter time than expected, but thread function adequately runs and reaches the end of the run for the ZPW_big_job_priority_test.c
+* There was one time I ran valgrind and got a segfault. I tried to recreate the error to no avail. I am wondering if there is a minor race condition that occurred. I
 knew about this and attempted to fix it, but was unable to recreate the issue. So, I am recording it here. This was running in Priority scheduling mode.
-* Small memory leaks with TCB and UContexts
 * Weird bug about printing and swapping for Priority on one test (Rachel was sent a screen shot)
-* I was unable to figure out how to break my code in userthread.c into multiple .h files. If I could have done so, I would have done ___, ___, and ____.
+* I was unable to figure out how to break my code in userthread.c into multiple .h files. If I could have done so, I would have done this to make more .h's and make the code more readable.
 * I am not 100% certain the ratio on my scheduler is correct. I followed your advice, but after running
 Eileen's test I am not sure I have the proper ratio. I think I do, but I wanted to document the
 possibility it was not 100% correct.
@@ -33,3 +31,5 @@ terminated that was attempting to be joined
 * I removed the valgrind information from my code, since it made it messier.
 * I think there is at least one segfault that I missed...
 * I could not figure out how to break the code into a series of .h files
+* I am not 100% sure if freeUcontext(scheduler); on 309 and 274 is causing an issue
+Please note that some of the information may be outdated, but it is comprehensive to tracking the progression of the project.
