@@ -458,7 +458,7 @@
 
 void big(void *arg)
 {
-    poll(NULL, 0, 300);
+    poll(NULL, 0, 500);
     printf("done with poll\n");
 }
 
