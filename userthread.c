@@ -904,7 +904,10 @@ TCB* newTCB(int TID, int usage1, int usage2, int usage3, int averageOfUsages, in
     if (returnValue == NULL) {
         return NULL;
     }
-    returnValue->ucontext = NULL;
+    returnValue->ucontext = malloc(sizeof(ucontext_t));
+    if (returnValue->ucontext == NULL) {
+        return NULL;
+    }
     returnValue->TID = TID;
     returnValue->usage1 = usage1;
     returnValue->usage2 = usage2;
@@ -913,10 +916,10 @@ TCB* newTCB(int TID, int usage1, int usage2, int usage3, int averageOfUsages, in
     returnValue->start = start;
     returnValue->stop = stop;
     returnValue->priority = priority;
-    returnValue->joined = malloc(sizeof(TCB));
-    if (returnValue->joined == NULL) {
-        return NULL;
-    }
+//    returnValue->joined = malloc(sizeof(TCB));
+//    if (returnValue->joined == NULL) {
+//        return NULL;
+//    }
     returnValue->joined = joined;
     returnValue->state = state;
 
