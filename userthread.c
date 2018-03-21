@@ -308,7 +308,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
     removeAlrmMask();
 
     if (POLICY == FIFO || POLICY == SJF) {
-        ucontext_t *newThread = newContext(newThread, NULL, func, arg);
+        ucontext_t *newThread = newContext(NULL, func, arg);
         if (newThread == NULL) {
             return FAILURE;
         }
@@ -329,7 +329,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
         }
         return currentTID;
     } else { //we are priority scheduling
-        ucontext_t *newThread = newContext(newThread, NULL, func, arg);
+        ucontext_t *newThread = newContext(NULL, func, arg);
 
         if (newThread == NULL) {
             return FAILURE;
