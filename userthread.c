@@ -878,7 +878,6 @@ int newContext(ucontext_t *ucontext, ucontext_t *uc_link, void (*func)(void *), 
 
     ucontext->uc_link = uc_link;
     ucontext->uc_stack.ss_sp = stack;
-    ucontext->uc_stack.ss_sp;
     ucontext->uc_stack.ss_size = STACKSIZE;
 
     return ret;
@@ -938,9 +937,9 @@ TCB* newTCB(int TID, int usage1, int usage2, int usage3, int averageOfUsages, in
 }
 
 void freeTCB(TCB *tcb) {
-    freeUcontext(tcb->ucontext); //TODO: see if this is causing errors...
-//    free(tcb->ucontext);
+    freeUcontext(tcb->ucontext); //TODO: see if this is causing errors..., yes double freeing and...
     printf("%d\n", tcb->TID);
+    printf("%d\n", sizeof(TCB));
     free(tcb);
     printf("%d\n", tcb->TID);
 }
