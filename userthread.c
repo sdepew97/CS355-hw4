@@ -708,10 +708,9 @@ void Log (int ticks, int OPERATION, int TID, int PRIORITY) {
 
 /* Method with the scheduling algorithms */
 void schedule() {
-    //setAlrmMask();
     getcontext(scheduler);
-
-    node *currentNode;
+    setAlrmMask();
+    node *currentNode = NULL;
 
     if (POLICY == FIFO) {
         //TODO: ensure this interaction is masked
@@ -726,16 +725,16 @@ void schedule() {
         //start timing here
         running->tcb->start = (int) getTicks(); //TODO: Ask Rachel: milliseconds of same time?? account for seconds?
         running->tcb->state = RUNNING;
-        //setAlrmMask();
+        removeAlrmMask();
         setcontext(running->tcb->ucontext);
     } else if (POLICY == SJF) {
         node *currentNode = readyList->head;
         int minRuntime = 0;
-        node *minRuntimeNode = NULL; //TODO: should be set to main here and gonna get segfault if not!!
+        node *minRuntimeNode = NULL;
 
         //use a loop to find a ready candidate here in the list of nodes to use as a initial value
         while (currentNode != NULL &&
-               currentNode->tcb->state != READY) { //TODO: ask rachel if thread here can be scheduled as running in SJF?
+               currentNode->tcb->state != READY) {
             currentNode = currentNode->next;
         }
         //current node is now in a ready state, since at least one node must be ready to run in the list
@@ -765,7 +764,7 @@ void schedule() {
         running->tcb->start = (int) getTicks(); //TODO: Ask Rachel: milliseconds of same time?? account for seconds?
         running->tcb->state = RUNNING;
 
-        //setAlrmMask();
+        removeAlrmMask();
         setcontext(running->tcb->ucontext);
     } else if (POLICY == PRIORITY) {
         //get random entry into array for the priority to be scheduled
@@ -838,7 +837,7 @@ void schedule() {
         //start timing here
         running->tcb->start = (int) getTicks(); //TODO: Ask Rachel: milliseconds of same time?? account for seconds?
         running->tcb->state = RUNNING;
-        //setAlrmMask();
+        removeAlrmMask();
         setcontext(running->tcb->ucontext);
     }
 }
