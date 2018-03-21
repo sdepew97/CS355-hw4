@@ -31,7 +31,7 @@ int main() {
     if (thread_join(tid1) != FAILURE)
         exit(EXIT_FAILURE);
 
-    int tid2 = thread_create(tryYield, NULL, -1);
+    int tid2 = thread_create(printHello, NULL, -1);
 
     if (tid2 != FAILURE)
         exit(EXIT_FAILURE);
