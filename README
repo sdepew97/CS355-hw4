@@ -25,3 +25,5 @@ terminated that was attempting to be joined
 * There is a free():invalid pointer and Aborted (core dumped) error on wjp_test_misuse1
 * Not sure if this is pertinent, but I changed the type of the foo functions in kyu's tests to get the files to compile.
 * I have an error on the kyu misuse test
+* I removed the valgrind information from my code, since it made it messier.
+
