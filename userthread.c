@@ -284,7 +284,7 @@ int thread_libterminate(void) {
 
 //TODO: masking, then done!
 int thread_create(void (*func)(void *), void *arg, int priority) {
-    setAlrmMask();
+    setAlrmMask(); //TODO: figure out why this mask is causing the issues..
 
     //This means that we have not called threadlib_init first, which is required
     if (running == NULL || func == NULL) {
@@ -293,8 +293,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
         }
         return FAILURE;
     }
-
-//    removeAlrmMask();
+    removeAlrmMask();
 
     if (POLICY == FIFO || POLICY == SJF) {
         ucontext_t *newThread = newContext(NULL, func, arg);
@@ -321,18 +320,19 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
         }
         return currentTID;
     } else { //we are priority scheduling
-//        setAlrmMask(); //TODO: figure out why this is causing the errors??
         ucontext_t *newThread = newContext(NULL, func, arg);
         if (newThread == NULL) {
-            removeAlrmMask();
             return FAILURE;
         }
 
         makecontext(newThread, (void (*)(void)) stub, 2, func, arg);
+
+        setAlrmMask(); //TODO: figure out why this is causing the errors??
         int currentTID = TID;
         TCB *newThreadTCB = newTCB(currentTID, 0, 0, 0, (totalRuntime / totalRuns), 0, 0, priority, READY, NULL);
         newThreadTCB->ucontext = newThread;
         TID++;
+        removeAlrmMask();
 
         if (priority == LOW) {
             if (addNode(newThreadTCB, lowList) == FAILURE) {
