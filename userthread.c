@@ -122,8 +122,7 @@ int thread_libinit(int policy) {
     static TCB *mainTCB = NULL;
 
     //create context for scheduler
-    scheduler = malloc(sizeof(ucontext_t));
-    int ret = newContext(scheduler, NULL, (void (*)(void *)) scheduler, NULL);
+    scheduler = newContext(NULL, (void (*)(void *)) scheduler, NULL);
     if (scheduler == NULL) {
         return FAILURE;
     }
@@ -131,12 +130,10 @@ int thread_libinit(int policy) {
     makecontext(scheduler, (void (*)(void)) schedule, 0);
 
     //context for main
-    ucontext_t *newMainContext = malloc(sizeof(ucontext_t));
+    ucontext_t *newMainContext = newContext(NULL, NULL, NULL);
     if (newMainContext == NULL) {
         return FAILURE;
     }
-
-    ret = newContext(newMainContext, NULL, NULL, NULL);
 
     //create main's TCB
     mainTCB = newTCB(MAINTID, newMainContext, 0, 0, 0, QUANTA / 2, (int) getTicks(), 0, MAINPRIORITY, READY, NULL);
