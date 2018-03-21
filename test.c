@@ -43,8 +43,8 @@ int main(void) {
 
 
     // more misuses...
-    thread_libterminate();
-    thread_join(123132);
+//    thread_libterminate();
+//    thread_join(123132);
 
 
     exit(EXIT_SUCCESS);
