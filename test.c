@@ -1,46 +1,55 @@
 //
-// Created by Sarah Depew on 3/21/18.
+// Created by Sarah Depew on 3/19/18.
 //
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h>
-#include <string.h>
-#include <poll.h>
 #include "userthread.h"
+#include "logger.h"
 
-#define N 128
+#define SUCCESS 0
+#define FAILURE -1
+#define PRIORITY 1
 
-void foo(void) {
-    poll(NULL, 0, 200);
+void printHello () {
+    printf("Hello world\n");
 }
 
-int main(void) {
-    printf(" * Running 129 threads! \n");
-    printf(" * We want to have this behave like a simple Round Robin scheduling algorithm with swapping out occurring. No memory leaks!\n");
+void tryYield() {
+    printf("start yield\n");
+    thread_yield();
+    printf("end yield\n");
+    printHello();
+}
 
-    if (thread_libinit(PRIORITY) == -1)
+int main() {
+    if (thread_libinit(PRIORITY) == FAILURE)
         exit(EXIT_FAILURE);
 
-    int tids[N];
-    memset(tids, -1, sizeof(tids));
+    int tid1 = thread_create(printHello, NULL, -1);
 
-    for (int i = 0; i < N; i++)  {
-        tids[i] = thread_create(foo, NULL, 1);
-    }
-
-    for (int i = 0; i < N; i++)  {
-        if (tids[i] == -1)
-            exit(EXIT_FAILURE);
-    }
-
-    for (int i = 0; i < N; i++)  {
-        if (thread_join(tids[i]) == -1)
-            exit(EXIT_FAILURE);
-    }
-
-    if (thread_libterminate() == -1)
+    if (tid1 == FAILURE)
         exit(EXIT_FAILURE);
 
+    int tid2 = thread_create(tryYield, NULL, -1);
+
+    if (tid2 == FAILURE)
+        exit(EXIT_FAILURE);
+
+    printf("joining 2\n");
+    if (thread_join(tid2) == FAILURE)
+        exit(EXIT_FAILURE);
+
+    printf("joining 1\n");
+
+    if (thread_join(tid1) == FAILURE)
+        exit(EXIT_FAILURE);
+
+    printf("Back to main\n");
+
+    if (thread_libterminate() == FAILURE)
+        exit(EXIT_FAILURE);
+
+    printf("Congratulations, your test was successful!\n");
     exit(EXIT_SUCCESS);
 }
