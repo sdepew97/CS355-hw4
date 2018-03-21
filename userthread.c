@@ -198,6 +198,8 @@ int thread_libinit(int policy) {
             return FAILURE;
         } else {
             lowList->size = 0;
+            lowList->head = NULL:
+            lowList->tail = NULL;
         }
 
         mediumList = malloc(sizeof(linkedList));
@@ -205,6 +207,8 @@ int thread_libinit(int policy) {
             return FAILURE;
         } else {
             mediumList->size = 0;
+            mediumList->head = NULL;
+            mediumList->tail = NULL;
         }
 
         highList = malloc(sizeof(linkedList));
@@ -212,6 +216,8 @@ int thread_libinit(int policy) {
             return FAILURE;
         } else {
             highList->size = 0;
+            highList->tail = NULL;
+            highList->head = NULL;
         }
 
         if (MAINPRIORITY == HIGH) {
