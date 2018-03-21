@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include "userthread.h"
 
-void foo(void) {}
-void bar(void) {}
+void foo(void *) {}
+void bar(void *) {}
 
 int main(void) {
     printf(" * Testing a basic FIFO with some misuse of the userthread library\n");
@@ -48,7 +48,7 @@ int main(void) {
            tid1, tid2 ,tid3, tid4, tid5, tid6);
 
     // more misuses...
-    thread_libterminate();
-    thread_join(123132);
+//    thread_libterminate();
+//    thread_join(123132);
     exit(EXIT_SUCCESS);
 }
