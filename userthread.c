@@ -288,9 +288,9 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
 
     //This means that we have not called threadlib_init first, which is required
     if (running == NULL || func == NULL) {
-//        if (removeAlrmMask() == FAILURE) {
-//            return FAILURE;
-//        }
+        if (removeAlrmMask() == FAILURE) {
+            return FAILURE;
+        }
         return FAILURE;
     }
 
@@ -324,6 +324,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
 //        setAlrmMask();
         ucontext_t *newThread = newContext(NULL, func, arg);
         if (newThread == NULL) {
+            removeAlrmMask();
             return FAILURE;
         }
 
@@ -335,17 +336,17 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
 
         if (priority == LOW) {
             if (addNode(newThreadTCB, lowList) == FAILURE) {
-//                removeAlrmMask();
+                removeAlrmMask();
                 return FAILURE;
             }
         } else if (priority == MEDIUM) {
             if (addNode(newThreadTCB, mediumList) == FAILURE) {
-//                removeAlrmMask();
+                removeAlrmMask();
                 return FAILURE;
             }
         } else if (priority == HIGH) {
             if (addNode(newThreadTCB, highList) == FAILURE) {
-//                removeAlrmMask();
+                removeAlrmMask();
                 return FAILURE;
             }
         } else {
