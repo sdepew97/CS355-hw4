@@ -111,7 +111,7 @@ static void sigHandler(int signo, siginfo_t *si, void *old_context);
  * Masking the entire method, since it uses globals on almost every line and I didn't want to end up in an inconsistent state
  */
 int thread_libinit(int policy) {
-    if(policy > PRIORITY || policy < FIFO || running == NULL) {
+    if(policy > PRIORITY || policy < FIFO) {
         return FAILURE;
     }
 
