@@ -284,17 +284,17 @@ int thread_libterminate(void) {
 
 //TODO: masking, then done!
 int thread_create(void (*func)(void *), void *arg, int priority) {
-    setAlrmMask();
+//    setAlrmMask();
 
     //This means that we have not called threadlib_init first, which is required
     if (running == NULL || func == NULL) {
-        if (removeAlrmMask() == FAILURE) {
-            return FAILURE;
-        }
+//        if (removeAlrmMask() == FAILURE) {
+//            return FAILURE;
+//        }
         return FAILURE;
     }
 
-    removeAlrmMask();
+//    removeAlrmMask();
 
     if (POLICY == FIFO || POLICY == SJF) {
         ucontext_t *newThread = newContext(NULL, func, arg);
@@ -321,7 +321,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
         }
         return currentTID;
     } else { //we are priority scheduling
-        setAlrmMask();
+//        setAlrmMask();
         ucontext_t *newThread = newContext(NULL, func, arg);
         if (newThread == NULL) {
             return FAILURE;
@@ -335,35 +335,35 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
 
         if (priority == LOW) {
             if (addNode(newThreadTCB, lowList) == FAILURE) {
-                removeAlrmMask();
+//                removeAlrmMask();
                 return FAILURE;
             }
         } else if (priority == MEDIUM) {
             if (addNode(newThreadTCB, mediumList) == FAILURE) {
-                removeAlrmMask();
+//                removeAlrmMask();
                 return FAILURE;
             }
         } else if (priority == HIGH) {
             if (addNode(newThreadTCB, highList) == FAILURE) {
-                removeAlrmMask();
+//                removeAlrmMask();
                 return FAILURE;
             }
         } else {
             //priority is invalid
-            removeAlrmMask();
+//            removeAlrmMask();
             return FAILURE;
         }
 
         Log((int) getTicks() - startTime, CREATED, currentTID, priority);
 
-        if (removeAlrmMask() == FAILURE) {
-            return FAILURE;
-        }
+//        if (removeAlrmMask() == FAILURE) {
+//            return FAILURE;
+//        }
         return currentTID;
     }
-    if (removeAlrmMask() == FAILURE) {
-        return FAILURE;
-    }
+//    if (removeAlrmMask() == FAILURE) {
+//        return FAILURE;
+//    }
 
     return FAILURE;
 }
