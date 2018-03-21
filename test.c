@@ -1,52 +1,50 @@
-#include <poll.h>
+//
+// Created by Sarah Depew on 3/21/18.
+//
+
+//
+// Created by Sarah Depew on 3/19/18.
+//
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "userthread.h"
+#include "logger.h"
 
-void hello_120(void *arg) {
-    poll(NULL, 0, 120);
-    thread_yield();
-    poll(NULL, 0, 120);
-    thread_yield();
-    poll(NULL, 0, 200);
-    printf("%s 120\n", arg);
+#define SUCCESS 0
+#define FAILURE -1
+#define PRIORITY 1
+
+void printHello () {
+    printf("Hello world\n");
 }
 
-void hello_150(void *arg) {
-    poll(NULL, 0, 150);
-    thread_yield();
-    poll(NULL, 0, 150);
-    thread_yield();
-    poll(NULL, 0, 200);
-    printf("%s 150\n", arg);
-}
+int main() {
+    printf(" * Test where you try to call methods without having called thread_libinit correctly. No memory leaks or crashes should occur.\n");
 
-void hello_170(void *arg) {
-    poll(NULL, 0, 170);
-    thread_yield();
-    poll(NULL, 0, 170);
-    thread_yield();
-    poll(NULL, 0, 200);
-    printf("%s 170\n", arg);
-}
+    int tid1 = thread_create(printHello, NULL, -1);
 
-int main(void) {
-    if (thread_libinit(SJF) == -1) exit(EXIT_FAILURE);
+    if (tid1 != FAILURE)
+        exit(EXIT_FAILURE);
 
-    char *hello_str = "Hello, world!";
-    int tid_1 = thread_create(hello_120, hello_str, 0);
-    int tid_2 = thread_create(hello_150, hello_str, 0);
-    int tid_3 = thread_create(hello_170, hello_str, 0);
+    printf("Trying to join 1.\n");
+    if (thread_join(tid1) != FAILURE)
+        exit(EXIT_FAILURE);
 
-    printf("Test case for SJF.\n");
-    printf("Print \"Hello, world! 120\", \"Hello, world! 150\", \"Hello, world! 170\" on success.\n");
-    printf("The order cannot be inverted.\n");
+    int tid2 = thread_create(tryYield, NULL, -1);
 
-    if (thread_join(tid_1) < 0) exit(EXIT_FAILURE);
-    if (thread_join(tid_2) < 0) exit(EXIT_FAILURE);
-    if (thread_join(tid_3) < 0) exit(EXIT_FAILURE);
+    if (tid2 != FAILURE)
+        exit(EXIT_FAILURE);
 
-    if (thread_libterminate() == -1) exit(EXIT_FAILURE);
+    printf("Trying to join 2.\n");
+    if (thread_join(tid2) != FAILURE)
+        exit(EXIT_FAILURE);
 
+    printf("Back to main\n");
+
+    if (thread_libterminate() == FAILURE)
+        exit(EXIT_FAILURE);
+
+    printf("Congratulations, your test was successful!\n");
     exit(EXIT_SUCCESS);
 }
