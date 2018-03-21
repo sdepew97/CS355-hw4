@@ -22,5 +22,5 @@ possibility it was not 100% correct.
 * I kept getting a persistent error with jiaping's wjp_priority_yield_same test and wjp_test_fifo_basic where I had a Conditional jump or move depending upon an uninitialized value error
 * I decided on different behavior than jiaping for wjp_test_invalid_join where an attempted join was valid on a thread that had already
 terminated that was attempting to be joined
-* When a failure occurs during a test, such as in wjp_test_invalid_join2, the exit happens immediately, so there is a guaranteed, and occurring memory leak as threadlib_term was not called
+* When a failure occurs during a test, such as in wjp_test_invalid_join2 and wjp_test_invalid_priority, the exit happens immediately, so there is a guaranteed, and occurring memory leak as threadlib_term was not called
 *
