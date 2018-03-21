@@ -17,7 +17,7 @@ void foo(void) {
 
 int main(void) {
     printf(" * Running 129 threads! \n");
-    printf(" * We want to have this behave like a simple Round Robin scheduling algorithm. No memory leaks!\n");
+    printf(" * We want to have this behave like a simple Round Robin scheduling algorithm with swapping out occurring. No memory leaks!\n");
 
     if (thread_libinit(PRIORITY) == -1)
         exit(EXIT_FAILURE);
