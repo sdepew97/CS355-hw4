@@ -32,3 +32,4 @@ terminated that was attempting to be joined
 * I have an error on the kyu misuse test
 * I removed the valgrind information from my code, since it made it messier.
 * I think there is at least one segfault that I missed...
+* I could not figure out how to break the code into a series of .h files

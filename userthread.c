@@ -110,7 +110,7 @@ static void sigHandler(int signo, siginfo_t *si, void *old_context);
  * Masking the entire method, since it uses globals on almost every line and I didn't want to end up in an inconsistent state
  */
 int thread_libinit(int policy) {
-    if(policy > PRIORITY || policy < FIFO) {
+    if (policy > PRIORITY || policy < FIFO) {
         return FAILURE;
     }
 
@@ -176,7 +176,7 @@ int thread_libinit(int policy) {
         Log((int) getTicks() - startTime, CREATED, MAINTID, MAINPRIORITY);
 
         //everything went fine, so return success
-        if(running->tcb->TID > MAINTID) { //need to set to NULL here
+        if (running->tcb->TID > MAINTID) { //need to set to NULL here
             running = NULL;
         }
         return SUCCESS;
@@ -235,7 +235,7 @@ int thread_libinit(int policy) {
         Log((int) getTicks() - startTime, CREATED, MAINTID, MAINPRIORITY);
         removeAlrmMask();
         //everything went fine, so return success
-        if(running->tcb->TID > MAINTID) { //need to set to NULL here
+        if (running->tcb->TID > MAINTID) { //need to set to NULL here
             running = NULL;
         }
         return SUCCESS;
@@ -250,7 +250,7 @@ int thread_libterminate(void) {
     node *currentNode = NULL;
     node *nextNode = NULL;
 
-    if(running == NULL) {
+    if (running == NULL) {
         //This means that init was not called
         return FAILURE;
     }
@@ -271,6 +271,7 @@ int thread_libterminate(void) {
             }
 
             free(readyList);
+            freeUcontext(scheduler);
 
             removeAlrmMask();
 
@@ -305,7 +306,7 @@ int thread_libterminate(void) {
             }
             free(lowList);
         }
-
+        freeUcontext(scheduler);
         removeAlrmMask();
         running = NULL;
         return SUCCESS;
@@ -340,7 +341,8 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
         makecontext(newThread, (void (*)(void)) stub, 2, func, arg);
 
         int currentTID = TID;
-        TCB *newThreadTCB = newTCB(currentTID, newThread, 0, 0, 0, (totalRuntime / totalRuns), 0, 0, priority, READY, NULL);
+        TCB *newThreadTCB = newTCB(currentTID, newThread, 0, 0, 0, (totalRuntime / totalRuns), 0, 0, priority, READY,
+                                   NULL);
         TID++;
 
         if (addNode(newThreadTCB, readyList) == FAILURE) {
@@ -362,7 +364,8 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
         setAlrmMask();
 
         int currentTID = TID;
-        TCB *newThreadTCB = newTCB(currentTID, newThread, 0, 0, 0, (totalRuntime / totalRuns), 0, 0, priority, READY, NULL);
+        TCB *newThreadTCB = newTCB(currentTID, newThread, 0, 0, 0, (totalRuntime / totalRuns), 0, 0, priority, READY,
+                                   NULL);
         TID++;
 
         if (priority == LOW) {
@@ -752,8 +755,8 @@ void schedule() {
     getcontext(scheduler);
     setAlrmMask();
 
-    if(running->tcb->state == DONE) {
-        if(POLICY == FIFO || POLICY == SJF) {
+    if (running->tcb->state == DONE) {
+        if (POLICY == FIFO || POLICY == SJF) {
             removeNode(running, readyList);
         }
         if (POLICY == PRIORITY) {
@@ -948,8 +951,8 @@ TCB* newTCB(int TID, ucontext_t *ucontext, int usage1, int usage2, int usage3, i
 }
 
 void freeTCB(TCB *tcb) {
-    if(tcb != NULL) {
-        if(tcb->ucontext != NULL) {
+    if (tcb != NULL) {
+        if (tcb->ucontext != NULL) {
             freeUcontext(tcb->ucontext);
         }
         free(tcb);
@@ -969,9 +972,9 @@ node* newNode(TCB *tcb, node* next, node* prev) {
 }
 
 void freeNode(node *nodeToFree) {
-    if(nodeToFree != NULL) {
+    if (nodeToFree != NULL) {
         TCB *tcb = nodeToFree->tcb;
-        if(tcb != NULL) {
+        if (tcb != NULL) {
             freeTCB(tcb);
         }
         nodeToFree->next = NULL;
