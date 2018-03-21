@@ -18,7 +18,7 @@ int main(void) {
     int tid2 = thread_create(foo, NULL, 1);
     int tid3 = thread_create(foo, NULL, 1);
 
-    printf("Tesing invalid join with bad ID\n");
+    printf("Testing invalid join with bad ID\n");
     printf("Should print exactly one 'Hello world' on success\n");
 
     if (thread_join(tid1) < 0)

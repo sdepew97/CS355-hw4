@@ -176,7 +176,7 @@ int thread_libinit(int policy) {
         //everything went fine, so return success
         return SUCCESS;
     } else if (policy == PRIORITY) {
-        struct itimerval realt; //TODO: potentially uninitialized
+        struct itimerval realt;
         setrtimer(&realt);
 
         if (setitimer(ITIMER_REAL, &realt, NULL) == FAILURE) {
@@ -232,7 +232,6 @@ int thread_libinit(int policy) {
     return FAILURE;
 }
 
-//TODO: free all memory here
 int thread_libterminate(void) {
     node *currentNode = NULL;
     node *nextNode = NULL;
@@ -325,7 +324,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
             return FAILURE;
         }
 
-        makecontext(newThread, (void (*)(void)) stub, 2, func, arg); //TODO: reminder I messed with this code to try and figure out malloc error...
+        makecontext(newThread, (void (*)(void)) stub, 2, func, arg);
 
         int currentTID = TID;
         TCB *newThreadTCB = newTCB(currentTID, newThread, 0, 0, 0, (totalRuntime / totalRuns), 0, 0, priority, READY, NULL);
@@ -461,7 +460,6 @@ int thread_yield(void) {
 }
 
 int thread_join(int tid) {
-    //TODO: ignore if joined something that is done/had been scheduled
     setAlrmMask();
 
     node *currentNode = NULL;
@@ -529,7 +527,7 @@ int thread_join(int tid) {
         return FAILURE;
     }
 
-    if (currentNode != NULL && currentNode->tcb->state != DONE) {
+    if (currentNode != NULL && currentNode->tcb->state != DONE && currentNode->tcb->joined == NULL) {
         // case where TID does exist and running thread is waiting already, which would mean you'd get stuck forever, perhaps?
         if (running->tcb->joined != NULL && running->tcb->joined->state == WAITING) {
             if (running->tcb->joined->TID != currentNode->tcb->TID) {
@@ -541,7 +539,7 @@ int thread_join(int tid) {
                 shiftUsages(running->tcb->stop - running->tcb->start, running->tcb);
                 setAverage(running->tcb);
                 currentNode->tcb->joined = running->tcb;
-                if (removeAlrmMask()  == FAILURE) {
+                if (removeAlrmMask() == FAILURE) {
                     return FAILURE;
                 }
                 swapcontext(running->tcb->ucontext, scheduler);
@@ -576,7 +574,12 @@ int thread_join(int tid) {
         return SUCCESS;
     } else {
         //case where TID doesn't exist/thread with that TID wasn't created
-        if (currentNode == NULL && tid <= TID) {
+        if (currentNode != NULL && currentNode->tcb->joined != NULL) {
+            if (removeAlrmMask() == FAILURE) {
+                return FAILURE;
+            }
+            return FAILURE;
+        } else if (currentNode == NULL && tid <= TID) {
             //shouldn't raise an error if trying to join a prior created thread that's already finished
             return SUCCESS;
         } else if (currentNode == NULL) {
@@ -597,7 +600,6 @@ int thread_join(int tid) {
 void stub(void (*func)(void *), void *arg) {
     // thread starts here
     func(arg); // call root function //Allow this function to be interrupted
-    //TODO: thread clean up mentioned in assignment guidelines on page 3
 
     setAlrmMask();
     Log((int) getTicks() - startTime, FINISHED, running->tcb->TID, running->tcb->priority);
@@ -947,7 +949,7 @@ TCB* newTCB(int TID, ucontext_t *ucontext, int usage1, int usage2, int usage3, i
 }
 
 void freeTCB(TCB *tcb) {
-    freeUcontext(tcb->ucontext); //TODO: see if this is causing errors..., yes double freeing and...
+    freeUcontext(tcb->ucontext);
     free(tcb);
 }
 
