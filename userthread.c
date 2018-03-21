@@ -165,6 +165,8 @@ int thread_libinit(int policy) {
             return FAILURE;
         } else {
             readyList->size = 0;
+            readyList->head = NULL;
+            readyList->tail = NULL;
         }
 
         //set ready list's value to running and update the size as necessary
