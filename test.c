@@ -12,7 +12,7 @@
 #define N 128
 
 void foo(void) {
-    poll(NULL, 0, 1);
+    poll(NULL, 0, 200);
 }
 
 int main(void) {
