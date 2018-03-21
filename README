@@ -13,4 +13,5 @@ Known Bugs:
 * Odd error relating to priority scheduling where I run for shorter time than expected, but thread function adequately runs and reaches the end of the run
 * There was one time I ran valgrind and got a segfault. I tried to recreate the error to no avail. I am wondering if there is a minor race condition that occured. I
 knew about this and attempted to fix it, but was unable to recreate the issue. So, I am recording it here. This was running in Priority scheduling mode.
+* Small memory leaks with TCB and UContexts
 
