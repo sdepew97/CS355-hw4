@@ -2,27 +2,36 @@
 #include <stdlib.h>
 #include "userthread.h"
 
-void hello(void *arg) {
-    printf("%s\n", arg);
+void foo(void *arg) {
+    printf("Hello world!\n");
 }
 
+/**
+ * Simple FIFO test
+ */
 int main(void) {
-    if (thread_libinit(FIFO) == -1) exit(EXIT_FAILURE);
-
-    char *hello_str = "Hello, world!";
-    int tid_1 = thread_create(NULL, hello_str, 0);
-
-    printf("Test case for FIFO given NULL as the funciton pointer.\n");
-    printf("Print \"Fail to create thread.\" on success.\n");
-
-    if(tid_1 == -1) {
-        printf("Fail to create thread.\n");
+    if (thread_libinit(FIFO) == -1)
         exit(EXIT_FAILURE);
-    }
 
-    if (thread_join(tid_1) < 0) exit(EXIT_FAILURE);
 
-    if (thread_libterminate() == -1) exit(EXIT_FAILURE);
+    int tid1 = thread_create(foo, NULL, 1);
+    int tid2 = thread_create(foo, NULL, 1);
+    int tid3 = thread_create(foo, NULL, 1);
+
+    printf("Tesing invalid join with bad ID\n");
+    printf("Should print exactly one 'Hello world' on success\n");
+
+    if (thread_join(tid1) < 0)
+        exit(EXIT_FAILURE);
+
+    if (thread_join(tid1) < 0)
+        exit(EXIT_FAILURE);
+
+    if (thread_join(tid2) < 0)
+        exit(EXIT_FAILURE);
+
+    if (thread_libterminate() == -1)
+        exit(EXIT_FAILURE);
 
     exit(EXIT_SUCCESS);
 }
