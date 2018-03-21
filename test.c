@@ -31,11 +31,11 @@ int main() {
         exit(EXIT_FAILURE);
 
     printf("Trying to join 1 again.\n");
-    if (thread_join(tid1) != FAILURE)
+    if (thread_join(tid1) == FAILURE)
         exit(EXIT_FAILURE);
 
     printf("Third attempt to join 1.\n");
-    if (thread_join(tid1) != FAILURE)
+    if (thread_join(tid1) == FAILURE)
         exit(EXIT_FAILURE);
 
     printf("Back to main\n");
