@@ -916,7 +916,6 @@ void freeUcontext(ucontext_t *ucontext) {
 //}
 
 TCB* newTCB(int TID, int usage1, int usage2, int usage3, int averageOfUsages, int start, int stop, int priority, int state, TCB *joined) {
-    printf("created TCB TID: %d\n", TID);
     TCB *returnValue = malloc(sizeof(TCB));
     if (returnValue == NULL) {
         return NULL;
@@ -957,7 +956,6 @@ node* newNode(TCB *tcb, node* next, node* prev) {
 }
 
 void freeNode(node *nodeToFree) {
-    printf("free node\n");
     TCB *tcb = nodeToFree->tcb;
     freeTCB(tcb);
     nodeToFree->next = NULL;
