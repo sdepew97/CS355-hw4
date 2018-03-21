@@ -39,8 +39,8 @@ int main(void) {
     }
   }
   
-//  if (thread_libterminate() == -1)
-//    exit(EXIT_FAILURE);
+  if (thread_libterminate() == -1)
+    exit(EXIT_FAILURE);
 
   printf(" Exit success\n");
   exit(EXIT_SUCCESS);
