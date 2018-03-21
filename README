@@ -23,4 +23,5 @@ terminated that was attempting to be joined
 * When a failure occurs during a test, such as in wjp_test_invalid_join2 and wjp_test_invalid_priority, the exit happens immediately, so there is a guaranteed, and occurring memory leak as threadlib_term was not called
 * wjp_test_misuse1.c also showed invalid reads, writes, and jumps; I was able to fix the segfault
 * There is a free():invalid pointer and Aborted (core dumped) error on wjp_test_misuse1
-*
+* Not sure if this is pertinent, but I changed the type of the foo functions in kyu's tests, since our thread_create function did not take in
+a void* as an argument.
