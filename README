@@ -33,3 +33,4 @@ terminated that was attempting to be joined
 * I could not figure out how to break the code into a series of .h files
 * I am not 100% sure if freeUcontext(scheduler); on 309 and 274 is causing an issue
 Please note that some of the information may be outdated, but it is comprehensive to tracking the progression of the project.
+* fifo_null_func.c has a memory leak, but that's because we exit on a failure and never call the terminate function for the library
