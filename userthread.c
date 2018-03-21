@@ -638,20 +638,6 @@ void stub(void (*func)(void *), void *arg) {
         }
     }
 
-    if (POLICY == PRIORITY) {
-        if (running->tcb->priority == HIGH) {
-            removeNode(running, highList);
-        } else if (running->tcb->priority == MEDIUM) {
-            removeNode(running, mediumList);
-        } else if (running->tcb->priority == LOW) {
-            removeNode(running, lowList);
-        }
-    }
-
-    //TODO: free node here with freenode function
-//    freeNode(running); //TODO: see if this causes an error...
-
-    running = NULL;
     removeAlrmMask();
 
     //current thread is done, so we must get a new thread to run
@@ -738,6 +724,24 @@ void Log (int ticks, int OPERATION, int TID, int PRIORITY) {
 void schedule() {
     getcontext(scheduler);
     setAlrmMask();
+
+    if(running->tcb->state == DONE) {
+        if(POLICY == FIFO || POLICY == SJF) {
+            removeNode(running, readyList);
+        }
+        if (POLICY == PRIORITY) {
+            if (running->tcb->priority == HIGH) {
+                removeNode(running, highList);
+            } else if (running->tcb->priority == MEDIUM) {
+                removeNode(running, mediumList);
+            } else if (running->tcb->priority == LOW) {
+                removeNode(running, lowList);
+            }
+        }
+
+        running = NULL;
+    }
+
     node *currentNode = NULL;
 
     if (POLICY == FIFO) {
@@ -887,7 +891,6 @@ void freeUcontext(ucontext_t *ucontext) {
     free(ucontext->uc_stack.ss_sp);
     free(ucontext);
 }
-
 
 //ucontext_t *newContext(ucontext_t *uc_link, void (*func)(void *), void* arg) {
 //    ucontext_t *returnValue = malloc(sizeof(ucontext_t));
