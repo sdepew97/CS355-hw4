@@ -284,7 +284,7 @@ int thread_libterminate(void) {
 
 //TODO: masking, then done!
 int thread_create(void (*func)(void *), void *arg, int priority) {
-    setAlrmMask(); //TODO: figure out why this mask is causing the issues..
+    setAlrmMask();
 
     //This means that we have not called threadlib_init first, which is required
     if (running == NULL || func == NULL) {
@@ -293,6 +293,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
         }
         return FAILURE;
     }
+
     removeAlrmMask();
 
     if (POLICY == FIFO || POLICY == SJF) {
