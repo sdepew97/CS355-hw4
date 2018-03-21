@@ -14,4 +14,5 @@ Known Bugs:
 * There was one time I ran valgrind and got a segfault. I tried to recreate the error to no avail. I am wondering if there is a minor race condition that occured. I
 knew about this and attempted to fix it, but was unable to recreate the issue. So, I am recording it here. This was running in Priority scheduling mode.
 * Small memory leaks with TCB and UContexts
+* Weird bug about printing and swapping for Prority on one test (Rachel was sent a screen shot)
 

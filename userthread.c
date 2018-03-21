@@ -245,6 +245,8 @@ int thread_libterminate(void) {
             }
 
             free(readyList);
+            freeUcontext(scheduler); //TODO: remove at end!
+
             removeAlrmMask();
 
             return SUCCESS;
@@ -277,6 +279,7 @@ int thread_libterminate(void) {
             }
             free(lowList);
         }
+        freeUcontext(scheduler); //TODO: remove at end!!
 
         removeAlrmMask();
         return SUCCESS;
