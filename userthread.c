@@ -104,7 +104,7 @@ void setrtimer(struct itimerval *ivPtr);
 int setAlrmMask();
 int removeAlrmMask();
 static int setupSignals(void);
-static void sigHandler(int j, siginfo_t *si, void *old_context);
+static void sigHandler(int signo, siginfo_t *si, void *old_context);
 
 /*
  * Masking the entire method, since it uses globals on almost every line and I didn't want to end up in an inconsistent state
@@ -388,9 +388,9 @@ int thread_yield(void) {
             totalRuns++;
             shiftUsages(running->tcb->stop - running->tcb->start, running->tcb);
             setAverage(running->tcb);
-            if (removeAlrmMask() == FAILURE) {
-                return FAILURE;
-            }
+//            if (removeAlrmMask() == FAILURE) {
+//                return FAILURE;
+//            }
             swapcontext(running->tcb->ucontext, scheduler);
             return SUCCESS;
         }
@@ -417,16 +417,16 @@ int thread_yield(void) {
         totalRuns++;
         shiftUsages(running->tcb->stop - running->tcb->start, running->tcb);
         setAverage(running->tcb);
-        if (removeAlrmMask() == FAILURE) {
-            return FAILURE;
-        }
+//        if (removeAlrmMask() == FAILURE) {
+//            return FAILURE;
+//        }
         swapcontext(running->tcb->ucontext, scheduler);
         return SUCCESS;
     }
 
-    if (removeAlrmMask() == FAILURE) {
-        return FAILURE;
-    }
+//    if (removeAlrmMask() == FAILURE) {
+//        return FAILURE;
+//    }
     return FAILURE;
 }
 
@@ -1070,7 +1070,7 @@ void setAverage(TCB *tcb) {
     tcb->averageOfUsages = computeAverage(tcb);
 }
 
-void sigHandler(int j, siginfo_t *si, void *old_context) {
+void sigHandler(int signo, siginfo_t *si, void *old_context) {
     printf("*********************got to sigHandler********************* at %d\n", (int) getTicks() - startTime);
 
     //save thread's state and go to the scheduler
@@ -1081,6 +1081,13 @@ void sigHandler(int j, siginfo_t *si, void *old_context) {
     } else {
         printf("thread not done, TID: %d\n", running->tcb->TID);
         //TODO: log a stop here
+        running->tcb->state = READY;
+        Log((int) getTicks() - startTime, STOPPED, running->tcb->TID, running->tcb->priority);
+        running->tcb->stop = (int) getTicks();
+        totalRuntime += running->tcb->stop - running->tcb->start;
+        totalRuns++;
+        shiftUsages(running->tcb->stop - running->tcb->start, running->tcb);
+        setAverage(running->tcb);
         swapcontext(running->tcb->ucontext, scheduler);
     }
 }
