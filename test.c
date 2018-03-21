@@ -1,49 +1,53 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
+#include <poll.h>
 #include "userthread.h"
 
-void inner_foo(void *arg) {
-    thread_yield();
+#define N 3
+
+#define H -1
+#define M 0
+#define L 1
+
+void foo(void* p) {
+    for(int i = 0; i < 19; i++) {
+        poll(NULL, 0, 100);
+        printf("Thread with priority %d is running %d times\n", *(int*)p, i+1);
+    }
 }
 
+int main(void) {
+    printf("* Test for priority\n");
+    printf("* When all three threads are not finished, threads with priority -1 should run 1.5 times more than threads with priority 0, which run 1.5 times more often than threads with priority 1\n");
+    printf("* Check console output: when thread with priority -1 runs 9 times, thread with priority 0 should run 6 times, and priority 0 runs 4 times\n");
 
-void foo(void *arg) {
-    int tid;
-    for (int i = 0; i < 5; ++i)
-    {
-        int tid = thread_create(inner_foo, NULL, 1);
+    if (thread_libinit(PRIORITY) == -1)
+        exit(EXIT_FAILURE);
 
-        if (tid < 0)
-            exit(EXIT_FAILURE);
+    int tids[N];
+    memset(tids, -1, sizeof(tids));
+    int h = H;
+    int m = M;
+    int l = L;
 
-        if (thread_join(tid) < 0)
+    tids[0] = thread_create(foo, &m, m);
+    tids[1] = thread_create(foo, &h, h);
+    tids[2] = thread_create(foo, &l, l);
+
+    for (int i = 0; i < N; i++)  {
+        if (tids[i] == -1)
             exit(EXIT_FAILURE);
     }
 
-}
-
-/**
- * Nested FIFO test
- */
-int main(void) {
-    if (thread_libinit(FIFO) == -1)
-        exit(EXIT_FAILURE);
-
-    char *arg = "Yay!";
-
-    int tid1 = thread_create(foo, arg, 1);
-
-    printf("More complicated FIFO test, with threads creating other threads.\n");
-    printf("Assuming that the first thread is tid 1, it should finish in order\n");
-    printf("2 -> 3 -> 4 -> 5 -> 6 -> 1\n");
-
-    if (thread_join(tid1) < 0)
-        exit(EXIT_FAILURE);
+    for (int i = 0; i < N; i++)  {
+        if (thread_join(tids[i]) == -1)
+            exit(EXIT_FAILURE);
+    }
 
     if (thread_libterminate() == -1)
         exit(EXIT_FAILURE);
-
 
     exit(EXIT_SUCCESS);
 }
