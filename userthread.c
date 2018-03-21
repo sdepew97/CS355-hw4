@@ -245,7 +245,7 @@ int thread_libterminate(void) {
             }
 
             free(readyList);
-            freeUcontext(scheduler); //TODO: remove at end!
+            freeUcontext(scheduler); //TODO: remove at end, since only needed for debugging purposes!
 
             removeAlrmMask();
 
@@ -258,6 +258,7 @@ int thread_libterminate(void) {
             currentNode = highList->head;
             while (currentNode != NULL) {
                 nextNode = currentNode->next;
+                printf("trying to free %d\n", currentNode->tcb->TID);
                 freeNode(currentNode);
                 currentNode = nextNode;
             }
