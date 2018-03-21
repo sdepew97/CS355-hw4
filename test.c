@@ -1,47 +1,37 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h>
-#include <string.h>
-#include <poll.h>
 #include "userthread.h"
 
-#define N 3
-
-#define H -1
-#define M 0
-#define L 1
-
-void foo(void* p) {
-    for(int i = 0; i < 19; i++) {
-        poll(NULL, 0, 100);
-        printf("Thread with priority %d is running %d times\n", *(int*)p, i+1);
-    }
+void foo_yield(void* args) {
+    for (int i = 0; i < 100; i ++)
+        thread_yield();
+    printf("Hello World\n");
 }
 
+/**
+ * A simple test for PRIORITY
+ * Expected Log: thread 1 to thread 3 end in order.
+ */
 int main(void) {
-    printf("* Test for priority\n");
-    printf("* When all three threads are not finished, threads with priority -1 should run 1.5 times more than threads with priority 0, which run 1.5 times more often than threads with priority 1\n");
-    printf("* Check console output: when thread with priority -1 runs 9 times, thread with priority 0 should run 6 times, and priority 0 runs 4 times\n");
-
     if (thread_libinit(PRIORITY) == -1)
         exit(EXIT_FAILURE);
 
-    int tids[N];
-    memset(tids, -1, sizeof(tids));
-    int h = H;
-    int m = M;
-    int l = L;
+    int tid1 = thread_create(foo_yield, NULL, -1);
+    int tid2 = thread_create(foo_yield, NULL, -1);
+    int tid3 = thread_create(foo_yield, NULL, -1);
 
-    tids[0] = thread_create(foo, &m, m);
-    tids[1] = thread_create(foo, &h, h);
-    tids[2] = thread_create(foo, &l, l);
+    printf(" * A simple test for PRIORITY scheduling\n");
+    printf(" * Threads should end in the order of fifo, since all have the same priority");
 
-    for (int i = 0; i < N; i++)  {
+    int n  = 3;
+    int tids[] = { tid1, tid2, tid3 };
+
+    for (int i = 0; i < n; i++)  {
         if (tids[i] == -1)
             exit(EXIT_FAILURE);
     }
 
-    for (int i = 0; i < N; i++)  {
+    for (int i = 0; i < n; i++)  {
         if (thread_join(tids[i]) == -1)
             exit(EXIT_FAILURE);
     }
@@ -49,5 +39,6 @@ int main(void) {
     if (thread_libterminate() == -1)
         exit(EXIT_FAILURE);
 
+    printf(" Exit success\n");
     exit(EXIT_SUCCESS);
 }

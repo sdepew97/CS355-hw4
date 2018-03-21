@@ -16,4 +16,7 @@ knew about this and attempted to fix it, but was unable to recreate the issue. S
 * Small memory leaks with TCB and UContexts
 * Weird bug about printing and swapping for Prority on one test (Rachel was sent a screen shot)
 * I was unable to figure out how to break my code in userthread.c into multiple .h files. If I could have done so, I would have done ___, ___, and ____.
-
+* I am not 100% certain the ratio on my scheduler is correct. I followed your advice, but after running
+Eileen's test I am not sure I have the proper ratio. I think I do, but I wanted to document the
+possibility it was not 100% correct.
+*
