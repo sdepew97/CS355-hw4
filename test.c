@@ -1,25 +1,31 @@
-#include <poll.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "userthread.h"
 
+#define THREADS_NUM   10
+#define TEST_PRIORITY 1
+
 void hello(void *arg) {
-    for(int i = 0; i < 15; i++) {
-        poll(NULL, 0, 300);
-    }
     printf("%s\n", arg);
 }
 
 int main(void) {
     if (thread_libinit(PRIORITY) == -1) exit(EXIT_FAILURE);
 
+    int tids[THREADS_NUM];
+    int i;
     char *hello_str = "Hello, world!";
-    int tid_1 = thread_create(hello, hello_str, -1);
 
-    printf("Test case for PRIORITY. The thread will be scheduled for 15 times.\n");
-    printf("Print \"Hello, world!\" on success.\n");
+    for(i = 0; i < THREADS_NUM; i++) {
+        tids[i] = thread_create(hello, hello_str, TEST_PRIORITY);
+    }
 
-    if (thread_join(tid_1) < 0) exit(EXIT_FAILURE);
+    printf("Test case for PRIORITY. All %i threads are given the same priority.\n", THREADS_NUM);
+    printf("Print \"Hello, world!\" for %i times on success.\n", THREADS_NUM);
+
+    for(i = 0; i < THREADS_NUM; i++) {
+        if (thread_join(tids[i]) < 0) exit(EXIT_FAILURE);
+    }
 
     if (thread_libterminate() == -1) exit(EXIT_FAILURE);
 
