@@ -18,16 +18,16 @@ int main(void) {
     int tid2 = thread_create(foo, NULL, 1);
     int tid3 = thread_create(foo, NULL, 1);
 
-    printf("Testing invalid join with bad ID\n");
-    printf("Should print exactly one 'Hello world' on success\n");
-
-    if (thread_join(tid1) < 0)
-        exit(EXIT_FAILURE);
+    printf("Tesing invalid join with bad ID\n");
+    printf("Should print exactly two 'Hello world' on success\n");
 
     if (thread_join(tid1) < 0)
         exit(EXIT_FAILURE);
 
     if (thread_join(tid2) < 0)
+        exit(EXIT_FAILURE);
+
+    if (thread_join(-1) < 0)
         exit(EXIT_FAILURE);
 
     if (thread_libterminate() == -1)

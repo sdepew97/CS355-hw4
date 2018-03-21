@@ -6,7 +6,7 @@ Notes:
 * My log is found in log.txt
 * I ran the Ziting tests and took care of the deadlocking cases by returning errors for these cases; I didn't want to deadlock, so I addressed the issues and simply did not permit the joins to occur
 
-Known Bugs:
+Known Bugs/Notes:
 * My yielding is not working 100% correctly for threads; I ended up having to sigprocmask too much of my code to allow successful interleaving to occur
 * I have a ton of valgrind errors
 * I am unable to free the context memory
@@ -19,5 +19,7 @@ knew about this and attempted to fix it, but was unable to recreate the issue. S
 * I am not 100% certain the ratio on my scheduler is correct. I followed your advice, but after running
 Eileen's test I am not sure I have the proper ratio. I think I do, but I wanted to document the
 possibility it was not 100% correct.
-* I kept getting a persistent error with jiaping's wjp_priority_yield_same test where I had a Conditional jump or move depending upon an uninitialized value error
+* I kept getting a persistent error with jiaping's wjp_priority_yield_same test and wjp_test_fifo_basic where I had a Conditional jump or move depending upon an uninitialized value error
+* I decided on different behavior than jiaping for wjp_test_invalid_join where an attempted join was valid on a thread that had already
+terminated that was attempting to be joined
 *
