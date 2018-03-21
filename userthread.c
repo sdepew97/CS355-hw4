@@ -438,33 +438,40 @@ int thread_join(int tid) {
 
     //This means that we have not called threadlib_init first, which is required or thread is trying to join itself
     if (running == NULL || running->tcb->TID == tid) {
+        removeAlrmMask();
         return FAILURE;
     }
 
     if (POLICY == FIFO || POLICY == SJF) {
         if (moveToEnd(running, readyList) == FAILURE) {
+            removeAlrmMask();
             return FAILURE;
         }
         currentNode = readyList->head;
 
         //find the node to join
         while (currentNode != NULL && currentNode->tcb->TID != tid) {
+            removeAlrmMask();
             currentNode = currentNode->next;
         }
     } else if (POLICY == PRIORITY) {
         if (running->tcb->priority == HIGH) {
             if (moveToEnd(running, highList) == FAILURE) {
+                removeAlrmMask();
                 return FAILURE;
             }
         } else if (running->tcb->priority == MEDIUM) {
             if (moveToEnd(running, mediumList) == FAILURE) {
+                removeAlrmMask();
                 return FAILURE;
             }
         } else if (running->tcb->priority == LOW) {
             if (moveToEnd(running, lowList) == FAILURE) {
+                removeAlrmMask();
                 return FAILURE;
             }
         } else {
+            removeAlrmMask();
             return FAILURE;
         }
 
