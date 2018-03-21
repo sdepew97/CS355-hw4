@@ -25,6 +25,7 @@ int main(void) {
         exit(EXIT_FAILURE);
 
     if (thread_join(tid1) < 0)
+        printf("failure\n");
         exit(EXIT_FAILURE);
 
     if (thread_join(tid2) < 0)
