@@ -4,7 +4,7 @@
 
 #define FAILURE -1
 
-void fifo_misue_foo() {
+void fifo_misuse_foo() {
     printf("Woo!\n");
 }
 
