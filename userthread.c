@@ -483,9 +483,9 @@ int thread_join(int tid) {
 
         //find the node to join
         while (currentNode != NULL && currentNode->tcb->TID != tid) {
-            removeAlrmMask();
             currentNode = currentNode->next;
         }
+        removeAlrmMask();
     } else if (POLICY == PRIORITY) {
         if (running->tcb->priority == HIGH) {
             if (moveToEnd(running, highList) == FAILURE) {
@@ -909,7 +909,7 @@ int newContext(ucontext_t *ucontext, ucontext_t *uc_link, void (*func)(void *), 
 }
 
 void freeUcontext(ucontext_t *ucontext) {
-    if(ucontext != NULL) {
+    if (ucontext != NULL) {
         if (ucontext->uc_stack.ss_sp != NULL) {
             free(ucontext->uc_stack.ss_sp);
         }
