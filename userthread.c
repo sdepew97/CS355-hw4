@@ -259,6 +259,7 @@ int thread_libterminate(void) {
             while (currentNode != NULL) {
                 nextNode = currentNode->next;
                 printf("trying to free %d\n", currentNode->tcb->TID);
+                printf("finding uninitialized value %d\n", currentNode->tcb->ucontext);
                 freeNode(currentNode);
                 currentNode = nextNode;
             }
