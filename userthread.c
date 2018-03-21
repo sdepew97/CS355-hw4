@@ -353,9 +353,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
         }
         return currentTID;
     } else { //we are priority scheduling
-        ucontext_t *newThread = malloc(sizeof(ucontext_t));
-        int ret = newContext(newThread, NULL, func, arg);
-
+        ucontext_t *newThread = newContext(NULL, func, arg);
         if (newThread == NULL) {
             return FAILURE;
         }
