@@ -127,9 +127,16 @@ int thread_libinit(int policy) {
 
     makecontext(scheduler, (void (*)(void)) schedule, 0);
 
+    //context for main
+    ucontext_t *newMainContext = malloc(sizeof(ucontext_t));
+    if (newMainContext == NULL) {
+        return FAILURE;
+    }
+
+    int ret = newContext(newMainContext, NULL, func, arg);
+
     //create main's TCB
-    mainTCB = newTCB(MAINTID, 0, 0, 0, QUANTA / 2, (int) getTicks(), 0, MAINPRIORITY, READY, NULL);
-    newContext(mainTCB->ucontext, NULL, NULL, NULL);
+    mainTCB = newTCB(MAINTID, newMainContext, 0, 0, 0, QUANTA / 2, (int) getTicks(), 0, MAINPRIORITY, READY, NULL);
     totalRuntime += QUANTA / 2;
     totalRuns++;
 
@@ -316,7 +323,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
         makecontext(newThread, (void (*)(void)) stub, 2, func, arg); //TODO: reminder I messed with this code to try and figure out malloc error...
 
         int currentTID = TID;
-        TCB *newThreadTCB = newTCB(currentTID, 0, 0, 0, (totalRuntime / totalRuns), 0, 0, priority, READY, NULL);
+        TCB *newThreadTCB = newTCB(currentTID, newThread, 0, 0, 0, (totalRuntime / totalRuns), 0, 0, priority, READY, NULL);
         TID++;
 
         if (addNode(newThreadTCB, readyList) == FAILURE) {
@@ -340,7 +347,7 @@ int thread_create(void (*func)(void *), void *arg, int priority) {
         setAlrmMask();
 
         int currentTID = TID;
-        TCB *newThreadTCB = newTCB(currentTID, 0, 0, 0, (totalRuntime / totalRuns), 0, 0, priority, READY, NULL);
+        TCB *newThreadTCB = newTCB(currentTID, newThread, 0, 0, 0, (totalRuntime / totalRuns), 0, 0, priority, READY, NULL);
         TID++;
 
         if (priority == LOW) {
