@@ -14,9 +14,9 @@ int main(void) {
     printf("because it tests adding a thread with priority 100\n");
     printf("On success, it prints 'Woo!', does not crash, and does not cause any memory leaks\n");
 
-//    int tidx = thread_create(FIFO, NULL, 0);
-//    if (tidx != -1)
-//        exit(EXIT_FAILURE);
+    int tidx = thread_create(FIFO, NULL, 0);
+    if (tidx != -1)
+        exit(EXIT_FAILURE);
 
     // thread lib terminate could return success or failure,
     // just make sure no memory leaks or crashes occur
