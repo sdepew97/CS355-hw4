@@ -6,7 +6,7 @@
 #include <signal.h>
 #include <unistd.h>
 //#include "valgrind.h"
-#include "/usr/include/valgrind/valgrind.h"
+//#include "/usr/include/valgrind/valgrind.h"
 #include "userthread.h"
 #include "logger.h"
 
@@ -40,10 +40,10 @@ static int scheduling[] = {HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH,
 typedef struct TCB {
     int TID;
     ucontext_t *ucontext;
-    unsigned int usage1;
-    unsigned int usage2;
-    unsigned int usage3;
-    unsigned int averageOfUsages; //sum of last, secondToLast, and thirdToLast over three
+    float usage1;
+    float usage2;
+    float usage3;
+    float averageOfUsages; //sum of last, secondToLast, and thirdToLast over three
     unsigned int start;
     unsigned int stop;
     unsigned int priority;
@@ -92,8 +92,8 @@ static TCB* newTCB(int TID, ucontext_t *ucontext, int usage1, int usage2, int us
 static node* newNode(TCB *tcb, node* next, node* prev);
 static int addNode(TCB *tcb, linkedList *list);
 static int moveToEnd(node *nodeToMove, linkedList *list);
-static void shiftUsages(int newUsageValue, TCB *tcb);
-static int computeAverage(TCB *tcb);
+static void shiftUsages(float newUsageValue, TCB *tcb);
+static float computeAverage(TCB *tcb);
 static void freeNode(node *nodeToFree);
 static void freeTCB(TCB *tcb);
 static void freeUcontext(ucontext_t *ucontext);
@@ -1094,14 +1094,14 @@ int removeNode(node *nodeToRemove, linkedList *list) {
     return FAILURE;
 }
 
-void shiftUsages(int newUsageValue, TCB *tcb) {
+void shiftUsages(float newUsageValue, TCB *tcb) {
     tcb->usage3 = tcb->usage2;
     tcb->usage2 = tcb->usage1;
     tcb->usage1 = newUsageValue;
 }
 
-int computeAverage(TCB *tcb) {
-    return ((tcb->usage1 + tcb->usage2 + tcb->usage3) / 3);
+float computeAverage(TCB *tcb) {
+    return ((tcb->usage1 + tcb->usage2 + tcb->usage3) / 3.0);
 }
 
 void setAverage(TCB *tcb) {
